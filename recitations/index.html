@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - التلاوات القرآنية لكبار القراء</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    
+    <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/recitations/style.css" />
+    <script src="../cordova.js"></script>
+</head>
+<body>
+
+    <!-- ===== الشريط العلوي ===== -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" aria-label="الرجوع للرئيسية" id="globalBackBtn">
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <div class="header-title">
+                <h1>
+                    <span class="header-icon">
+                        <i class="fa-solid fa-headphones"></i>
+                    </span>
+                    <span class="header-text" id="headerTitleText">التلاوات القرآنية</span>
+                </h1>
+            </div>
+            <button class="header-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" aria-label="الإعدادات">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <main class="main-content">
+
+        <!-- ============================================= -->
+        <!-- الواجهة الأولى: بطاقات كبار القراء           -->
+        <!-- ============================================= -->
+        <section class="view-section active" id="recitersView">
+            <div class="section-intro">
+                <h2><i class="fa-solid fa-users-viewfinder"></i> اختر القارئ للاستماع للتلاوة</h2>
+                <p>مكتبة شريفة تضم نخبة كبار قراء العالم الإسلامي بمختلف الروايات (ورش، قالون، حفص...)</p>
+            </div>
+
+            <!-- شريط البحث عن القراء -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="reciterSearchInput" placeholder="ابحث باسم القارئ أو الرواية (مثال: العيون الكوشي، ورش، قالون، المنشاوي)..." autocomplete="off" />
+                    <button class="search-clear" id="reciterSearchClear" aria-label="مسح البحث" style="display:none;">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- شرائح فلترة الروايات -->
+            <div class="filter-chips" id="rewayahFilterChips">
+                <button class="rewayah-chip active" data-rewayah="all">جميع الروايات</button>
+                <button class="rewayah-chip" data-rewayah="warsh"><i class="fa-solid fa-book-quran"></i> ورش عن نافع</button>
+                <button class="rewayah-chip" data-rewayah="hafs"><i class="fa-solid fa-book-quran"></i> حفص عن عاصم</button>
+                <button class="rewayah-chip" data-rewayah="qaloon"><i class="fa-solid fa-book-quran"></i> قالون عن نافع</button>
+                <button class="rewayah-chip" data-rewayah="duri"><i class="fa-solid fa-book-quran"></i> الدوري عن أبي عمرو</button>
+                <button class="rewayah-chip" data-rewayah="downloaded"><i class="fa-solid fa-circle-check"></i> المحملة أوفلاين</button>
+            </div>
+
+            <!-- شبكة بطاقات القراء -->
+            <div class="reciters-cards-grid" id="recitersCardsGrid"></div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- الواجهة الثانية: قائمة سور القارئ المختار    -->
+        <!-- ============================================= -->
+        <section class="view-section" id="surahsView" style="display:none;">
+            <!-- بطاقة القارئ المختار وشريط العودة -->
+            <div class="selected-reciter-header">
+                <button class="back-to-reciters-btn" id="backToRecitersBtn">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <span>الرجوع لقائمة القراء</span>
+                </button>
+                <div class="reciter-header-info">
+                    <div class="reciter-header-avatar">
+                        <i class="fa-solid fa-microphone"></i>
+                    </div>
+                    <div class="reciter-header-details">
+                        <h2 id="selectedReciterName">الشيخ العيون الكوشي</h2>
+                        <span id="selectedReciterStyle">القرآن الكريم — برواية ورش عن نافع</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- شريط البحث السريع للسور -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="surahSearchInput" placeholder="ابحث باسم السورة أو رقمها (مثال: الفاتحة، البقرة، يس)..." autocomplete="off" />
+                    <button class="search-clear" id="surahSearchClear" aria-label="مسح البحث" style="display:none;">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- أزرار الفلترة والتصنيف -->
+            <div class="filter-chips">
+                <button class="chip active" data-filter="all">جميع السور (114)</button>
+                <button class="chip" data-filter="downloaded"><i class="fa-solid fa-hard-drive"></i> المحملة أوفلاين</button>
+                <button class="chip" data-filter="makkiah"><i class="fa-solid fa-kaaba"></i> مكية</button>
+                <button class="chip" data-filter="madaniyah"><i class="fa-solid fa-mosque"></i> مدنية</button>
+                <button class="chip" data-filter="favorites"><i class="fa-solid fa-heart"></i> المفضلة</button>
+            </div>
+
+            <!-- شريط حالة التحميل والإحصائيات -->
+            <div class="stats-bar" id="statsBar">
+                <i class="fa-solid fa-circle-play"></i>
+                <span id="statsText">اختر سورة للبدء في الاستماع</span>
+            </div>
+
+            <!-- حالة التحميل -->
+            <div class="loading-state" id="loadingState" style="display:none;">
+                <div class="loading-spinner">
+                    <i class="fa-solid fa-spinner spin"></i>
+                </div>
+                <span class="loading-text">جاري تحميل السور المباركة...</span>
+            </div>
+
+            <!-- قائمة السور الاستماعية -->
+            <div class="surahs-list" id="surahsGrid"></div>
+
+            <!-- لا توجد نتائج -->
+            <div class="no-results" id="noResults" style="display:none;">
+                <i class="fa-solid fa-circle-exclamation no-results-icon"></i>
+                <p class="no-results-text">لم نجد أي سورة تطابق بحثك</p>
+                <button class="no-results-btn" id="clearSearchBtn">عرض جميع السور</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================= -->
+    <!-- مشغل الصوت العائم العالي التباين           -->
+    <!-- ========================================= -->
+    <div class="audio-player-container" id="audioPlayerContainer">
+        <!-- شريط التقديم المصغر -->
+        <div class="mini-progress-bar" id="miniProgressBar">
+            <div class="mini-progress-fill" id="miniProgressFill"></div>
+        </div>
+
+        <div class="audio-player-bar">
+            <!-- معلومات السورة والقارئ الحالي -->
+            <div class="player-info" id="playerExpandTrigger">
+                <div class="player-thumb">
+                    <i class="fa-solid fa-compact-disc spin-slow" id="playerDiscIcon"></i>
+                </div>
+                <div class="player-text">
+                    <span class="player-surah-title" id="playerSurahTitle">اختر سورة للاستماع</span>
+                    <span class="player-reciter-sub" id="playerReciterSub">مشاري العفاسي</span>
+                </div>
+            </div>
+
+            <!-- أزرار التحكم الرئيسية المباشرة -->
+            <div class="player-quick-controls">
+                <button class="control-btn icon-btn" id="prevBtn" title="السورة السابقة">
+                    <i class="fa-solid fa-backward-step"></i>
+                </button>
+
+                <button class="control-btn play-main-btn" id="playPauseBtn" title="تشغيل / إيقاف">
+                    <i class="fa-solid fa-play" id="playPauseIcon"></i>
+                </button>
+
+                <button class="control-btn icon-btn" id="nextBtn" title="السورة التالية">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+
+                <button class="control-btn icon-btn" id="expandPlayerBtn" title="تكبير المشغل للنص القرآني">
+                    <i class="fa-solid fa-chevron-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- مودال المشغل المتوسع والنص القرآني المكتوب  -->
+    <!-- ========================================= -->
+    <div class="modal-overlay" id="fullPlayerModal">
+        <div class="modal-content full-player-modal">
+            <!-- الهيدر -->
+            <div class="full-player-header">
+                <button class="modal-close" id="closeFullPlayerBtn">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div class="full-player-header-title">
+                    <span>مشغل التلاوات القرأنية</span>
+                </div>
+            </div>
+
+            <div class="full-player-body">
+                <!-- بطاقة الرمز الفني / الايقونة والموجات الصوتية -->
+                <div class="full-player-art">
+                    <div class="art-circle" id="artCircle">
+                        <i class="fa-solid fa-kaaba art-icon"></i>
+                        <div class="equalizer-bars" id="fullEqualizer">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <h2 class="full-surah-title" id="fullSurahTitle">سورة الفاتحة</h2>
+                    <span class="full-reciter-name" id="fullReciterName">الشيخ العيون الكوشي</span>
+                    <span class="offline-playing-badge" id="offlinePlayingBadge" style="display:none;"><i class="fa-solid fa-hard-drive"></i> تلاوة محملة (يعمل بدون نت)</span>
+                </div>
+
+                <!-- شريط الوقت والتمرير -->
+                <div class="time-slider-section">
+                    <input type="range" id="seekSlider" min="0" max="100" value="0" class="custom-slider" />
+                    <div class="time-labels">
+                        <span id="currentTimeText">00:00</span>
+                        <span id="durationTimeText">00:00</span>
+                    </div>
+                </div>
+
+                <!-- صف عناصر التحكم الصوتية المتقدمة -->
+                <div class="advanced-controls-row">
+                    <button class="sub-control-btn" id="repeatModeBtn" title="تكرار التشغيل">
+                        <i class="fa-solid fa-repeat"></i>
+                    </button>
+
+                    <button class="sub-control-btn" id="skipBackBtn" title="تأخير 10 ثوانٍ">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span class="btn-subtext">10ث</span>
+                    </button>
+
+                    <button class="main-play-circle" id="fullPlayPauseBtn">
+                        <i class="fa-solid fa-play" id="fullPlayPauseIcon"></i>
+                    </button>
+
+                    <button class="sub-control-btn" id="skipForwardBtn" title="تقديم 10 ثوانٍ">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span class="btn-subtext">10ث</span>
+                    </button>
+
+                    <button class="sub-control-btn" id="speedToggleBtn" title="سرعة الصوت">
+                        <span id="speedLabel">1.0x</span>
+                    </button>
+                </div>
+
+                <!-- التحكم في الصوت والاستماع -->
+                <div class="volume-row">
+                    <button class="vol-btn" id="muteBtn"><i class="fa-solid fa-volume-high" id="muteIcon"></i></button>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" class="volume-slider" />
+                </div>
+
+                <!-- لوحة النص القرآني المتزامن (تظهر تلقائياً) -->
+                <div class="ayah-text-container" id="ayahTextContainer" style="display:flex;">
+                    <div class="ayah-text-header">
+                        <span><i class="fa-solid fa-scroll"></i> النص القرآني المبارك</span>
+                        <span class="ayah-count-badge" id="ayahCountBadge">-- آيات</span>
+                    </div>
+                    <div class="ayah-text-scroll" id="ayahTextScroll">
+                        <p class="loading-ayahs-note">جاري تحميل آيات السورة...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- عنصر الصوت الخفي للتشغيل -->
+    <audio id="globalAudioPlayer" preload="auto"></audio>
+
+    <!-- حاوية التنبيهات -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/cordova-bridge.js"></script>
+    <script src="/praytime.js"></script>
+    <script src="/settings.js"></script>
+    <script src="/recitations/main.js"></script>
+</body>
+</html>

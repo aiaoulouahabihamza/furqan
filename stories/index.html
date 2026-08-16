@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - قصص الأنبياء والصحابة والإسلام</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    
+    <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/stories/style.css" />
+    <script src="../cordova.js"></script>
+</head>
+<body>
+
+    <!-- ===== الشريط العلوي ===== -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" id="storyPageHeaderBackBtn" aria-label="الرجوع للرئيسية">
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <div class="header-title">
+                <h1>
+                    <span class="header-icon">
+                        <i class="fa-solid fa-book-open-reader"></i>
+                    </span>
+                    <span class="header-text">قصص القرآن والإسلام</span>
+                </h1>
+            </div>
+            <button class="header-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" aria-label="الإعدادات">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <main class="main-content">
+        <!-- شريط البحث -->
+        <div class="search-section">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="ابحث في القصص أو الأسماء..." autocomplete="off" />
+                <button class="search-clear" id="searchClear" aria-label="مسح البحث" style="display:none;">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- تبويبات الأقسام الثلاثة -->
+        <div class="tabs-container">
+            <button class="tab-btn active" id="tabProphets" data-tab="prophets">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>قصص الأنبياء</span>
+            </button>
+            <button class="tab-btn" id="tabSahaba" data-tab="sahaba">
+                <i class="fa-solid fa-users-gear"></i>
+                <span>قصص الصحابة</span>
+            </button>
+            <button class="tab-btn" id="tabIslamic" data-tab="islamic">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span>قصص في الإسلام</span>
+            </button>
+        </div>
+
+        <!-- شريط المعلومات -->
+        <div class="stats-bar" id="statsBar">
+            <i class="fa-solid fa-seedling"></i>
+            <span id="statsText">جاري تحميل القصص...</span>
+        </div>
+
+        <!-- حالة التحميل -->
+        <div class="loading-state" id="loadingState">
+            <div class="loading-spinner">
+                <i class="fa-solid fa-spinner spin"></i>
+            </div>
+            <span class="loading-text">جاري تحميل القصص النيرة...</span>
+        </div>
+
+        <!-- شبكة العرض للقصص -->
+        <div class="stories-grid" id="storiesGrid"></div>
+
+        <!-- لا توجد نتائج -->
+        <div class="no-results" id="noResults" style="display:none;">
+            <i class="fa-solid fa-book-bookmark no-results-icon"></i>
+            <p class="no-results-text">لم نجد قصصاً تطابق بحثك</p>
+            <button class="no-results-btn" id="clearSearchBtn">عرض جميع القصص</button>
+        </div>
+    </main>
+
+    <!-- ===== مودال القراءة ===== -->
+    <div class="modal-overlay" id="storyModal">
+        <div class="modal-content story-reading-modal">
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <span class="modal-category-badge" id="modalCategoryBadge">قصة</span>
+                    <h2 id="modalStoryTitle">--</h2>
+                </div>
+                <div class="modal-header-actions">
+                    <button class="icon-btn" id="copyStoryBtn" title="نسخ القصة">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                    <button class="modal-close" id="closeStoryModal" aria-label="إغلاق">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="story-body" id="modalStoryBody">
+                <!-- محتوى القصة -->
+            </div>
+        </div>
+    </div>
+
+    <!-- التوست -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/cordova-bridge.js"></script>
+    <script src="/praytime.js"></script>
+    <script src="/settings.js"></script>
+    <script src="/global-audio.js"></script>
+    <script src="/stories/main.js"></script>
+</body>
+</html>

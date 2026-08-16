@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - المصحف الشريف بالخط المغربي</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    
+    
+    <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/quran/page.css" />
+    <script src="../cordova.js"></script>
+</head>
+<body>
+
+    <!-- ===== الهيدر الثابت ===== -->
+    <div class="fixed-header" id="fixedHeader">
+        <div class="fixed-header-content">
+            <div class="header-right">
+                <a href="/quran/index.html" class="back-btn" style="text-decoration:none;color:inherit;">
+                    <i class="fa-solid fa-arrow-right" style="font-size:20px;color:var(--color-text-light);"></i>
+                </a>
+                <div class="surah-name-fixed" id="surahNameFixed">الفاتحة</div>
+            </div>
+            <div class="header-left">
+                <div class="hizb-info" id="hizbInfo">الجزء ١ · الحزب ١</div>
+                <button class="theme-toggle-btn" id="themeToggle" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--color-text-light);">
+                    <i class="fa-solid fa-moon" style="font-size:18px;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="quran-viewer" id="quranViewer"></div>
+
+    <!-- ===== قائمة خيارات الآية (تظهر عند الضغط المطول) ===== -->
+    <div class="ayah-sheet-backdrop" id="ayahSheetBackdrop"></div>
+    <div class="ayah-sheet" id="ayahSheet">
+        <div class="ayah-sheet-handle"></div>
+        <div class="ayah-sheet-verse-preview" id="ayahSheetPreview"></div>
+        <div class="ayah-sheet-actions">
+            <button class="ayah-sheet-action" id="ayahActionTafsir">
+                <i class="fa-solid fa-book-open"></i>
+                <span>التفسير والبيان</span>
+            </button>
+            <button class="ayah-sheet-action" id="ayahActionBookmark">
+                <i class="fa-solid fa-bookmark"></i>
+                <span>حفظ كعلامة مرجعية</span>
+            </button>
+            <button class="ayah-sheet-action" id="ayahActionCopy">
+                <i class="fa-solid fa-copy"></i>
+                <span>نسخ الآية</span>
+            </button>
+            <button class="ayah-sheet-action" id="ayahActionShare">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>مشاركة</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== مودال التفسير والبيان التفاعلي ===== -->
+    <div class="tafsir-modal" id="tafsirModal" style="display: none;">
+        <div class="tafsir-modal-backdrop" id="tafsirModalBackdrop"></div>
+        <div class="tafsir-modal-content">
+            <div class="tafsir-modal-header">
+                <h2><i class="fa-solid fa-book-open" style="color:var(--color-primary); margin-left:8px;"></i> التفسير والبيان</h2>
+                <button class="tafsir-modal-close" id="closeTafsirBtn" aria-label="إغلاق">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="tafsir-modal-body">
+                <div class="tafsir-verse-card">
+                    <p class="tafsir-verse-arabic" id="tafsirVerseText"></p>
+                    <span class="tafsir-verse-info" id="tafsirVerseInfo"></span>
+                </div>
+                
+                <div class="tafsir-source-title">
+                    <i class="fa-solid fa-book-bookmark" style="color:var(--color-primary); margin-left:6px; font-size:14px;"></i>
+                    <span>التفسير الميسر</span>
+                </div>
+                
+                <div class="tafsir-text-container">
+                    <div id="tafsirLoading" class="tafsir-loading" style="display: none;">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        <span>جاري تحميل التفسير...</span>
+                    </div>
+                    <p class="tafsir-content-text" id="tafsirContentText"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/cordova-bridge.js"></script>
+    <script src="/quran/page.js"></script>
+</body>
+</html>

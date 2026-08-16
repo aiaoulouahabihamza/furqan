@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - المصحف الشريف</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/quran/style.css" />
+    <script src="../cordova.js"></script>
+</head>
+<body>
+
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" aria-label="رجوع">
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <div class="header-title">
+                <h1>
+                    <span class="header-icon">
+                        <i class="fa-solid fa-book-open"></i>
+                    </span>
+                    <span class="header-text">القرآن الكريم</span>
+                </h1>
+            </div>
+            <button class="header-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" aria-label="الإعدادات">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="search-section">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="ابحث عن سورة..." autocomplete="off" />
+                <button class="search-clear" id="searchClear" aria-label="مسح البحث">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="riwayah-note" id="statsBar">
+            <i class="fa-solid fa-feather-pointed"></i>
+            <span>القرآن الكريم برواية ورش عن نافع — الرسم والضبط المغربي</span>
+        </div>
+
+        <a href="/recitations/index.html" class="recitations-banner-link" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(16, 130, 141, 0.15), rgba(18, 85, 123, 0.1)); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 12px; text-decoration: none; color: var(--color-primary-dark); font-weight: 700; font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-headphones" style="font-size: 18px; color: var(--color-primary);"></i>
+                <span>قسم التلاوات: استمع للقرآن بصوت مشاري العفاسي، عبد الباسط، والمنشاوي...</span>
+            </div>
+            <i class="fa-solid fa-chevron-left" style="font-size: 12px; color: var(--color-primary);"></i>
+        </a>
+
+        <div class="loading-state" id="loadingState">
+            <div class="loading-spinner">
+                <i class="fa-solid fa-spinner spin"></i>
+            </div>
+            <span class="loading-text">جاري تحميل القرآن...</span>
+        </div>
+
+        <div class="surah-list" id="surahList"></div>
+
+        <div class="no-results" id="noResults" style="display:none;">
+            <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
+            <p class="no-results-text">لا توجد نتائج للبحث</p>
+            <button class="no-results-btn" id="clearSearchBtn">عرض جميع السور</button>
+        </div>
+    </main>
+
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="/index.html" class="nav-item active">
+            <i class="fa-solid fa-house"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="#" class="nav-item" id="lastReadBtn">
+            <i class="fa-regular fa-bookmark"></i>
+            <span>آخر قراءة</span>
+        </a>
+        <a href="#" class="nav-item" id="bookmarksBtn">
+            <i class="fa-solid fa-book-bookmark"></i>
+            <span>المرجعيات</span>
+        </a>
+    </nav>
+
+    <!-- مودال العلامات المرجعية -->
+    <div class="modal-overlay" id="bookmarksModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-book-bookmark"></i> العلامات المرجعية بالسور</h2>
+                <button class="modal-close" id="closeBookmarksBtn" aria-label="إغلاق">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="bookmarks-body" id="bookmarksList">
+                <!-- سيتم تعبئتها عبر الجافا سكريبت -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/cordova-bridge.js"></script>
+    <script src="/praytime.js"></script>
+    <script src="/settings.js"></script>
+    <script src="/global-audio.js"></script>
+    <script src="/quran/main.js"></script>
+</body>
+</html>

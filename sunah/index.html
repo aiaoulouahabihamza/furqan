@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - السنة النبوية الشريفة</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    
+    <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/sunah/style.css" />
+    <script src="../cordova.js"></script>
+</head>
+<body>
+
+    <!-- ===== الشريط العلوي ===== -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" id="headerBackBtn">
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <div class="header-title">
+                <h1><i class="fa-solid fa-book"></i> السنة النبوية</h1>
+                <span>عليكم بسنتي</span>
+            </div>
+            <button class="header-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" title="الإعدادات">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ===== المحتوى ===== -->
+    <main class="main-content">
+        
+        <!-- حالة التحميل المشتركة -->
+        <div class="loading-state" id="loadingState">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <span>جاري تحميل كتب السنة...</span>
+        </div>
+
+        <!-- 1) المرحلة الأولى: قائمة المجموعات التسع -->
+        <div id="booksStage" style="display: none;">
+            <div class="section-label">كتب الحديث التسعة الشريفة</div>
+            <div class="books-list" id="booksGrid"></div>
+        </div>
+
+        <!-- 2) المرحلة الثانية: الأبواب داخل كتاب معين -->
+        <div id="chaptersStage" style="display: none;">
+            <div class="stage-header-card">
+                <button class="back-stage-btn" id="backToBooksBtn">
+                    <i class="fa-solid fa-arrow-right"></i> العودة للكتب
+                </button>
+                <h2 class="active-stage-title" id="activeBookTitle">صحيح البخاري</h2>
+                <span class="active-stage-subtitle" id="activeBookAuthor">محمد بن إسماعيل البخاري</span>
+            </div>
+            <div class="section-label">أبواب الكتاب</div>
+            <div class="chapters-stack" id="chaptersList"></div>
+        </div>
+
+        <!-- 3) المرحلة الثالثة: الأحاديث داخل باب معين -->
+        <div id="hadithsStage" style="display: none;">
+            <div class="stage-header-card">
+                <button class="back-stage-btn" id="backToChaptersBtn">
+                    <i class="fa-solid fa-arrow-right"></i> العودة للأبواب
+                </button>
+                <h2 class="active-stage-title" id="activeChapterTitle">باب بدء الوحي</h2>
+                <span class="active-stage-subtitle" id="activeChapterBookName">صحيح البخاري</span>
+            </div>
+            <div class="section-label">أحاديث الباب</div>
+            <div class="hadiths-stack" id="hadithsList"></div>
+            
+            <div class="load-more-btn-container" id="loadMoreContainer" style="display: none;">
+                <button class="load-more-hadiths-btn" id="loadMoreBtn">تحميل المزيد من الأحاديث</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- توست الإشعارات المشترك -->
+    <div class="toast-msg" id="toastMsg">تم النسخ بنجاح</div>
+
+    <script src="/cordova-bridge.js"></script>
+    <script src="/praytime.js"></script>
+    <script src="/settings.js"></script>
+    <script src="/global-audio.js"></script>
+    <script src="/sunah/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.fur9an.app" version="2.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>الفرقان</name>
+    <description>منصة الفرقان الإسلامية الشاملة - القرآن الكريم، الأذكار، أوقات الصلاة، والسنة النبوية</description>
+    <author email="info@fur9an.com" href="https://fur9an.com">فريق تطوير الفرقان</author>
+    
+    <content src="index.html" />
+    
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    
+    <preference name="ScrollEnabled" value="false" />
+    <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+    <preference name="KeepRunning" value="true" />
+    <preference name="StatusBarBackgroundColor" value="#8c6239" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    
+    <!-- إعداد أيقونة التطبيق الرسمية -->
+    <icon src="data/images/logo.png" />
+    
+    <platform name="android">
+        <allow-intent href="market:*" />
+        <preference name="FormatDetections" value="telephone=no" />
+        <preference name="AutoHideSplashScreen" value="true" />
+        <preference name="SplashScreenDelay" value="2000" />
+        
+        <!-- صلاحيات نظام أندرويد للإشعارات وجدولة الأذان والموقع والتشغيل بالخلفية -->
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+            <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+            <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+            <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+            <uses-permission android:name="android.permission.VIBRATE" />
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+        </config-file>
+    </platform>
+    
+    <!-- الإضافات المطلوبة لتحديد الموقع والتحكم بالأجهزة والتشغيل أوفلاين -->
+    <plugin name="cordova-plugin-geolocation" spec="^5.0.0" />
+    <plugin name="cordova-plugin-statusbar" spec="^3.0.0" />
+    <plugin name="cordova-plugin-splashscreen" spec="^6.0.2" />
+    <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
+</widget>

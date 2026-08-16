@@ -1,0 +1,21 @@
+{
+  "name": "الفرقان",
+  "short_name": "الفرقان",
+  "description": "منصة الفرقان الرقمية الشاملة - المصحف الشريف، الأذكار، مواقيت الصلاة، والحديث النبوي الشريف",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbfaf7",
+  "theme_color": "#8c6239",
+  "icons": [
+    {
+      "src": "/data/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/data/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
