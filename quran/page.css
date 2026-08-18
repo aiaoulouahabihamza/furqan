@@ -51,7 +51,8 @@ html, body {
 
 .surah-name-fixed {
     font-size: 13px;
-    background: #F1E7DD;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
     border-radius: 15px;
     width: auto;
     min-width: 90px;
@@ -61,7 +62,7 @@ html, body {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: var(--color-text-light);
+    color: var(--color-primary);
     font-family: var(--font-family);
 }
 
@@ -79,10 +80,11 @@ html, body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #EBDDD0;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
     border-radius: 15px;
     font-size: 13px;
-    color: var(--color-text-lighter);
+    color: var(--color-text-light);
     font-weight: 700;
     font-family: var(--font-family);
 }
@@ -183,6 +185,10 @@ html, body {
 .quran-line {
     font-family: var(--font-maghribi);
     font-size: 30px;
+    font-weight: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     line-height: var(--quran-line-height);
     height: var(--quran-line-height);
     text-align: justify;
@@ -207,6 +213,7 @@ html, body {
 .q-word {
     white-space: nowrap;
     display: inline-block;
+    font-weight: normal;
 }
 
 /* ===== رقم الآية ===== */
@@ -441,6 +448,10 @@ html, body {
 .ayah-sheet-verse-preview {
     font-family: var(--font-maghribi);
     font-size: 20px;
+    font-weight: 700;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     line-height: 1.9;
     color: var(--color-text);
     text-align: center;
@@ -649,8 +660,12 @@ html, body {
 }
 
 .tafsir-verse-arabic {
-    font-family: var(--font-amiri);
+    font-family: var(--font-maghribi);
     font-size: 21px;
+    font-weight: 700;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     line-height: 1.8;
     color: var(--color-text);
     text-align: center;
@@ -674,87 +689,6 @@ html, body {
     font-weight: 700;
     font-size: 14.5px;
     border-right: 3px solid var(--color-primary);
-}  max-width: var(--max-width);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    box-shadow: var(--shadow-strong);
-    padding: 18px 20px calc(24px + env(safe-area-inset-bottom, 0px));
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
-
-.tafsir-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--color-border-light);
-}
-
-.tafsir-modal-header h2 {
-    font-size: 17px;
-    font-weight: 800;
-    color: var(--color-text);
-    display: flex;
-    align-items: center;
-}
-
-.tafsir-modal-close {
-    background: var(--color-bg-secondary);
-    border: none;
-    color: var(--color-text-light);
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-}
-
-.tafsir-modal-close:hover {
-    background: var(--color-border);
-    color: var(--color-text);
-}
-
-.tafsir-modal-body {
-    overflow-y: auto;
-    padding-top: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.tafsir-verse-card {
-    background: var(--color-bg-secondary);
-    border-right: 4px solid var(--color-primary);
-    border-radius: var(--radius-sm);
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.tafsir-verse-arabic {
-    font-family: var(--font-amiri);
-    font-size: 21px;
-    line-height: 1.8;
-    color: var(--color-text);
-    text-align: center;
-}
-
-.tafsir-verse-info {
-    font-size: 12px;
-    color: var(--color-text-lighter);
-    font-weight: 700;
-    text-align: left;
 }
 
 .tafsir-tabs {

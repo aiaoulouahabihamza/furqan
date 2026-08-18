@@ -13,7 +13,7 @@
     <!-- المتغيرات الشاملة (الألوان، الثيمات، الخطوط) -->
     <link rel="stylesheet" href="/variables.css" />
     <link rel="stylesheet" href="/tasbeeh/style.css" />
-    <!-- منع تكبير الشاشة في iOS -->
+    <!-- منع تكبير الشاشة في iOS واللمس المتعدد غير المقصود -->
     <style>
         * { touch-action: manipulation; }
     </style>
@@ -25,14 +25,14 @@
         <!-- ========================================= -->
         <header class="main-header" id="mainHeader">
             <div class="header-content">
-                <a href="/index.html" class="back-btn" aria-label="الرجوع للرئيسية">
+                <a href="/index.html" class="back-btn" id="headerBackBtn" aria-label="الرجوع للرئيسية">
                     <i class="fa-solid fa-arrow-right"></i>
                 </a>
                 <div class="header-title">
                     <h1>المسبحة الإلكترونية</h1>
                 </div>
                 <div class="header-actions">
-                    <button class="header-btn settings-btn" onclick="window.location.href='/settings/index.html'" aria-label="الإعدادات" title="الإعدادات">
+                    <button class="header-btn settings-btn" id="headerSettingsBtn" onclick="window.location.href='/settings/index.html'" aria-label="الإعدادات" title="الإعدادات">
                         <i class="fa-solid fa-gear"></i>
                     </button>
                 </div>
@@ -40,108 +40,120 @@
         </header>
 
         <!-- ========================================= -->
-        <!-- المحتوى الرئيسي للمسبحة                    -->
+        <!-- المحتوى الرئيسي للمسبحة (تصميم مسبحتي)        -->
         <!-- ========================================= -->
         <main class="tasbeeh-main-content">
             <div class="tasbeeh-page-wrapper">
                 
-                <!-- إعدادات المسبحة -->
-                <div class="tasbeeh-controls-card">
-                    
-                    <div class="custom-dropdown-container" id="tasbeehPhraseDropdownContainer">
-                        <label>الذكر الحالي:</label>
-                        <div class="custom-select" tabindex="0" id="tasbeehPhraseCustomSelect">
-                            <div class="custom-select-trigger">
-                                <span id="tasbeehPhraseSelectedText">سبحان الله</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                            <div class="custom-options" id="tasbeehPhraseOptions">
-                                <div class="custom-option selected" data-value="سبحان الله">سبحان الله</div>
-                                <div class="custom-option" data-value="الحمد لله">الحمد لله</div>
-                                <div class="custom-option" data-value="لا إله إلا الله">لا إله إلا الله</div>
-                                <div class="custom-option" data-value="الله أكبر">الله أكبر</div>
-                                <div class="custom-option" data-value="لا حول ولا قوة إلا بالله">لا حول ولا قوة إلا بالله</div>
-                                <div class="custom-option" data-value="أستغفر الله">أستغفر الله</div>
-                                <div class="custom-option" data-value="اللهم صل وسلم على نبينا محمد">اللهم صل وسلم على نبينا محمد</div>
-                                <div class="custom-option" data-value="سبحان الله وبحمده، سبحان الله العظيم">سبحان الله وبحمده، سبحان الله العظيم</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tasbeeh-settings-row">
-                        <div class="custom-dropdown-container small-dropdown" id="tasbeehTargetDropdownContainer">
-                            <label>الهدف:</label>
-                            <div class="custom-select" tabindex="0" id="tasbeehTargetCustomSelect">
-                                <div class="custom-select-trigger">
-                                    <span id="tasbeehTargetSelectedText">33</span>
-                                    <i class="fa-solid fa-chevron-down"></i>
-                                </div>
-                                <div class="custom-options" id="tasbeehTargetOptions">
-                                    <div class="custom-option selected" data-value="33">33 مرة</div>
-                                    <div class="custom-option" data-value="99">99 مرة</div>
-                                    <div class="custom-option" data-value="100">100 مرة</div>
-                                    <div class="custom-option" data-value="1000">1000 مرة</div>
-                                    <div class="custom-option" data-value="0">مفتوح</div>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="tasbeeh-action-btn" id="tasbeehResetBtn">
-                            <i class="fa-solid fa-rotate-left"></i> تصفير
-                        </button>
-                    </div>
-
+                <!-- 1. لوحة الذكر الفعّال الحالي (Current Active Dhikr) -->
+                <div class="active-dhikr-display-card" id="activeDhikrCard">
+                    <p class="current-label">الذكر الحالي</p>
+                    <h2 class="current-dhikr-text" id="tasbeehPhraseDisplayText">سبحان الله</h2>
                 </div>
 
-                <!-- شاشة العرض والزر الرئيسي -->
-                <div class="tasbeeh-counter-card">
-                    <div class="tasbeeh-display-screen">
-                        <div class="tasbeeh-meta-row">
-                            <span class="tasbeeh-total-rounds" id="tasbeehRounds">الدورات: 0</span>
-                            <span class="tasbeeh-target-text" id="tasbeehTargetDisplay">الهدف: 33</span>
+                <!-- 2. زر العداد الدائري العملاق (The Giant Circular Counter Clicker) -->
+                <div class="giant-counter-wrapper">
+                    <button class="giant-click-circle" id="masbahatiClicker" aria-label="اضغط للتسبيح">
+                        <!-- حلقة التقدم الدائرية SVG المحيطة بالدائرة بالكامل -->
+                        <svg class="progress-ring-svg" viewBox="0 0 240 240">
+                            <!-- الحلقة الخلفية الخافتة -->
+                            <circle class="progress-ring-track" cx="120" cy="120" r="110" />
+                            <!-- حلقة التقدم النشطة المتوهجة -->
+                            <circle class="progress-ring-fill" id="progressRingFill" cx="120" cy="120" r="110" />
+                        </svg>
+                        
+                        <!-- المحتوى الرقمي بداخل الدائرة العملاقة -->
+                        <div class="inner-clicker-content">
+                            <span class="count-number" id="tasbeehCountDisplay">0</span>
+                            <span class="tap-hint-text" id="clickerHintLabel">اضغط للتسبيح</span>
                         </div>
-                        <div class="tasbeeh-number" id="tasbeehCountDisplay">0</div>
-                        <div class="tasbeeh-phrase-display" id="tasbeehPhraseDisplayText">سبحان الله</div>
-                        <div class="tasbeeh-progress-bar">
-                            <div class="tasbeeh-progress-fill" id="tasbeehProgressFill"></div>
-                        </div>
+                    </button>
+                </div>
+
+                <!-- 3. شريط التحكم المدمج والخيارات السريعة (Quick Settings Row) -->
+                <div class="compact-controls-row">
+                    <!-- زر تصفير العداد الحالي -->
+                    <button class="control-round-btn" id="tasbeehResetBtn" title="تصفير العداد" aria-label="تصفير العداد">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>تصفير</span>
+                    </button>
+
+                    <!-- عداد الدورات الإجمالي للذكر الحالي -->
+                    <div class="stat-pill-badge">
+                        <span class="badge-label">الدورات:</span>
+                        <span class="badge-val" id="tasbeehRounds">0</span>
                     </div>
-                    
-                    <div class="tasbeeh-btn-wrapper">
-                        <button class="tasbeeh-tap-btn" id="tasbeehTapBtn">
-                            <i class="fa-solid fa-fingerprint"></i>
-                            <span>اضغط للتسبيح</span>
+
+                    <!-- ميزة اختيار الهدف النشط السريع (33، 100، مفتوح) عند النقر -->
+                    <button class="control-round-btn clickable" id="cycleTargetBtn" title="تغيير الهدف السريع">
+                        <i class="fa-solid fa-bullseye"></i>
+                        <span id="tasbeehTargetDisplay">الهدف: 33</span>
+                    </button>
+
+                    <!-- خيار كتم الصوت والاهتزاز التفاعلي -->
+                    <button class="control-round-btn" id="toggleFeedbackBtn" title="كتم/تفعيل التفاعل">
+                        <i class="fa-solid fa-volume-high" id="feedbackIcon"></i>
+                        <span id="feedbackLabel">تفاعل</span>
+                    </button>
+                </div>
+
+                <!-- 4. قائمة اختيار الأذكار وإدارة الكتالوج (Dhikr Management Grid) -->
+                <div class="dhikr-selection-card">
+                    <div class="selection-card-header">
+                        <h3>قائمة الأذكار والتسابيح</h3>
+                        <button class="add-custom-dhikr-btn" id="toggleAddFormBtn" aria-label="إضافة ذكر مخصص">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>إضافة ذكر</span>
                         </button>
+                    </div>
+
+                    <!-- نموذج إضافة ذكر جديد منبثق مدمج ومصمم برقي -->
+                    <div class="add-dhikr-slide-form" id="addDhikrForm">
+                        <div class="form-inputs-row">
+                            <div class="form-input-box">
+                                <label for="newDhikrText">الذكر المقترح:</label>
+                                <input type="text" id="newDhikrText" placeholder="اكتب الذكر هنا..." maxlength="60" />
+                            </div>
+                            <div class="form-input-box short">
+                                <label for="newDhikrTarget">الهدف:</label>
+                                <input type="number" id="newDhikrTarget" value="33" min="1" max="9999" />
+                            </div>
+                        </div>
+                        <button class="submit-new-dhikr-btn" id="btnSubmitDhikr">
+                            <i class="fa-solid fa-check"></i>
+                            <span>حفظ الذكر وإضافته</span>
+                        </button>
+                    </div>
+
+                    <!-- قائمة الأذكار الكلية -->
+                    <div class="dhikr-catalog-grid" id="dhikrCatalogList">
+                        <!-- يتم إنشاؤها عبر JavaScript ديناميكياً -->
                     </div>
                 </div>
 
             </div>
         </main>
 
-        <!-- نافذة تأكيد التصفير -->
+        <!-- نافذة تأكيد التصفير المنبثقة الراقية -->
         <div class="modal-overlay" id="tasbeehResetModal">
-            <div class="modal-content" style="text-align: center; padding: 24px; max-width: 340px; border-radius: 20px; background: var(--color-surface, #ffffff); border: 1.5px solid var(--color-border);">
-                <div style="font-size: 40px; color: #e63946; margin-bottom: 12px;">
+            <div class="modal-content">
+                <div class="modal-alert-icon">
                     <i class="fa-solid fa-rotate-left"></i>
                 </div>
-                <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--color-text);">تصفير المسبحة</h3>
-                <p style="font-size: 14px; color: var(--color-text-light); margin-bottom: 20px; line-height: 1.5;">هل تريد بالتأكيد تصفير عداد التسبيح وعدد الدورات؟</p>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button id="confirmResetBtn" style="flex: 1; padding: 12px; background: #e63946; color: #fff; border: none; border-radius: 12px; font-family: 'Cairo', sans-serif; font-weight: 700; cursor: pointer;">نعم، تصفير</button>
-                    <button id="cancelResetBtn" style="flex: 1; padding: 12px; background: var(--color-bg); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 12px; font-family: 'Cairo', sans-serif; font-weight: 700; cursor: pointer;">إلغاء</button>
+                <h3>تصفير العداد</h3>
+                <p>هل أنت متأكد من رغبتك في تصفير العداد وإعادة ضبط عدد الدورات للذكر الحالي بالكامل؟</p>
+                <div class="modal-buttons-grid">
+                    <button id="confirmResetBtn" class="modal-btn-confirm">تصفير الآن</button>
+                    <button id="cancelResetBtn" class="modal-btn-cancel">تراجع</button>
                 </div>
             </div>
-        </div>
-
-        <!-- نافذة الإعدادات -->
-        <div class="modal-overlay" id="settingsModal">
-            <!-- سيتم حقنها من settings.js -->
         </div>
 
     </div>
     
     <!-- السكريبتات -->
+    <script src="/android-bridge.js"></script>
     <script src="/settings.js"></script>
-    <script src="/cordova-bridge.js"></script>
     <script src="/global-audio.js"></script>
     <script src="/tasbeeh/main.js"></script>
 </body>

@@ -1,0 +1,9 @@
+{
+  "appId": "com.furqan.app",
+  "appName": "الفرقان",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "allowNavigation": ["*"]
+  }
+}

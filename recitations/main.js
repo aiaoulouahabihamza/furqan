@@ -967,6 +967,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (playPauseIcon) playPauseIcon.className = `fa-solid ${iconClass}`;
         if (fullPlayPauseIcon) fullPlayPauseIcon.className = `fa-solid ${iconClass}`;
 
+        if (window.Fur9anBridge && typeof window.Fur9anBridge.updateMediaNotification === 'function') {
+            window.Fur9anBridge.updateMediaNotification(surah.name, selectedReciter.name, isPlaying && !isAudioBuffering);
+        }
+
         renderSurahs();
     }
 
@@ -1349,4 +1353,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // البدء بعرض بطاقات القراء
     renderRecitersCards();
+
+    // تصدير واجهة التحكم بالصوت من أجل جسر الأندرويد ليعمل بشكل متكامل
+    window.Fur9anAudio = {
+        get isPlaying() {
+            const player = document.getElementById('globalAudioPlayer');
+            return player ? !player.paused : false;
+        },
+        togglePlay: function() {
+            togglePlayPause();
+        },
+        nextSurah: function() {
+            if (currentSurahIndex !== undefined && typeof currentSurahIndex === 'number' && allSurahs && currentSurahIndex < allSurahs.length - 1) {
+                playSurahByIndex(currentSurahIndex + 1);
+            }
+        },
+        prevSurah: function() {
+            if (currentSurahIndex !== undefined && typeof currentSurahIndex === 'number' && currentSurahIndex > 0) {
+                playSurahByIndex(currentSurahIndex - 1);
+            }
+        }
+    };
 });

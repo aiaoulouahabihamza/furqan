@@ -18,8 +18,8 @@ body {
     flex-direction: column;
     align-items: center;
     background-image: 
-        radial-gradient(at 0% 0%, rgba(16, 130, 141, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(163, 224, 98, 0.08) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(var(--color-primary-rgb), 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, var(--color-border-light) 0px, transparent 50%);
     background-attachment: fixed;
 }
 
@@ -100,8 +100,8 @@ body {
 }
 
 [data-theme="dark"] .settings-section {
-    background: #0E2A36;
-    border-color: rgba(16, 130, 141, 0.35);
+    background: var(--color-surface);
+    border-color: var(--color-border);
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
@@ -141,8 +141,8 @@ body {
 }
 
 [data-theme="dark"] .theme-option {
-    background: #091D26;
-    border-color: rgba(16, 130, 141, 0.3);
+    background: var(--color-bg);
+    border-color: var(--color-border);
 }
 
 .theme-option:hover {
@@ -229,10 +229,10 @@ body {
 }
 
 .madhab-card-option.selected {
-    background: rgba(16, 130, 141, 0.12);
+    background: rgba(var(--color-primary-rgb), 0.12);
     border-color: var(--color-primary);
     color: var(--color-primary);
-    box-shadow: 0 2px 8px rgba(16, 130, 141, 0.15);
+    box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.15);
 }
 
 /* قائمة المؤذنين والمعاينة الصوتية */
@@ -263,7 +263,7 @@ body {
 }
 
 .reciter-preview-row.selected {
-    background: rgba(16, 130, 141, 0.1);
+    background: rgba(var(--color-primary-rgb), 0.1);
     border-color: var(--color-primary);
 }
 
@@ -388,7 +388,7 @@ body {
 }
 
 [data-theme="dark"] .custom-options {
-    background: #0E2A36;
+    background: var(--color-surface);
 }
 
 .custom-select.open .custom-options {
@@ -405,7 +405,7 @@ body {
 }
 
 .custom-option:hover, .custom-option.selected {
-    background: rgba(16, 130, 141, 0.12);
+    background: rgba(var(--color-primary-rgb), 0.12);
     color: var(--color-primary);
 }
 
@@ -437,4 +437,141 @@ body {
 .save-settings-btn:active {
     transform: scale(0.98);
 }
+
+/* =========================================
+   تنسيق مفاتيح التفعيل المخصصة (iOS-style Toggle Switches)
+   ========================================= */
+.furqan-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.furqan-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.furqan-switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-bg-secondary);
+    border: 1.5px solid var(--color-border);
+    transition: 0.25s ease;
+    border-radius: 24px;
+}
+
+.furqan-switch .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    right: 3px;
+    bottom: 2.5px;
+    background-color: #ffffff;
+    transition: 0.25s ease;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.furqan-switch input:checked + .slider {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.furqan-switch input:checked + .slider:before {
+    transform: translateX(-20px);
+}
+
+.switch-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+/* =========================================
+   الشريط السفلي (Bottom Nav)
+   ========================================= */
+.bottom-nav {
+    position: fixed;
+    bottom: 8px;
+    right: 8px;
+    left: 8px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: 0 8px 24px rgba(18, 85, 123, 0.12);
+    padding: 0;
+    z-index: 1000;
+    height: var(--bottom-nav-height, 56px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg, 16px);
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+.nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-decoration: none;
+    color: var(--color-text-lighter);
+    font-size: 10px;
+    font-weight: 600;
+    width: 100%;
+    height: 100%;
+    transition: var(--transition);
+    position: relative;
+    border-radius: var(--radius, 12px);
+}
+
+.nav-item i {
+    font-size: 17px;
+    transition: var(--transition);
+}
+
+.nav-item.active {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.nav-item.active i {
+    transform: translateY(-1px);
+    color: var(--color-primary);
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 0 0 3px 3px;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.nav-item.active::before {
+    opacity: 1;
+}
+
+
 

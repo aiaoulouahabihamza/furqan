@@ -21,16 +21,13 @@
     
     <link rel="stylesheet" href="variables.css" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- تضمين مكتبة كوردوفا الأساسية لمحاكاة الأندرويد والوصول للأجهزة الذكية -->
-    <script src="cordova.js"></script>
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js');
+                navigator.serviceWorker.register('sw.js');
             });
         }
     </script>
@@ -146,6 +143,7 @@
                     <span class="dua-text" id="randomDua">جاري التحميل...</span>
                 </div>
             </div>
+            <div class="dots-container" id="duaDots"></div>
         </section>
 
         <!-- ===== آية وعبرة ===== -->
@@ -159,6 +157,7 @@
                 <span class="verse-ref" id="verseRef">--</span>
                 <p class="verse-lesson" id="verseLesson">--</p>
             </div>
+            <div class="dots-container" id="verseDots"></div>
         </section>
 
         <!-- ===== شبكة الخدمات الإيمانية ===== -->
@@ -176,7 +175,7 @@
                     <span>قصص الأنبياء</span>
                 </a>
                 <a href="./tasbeeh/index.html" class="service-item">
-                    <i class="fa-solid fa-beads"></i>
+                    <i class="fa-solid fa-fingerprint"></i>
                     <span>المسبحة الإلكترونية</span>
                 </a>
                 <button class="service-item" onclick="showToast('قسم السيرة النبوية قريباً بإذن الله')">
@@ -271,7 +270,7 @@
                 <p class="furqan-popup-welcome" style="margin-bottom: 16px; color: var(--color-text-light);">أهلاً بك في <strong>منصة الفرقان</strong> بالحلّة الجديدة المميزة والانيقة:</p>
                 <ul class="furqan-popup-features" style="list-style: none; padding: 0;">
                     <li>
-                        <i class="fa-solid fa-beads"></i>
+                        <i class="fa-solid fa-fingerprint"></i>
                         <div>
                             <strong>المسبحة الإلكترونية الرقمية:</strong>
                             <span>عداد تفاعلي سلس مع تحديد الهدف والدورات والتفاعل بالاهتزاز عند التسبيح.</span>
@@ -299,7 +298,7 @@
         </div>
     </div>
 
-    <script src="/cordova-bridge.js"></script>
+    <script src="/android-bridge.js"></script>
     <script src="/praytime.js"></script>
     <script src="/settings.js"></script>
     <script src="/global-audio.js"></script>

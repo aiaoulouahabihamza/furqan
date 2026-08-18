@@ -767,11 +767,11 @@ async function renderHadithsStage() {
             </div>
 
             <div class="hadith-actions-row">
-                <button class="hadith-action-btn copy-hadith" data-text="${text.replace(/"/g, '&quot;')}">
-                    <i class="fa-regular fa-copy"></i> نسخ الحديث
+                <button class="hadith-action-btn copy-hadith" data-text="${text.replace(/"/g, '&quot;')}" title="نسخ الحديث">
+                    <i class="fa-regular fa-copy"></i>
                 </button>
-                <button class="hadith-action-btn share-hadith" data-text="${text.replace(/"/g, '&quot;')}">
-                    <i class="fa-solid fa-share-nodes"></i> مشاركة الحديث
+                <button class="hadith-action-btn share-hadith" data-text="${text.replace(/"/g, '&quot;')}" title="مشاركة الحديث">
+                    <i class="fa-solid fa-share-nodes"></i>
                 </button>
             </div>
         `;

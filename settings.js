@@ -255,11 +255,13 @@
         let formattedStr = '';
 
         try {
-            const calType = (settings.calcMethod === 'Morocco' || adj === -1) ? 'ar-MA-u-ca-islamic' : 'ar-SA-u-ca-islamic-umalqura';
+            // نستخدم تقويم أم القرى بشكل قياسي وموحد مع ضبط المنطقة الزمنية للرياض لضمان الدقة وتفادي أي فروقات فروق التوقيت
+            const calType = 'ar-SA-u-ca-islamic-umalqura';
             const formatter = new Intl.DateTimeFormat(calType, {
                 day: 'numeric',
                 month: 'long',
-                year: 'numeric'
+                year: 'numeric',
+                timeZone: 'Asia/Riyadh'
             });
             const parts = formatter.formatToParts(workingDate);
             let pDay = '', pMonth = '', pYear = '';
@@ -274,7 +276,9 @@
                 hYear = parseInt(pYear.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)), 10) || 1448;
                 formattedStr = `${dayOfWeekName}، ${hDay} ${monthName} ${hYear} هـ`;
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('Error formatting Hijri date with Intl:', e);
+        }
 
         if (!formattedStr) {
             // خوارزمية الحساب الفلكي التقريبي لتقويم أم القرى / الحساب الجدولي
@@ -449,22 +453,30 @@
             const currentSrc = sources[currentIndex];
             audio.src = currentSrc;
 
-            audio.play().then(() => {
-                if (typeof options.onStart === 'function') options.onStart(currentSrc, reciter);
-            }).catch(err => {
-                console.warn(`[AdhanPlayer] فشل المصدر ${currentSrc} للمؤذن ${reciter.name}، تجربة المصدر التالي...`, err);
+            let attemptedNext = false;
+            function proceedToNext(reason) {
+                if (attemptedNext) return;
+                attemptedNext = true;
+                console.warn(`[AdhanPlayer] فشل المصدر ${currentSrc} بسبب ${reason} للمؤذن ${reciter.name}، تجربة المصدر التالي...`);
                 currentIndex++;
                 tryPlayCurrentSource();
+            }
+
+            audio.onerror = () => {
+                proceedToNext('error event');
+            };
+
+            audio.play().then(() => {
+                audio.onerror = null;
+                if (typeof options.onStart === 'function') options.onStart(currentSrc, reciter);
+            }).catch(err => {
+                audio.onerror = null;
+                proceedToNext('play catch: ' + (err ? err.message : 'unknown error'));
             });
         }
 
         audio.addEventListener('ended', () => {
             if (typeof options.onEnded === 'function') options.onEnded(reciter);
-        });
-
-        audio.addEventListener('error', () => {
-            currentIndex++;
-            tryPlayCurrentSource();
         });
 
         tryPlayCurrentSource();
@@ -551,14 +563,7 @@
         const reciterId = settings.adhanReciter || 'alafasi';
         const reciterObj = (window.ADHAN_RECITERS || []).find(r => r.id === reciterId) || window.ADHAN_RECITERS[0];
 
-        // 1. إرسال أمر لتطبيق أندرويد عبر الجسر
-        if (window.Fur9anBridge && typeof window.Fur9anBridge.onPrayerTimeArrived === 'function') {
-            window.Fur9anBridge.onPrayerTimeArrived(prayerKey, prayerNameAr, reciterObj.name, reciterObj.file);
-        } else if (window.Android && typeof window.Android.onPrayerTimeArrived === 'function') {
-            window.Android.onPrayerTimeArrived(prayerNameAr, reciterObj.name, reciterObj.file);
-        }
-
-        // 2. تشغيل الأذان محلياً عبر نظام التبديل الذكي
+        // تشغيل الأذان محلياً عبر نظام التبديل الذكي
         if (activeAdhanAudio) {
             activeAdhanAudio.pause();
             activeAdhanAudio = null;
@@ -677,8 +682,21 @@
     }
 
     // ============================================
-    // 7. تحويل الأزرار القديمة إلى زر الإعدادات الموحد
+    // 7. تحويل الأزرار القديمة إلى زر الإعدادات الموحد وحقن التاريخ الهجري تلقائياً
     // ============================================
+    function initializeGlobalHijriHeaders() {
+        if (typeof window.getOfflineHijriDate !== 'function') return;
+
+        const hijriObj = window.getOfflineHijriDate(new Date());
+        const hijriStr = (hijriObj && hijriObj.formatted) ? hijriObj.formatted : 'اليوم الهجري المبارك';
+
+        // 1. تحديث التاريخ الهجري الرئيسي في الصفحة الرئيسية إذا كان موجوداً
+        const topbarText = document.getElementById('topbarHijriText');
+        if (topbarText) {
+            topbarText.textContent = hijriStr;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const themeToggleBtns = document.querySelectorAll('#themeToggle, .theme-toggle, .settings-btn');
         themeToggleBtns.forEach(btn => {
@@ -688,6 +706,56 @@
                 e.preventDefault();
                 window.location.href = '/settings/index.html';
             };
+        });
+
+        // تشغيل نظام حقن التاريخ الهجري تلقائياً في ترويسة جميع صفحات التطبيق بدقة عالية عبر المكتبة
+        initializeGlobalHijriHeaders();
+
+        // ============================================
+        // 8. نظام محاكاة زر الرجوع في الأندرويد للأجهزة المحمولة (عبر الهاش لثبات كامل)
+        // ============================================
+        
+        // عند نقر أي عنصر يفتح مودال، نقوم بتسجيل الهاش في تاريخ المتصفح
+        document.body.addEventListener('click', function(e) {
+            // انتظار تفعيل كلاس نشاط المودال
+            setTimeout(() => {
+                const activeModal = document.querySelector('.modal-overlay.active, .tafsir-modal.active, .modal.active, #tasbeehResetModal.active, #settingsModal.active, #storyModal.active, #fullPlayerModal.active, #profileModal.active, #cityModal.active, #prayerOnboardingModal.active');
+                if (activeModal) {
+                    if (window.location.hash !== '#modal') {
+                        window.location.hash = 'modal';
+                    }
+                }
+            }, 120);
+        });
+
+        // عند نقر زر الإغلاق اليدوي، نرجع التاريخ خطوة واحدة لمسح الهاش
+        document.body.addEventListener('click', function(e) {
+            if (e.target.closest('.modal-close, .tafsir-modal-close, #closeTafsirBtn, #closeBookmarksBtn, #closeFullPlayerBtn, #profileClose, #cityModalClose, #prayerOnboardingClose, #closeStoryModal, .close-btn, .modal-overlay, .tafsir-modal-backdrop')) {
+                // نضمن الإغلاق والرجوع خطوة لمسح الهاش
+                if (window.location.hash === '#modal') {
+                    history.back();
+                }
+            }
+        });
+
+        // الاستماع لتغيير الهاش (الناتج عن ضغط زر الرجوع الفعلي في هاتف الأندرويد)
+        window.addEventListener('hashchange', function() {
+            if (window.location.hash !== '#modal') {
+                // نغلق أي مودال مفتوح
+                const activeModal = document.querySelector('.modal-overlay.active, .tafsir-modal.active, .modal.active, #tasbeehResetModal.active, #settingsModal.active, #storyModal.active, #fullPlayerModal.active, #profileModal.active, #cityModal.active, #prayerOnboardingModal.active');
+                if (activeModal) {
+                    activeModal.classList.remove('active');
+                    if (activeModal.id === 'tafsirModal') {
+                        activeModal.style.display = 'none';
+                    }
+                    
+                    // محاكاة زر الإغلاق لمحاكاة جميع أكواد التنظيف
+                    const closeBtn = activeModal.querySelector('.modal-close, .tafsir-modal-close, #closeTafsirBtn, #closeBookmarksBtn, #closeFullPlayerBtn, #profileClose, #cityModalClose, #prayerOnboardingClose, #closeStoryModal, .close-btn');
+                    if (closeBtn) {
+                        closeBtn.click();
+                    }
+                }
+            }
         });
     });
 

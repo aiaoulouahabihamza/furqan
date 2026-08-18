@@ -26,7 +26,8 @@ function updateTopbarHijriDate() {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
-                year: 'numeric'
+                year: 'numeric',
+                timeZone: 'Asia/Riyadh'
             });
             let formatted = formatter.format(new Date());
             formatted = formatted.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
@@ -279,6 +280,7 @@ async function loadDua() {
         const response = await fetch('./data/json/100dua.json');
         const data = await response.json();
         allDua = data;
+        initDots('duaDots', allDua.length);
         displayDua(0);
         startDuaRotation();
     } catch (error) {
@@ -342,6 +344,7 @@ async function loadVerse() {
         const response = await fetch('./data/json/ayat&ebra.json');
         const data = await response.json();
         allVerses = data;
+        initDots('verseDots', allVerses.length);
         displayVerse(0);
         startVerseRotation();
     } catch (error) {
@@ -379,15 +382,31 @@ function startVerseRotation() {
 }
 
 // ============================================
-// 13. تحديث النقاط
+// 13. تهيئة وتحديث النقاط
 // ============================================
+function initDots(containerId, count) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    const maxDots = Math.min(count, 5); // حد أقصى 5 نقاط لمنع التجاوز البصري
+    for (let i = 0; i < maxDots; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.dataset.index = i;
+        container.appendChild(dot);
+    }
+}
+
 function updateDots(containerId, activeIndex, total) {
     const container = document.getElementById(containerId);
     if (!container) return;
     
     const dots = container.querySelectorAll('.dot');
+    if (dots.length === 0) return;
+    
+    const activeDotIndex = activeIndex % dots.length;
     dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === (activeIndex % total));
+        dot.classList.toggle('active', i === activeDotIndex);
     });
 }
 

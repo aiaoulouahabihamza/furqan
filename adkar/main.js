@@ -214,11 +214,11 @@ function renderAzkar(category) {
                 
                 <!-- أزرار النسخ والمشاركة المباشرة -->
                 <div class="zekr-actions-row">
-                    <button class="zekr-card-btn copy-btn" data-text="${item.zekr.replace(/"/g, '&quot;')}">
-                        <i class="fa-regular fa-copy"></i> نسخ الذكر
+                    <button class="zekr-card-btn copy-btn" data-text="${item.zekr.replace(/"/g, '&quot;')}" title="نسخ الذكر">
+                        <i class="fa-regular fa-copy"></i>
                     </button>
-                    <button class="zekr-card-btn share-btn" data-text="${item.zekr.replace(/"/g, '&quot;')}">
-                        <i class="fa-solid fa-share-nodes"></i> مشاركة
+                    <button class="zekr-card-btn share-btn" data-text="${item.zekr.replace(/"/g, '&quot;')}" title="مشاركة">
+                        <i class="fa-solid fa-share-nodes"></i>
                     </button>
                 </div>
             </div>

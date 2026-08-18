@@ -443,6 +443,10 @@
                 persIcon.className = this.isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
             }
 
+            if (window.Fur9anBridge && typeof window.Fur9anBridge.updateMediaNotification === 'function') {
+                window.Fur9anBridge.updateMediaNotification(surahName, reciterName, this.isPlaying);
+            }
+
             this.updateRepeatUI();
         }
 

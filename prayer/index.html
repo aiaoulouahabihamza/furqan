@@ -10,7 +10,6 @@
     
     <link rel="stylesheet" href="/variables.css" />
     <link rel="stylesheet" href="/prayer/style.css" />
-    <script src="../cordova.js"></script>
 </head>
 <body>
 
@@ -23,17 +22,9 @@
             
             <div class="header-title">
                 <h1><i class="fa-solid fa-mosque header-icon-gold"></i> أوقات الصلاة</h1>
-                <div class="date-badge-wrapper">
-                    <span id="currentDateHijri" class="hijri-date-text">--</span>
-                    <span class="date-sep">•</span>
-                    <span id="currentDateGregorian" class="gregorian-date-text">--</span>
-                </div>
             </div>
 
             <div class="header-actions">
-                <button class="header-action-btn setup-btn" id="openPrayerSetupBtn" title="إعدادات الحساب والمذهب">
-                    <i class="fa-solid fa-sliders"></i>
-                </button>
                 <button class="header-action-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" title="الإعدادات">
                     <i class="fa-solid fa-gear"></i>
                 </button>
@@ -190,6 +181,8 @@
 
     </main>
 
+
+
     <!-- ===== مودال تغيير المدينة ===== -->
     <div class="modal-overlay" id="cityModal">
         <div class="modal-content city-modal-content">
@@ -285,7 +278,7 @@
         </div>
     </div>
 
-    <script src="/cordova-bridge.js"></script>
+    <script src="/android-bridge.js"></script>
     <script src="/praytime.js"></script>
     <script src="/settings.js"></script>
     <script src="/global-audio.js"></script>

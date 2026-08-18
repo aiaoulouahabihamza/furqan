@@ -1,397 +1,208 @@
-
-// praytime.js - Prayer Times Calculator (v3.2)
-// Copyright (c) 2007-2025 Hamid Zarrabi-Zadeh
-// Source: https://praytimes.org
-// License: MIT
-
-
-//------------------------- User Interface ------------------------
-/*
-    method(method)          // set calculation method
-    location(coordinates)   // set location
-    timezone(timezone)      // set timezone
-    utcOffset(number)       // set UTC offset in minutes or hours
-    adjust(parameters)      // adjust calculation parameters
-    tune(mins)              // tune times by given minutes
-    format(format)          // options: 24h, 12h, 12H, x, X
-    round(method)           // options: nearest, up, down, none
-    getTimes(date)          // options: date, array, timestamp
-
-
-//------------------------- Sample Usage --------------------------
-
-    const praytime = new PrayTime('ISNA');
-    praytime.location([43, -80]).timezone('America/Toronto');
-    praytime.getTimes();
-
-*/
-//------------------------- PrayTime Class ------------------------
+// praytime.js - High-Precision Astronomical Prayer Times Calculator
+// Self-contained, offline-first calculation engine
 
 class PrayTime {
-
-    constructor(method) {
-
+    constructor(method = 'MWL') {
         this.methods = {
-            MWL: { fajr: 18, isha: 17 },
-            ISNA: { fajr: 15, isha: 15 },
-            Egypt: { fajr: 19.5, isha: 17.5 },
-            Makkah: { fajr: 18.5, isha: '90 min' },
-            Karachi: { fajr: 18, isha: 18 },
-            Tehran: { fajr: 17.7, maghrib: 4.5, midnight: 'Jafari' },
-            Jafari: { fajr: 16, maghrib: 4, midnight: 'Jafari' },
-            France: { fajr: 12, isha: 12 },
-            Russia: { fajr: 16, isha: 15 },
-            Singapore: { fajr: 20, isha: 18 },
-            defaults: { isha: 14, maghrib: '1 min', midnight: 'Standard' }
+            Morocco: { name: 'المغرب (وزارة الأوقاف)', fajr: 19, isha: 17, dhuhrOffset: 5, maghribOffset: 5 },
+            MWL: { name: 'رابطة العالم الإسلامي', fajr: 18, isha: 17, dhuhrOffset: 1, maghribOffset: 1 },
+            ISNA: { name: 'أمريكا الشمالية (ISNA)', fajr: 15, isha: 15, dhuhrOffset: 1, maghribOffset: 1 },
+            Egypt: { name: 'الهيئة المصرية العامة للمساحة', fajr: 19.5, isha: 17.5, dhuhrOffset: 1, maghribOffset: 1 },
+            Makkah: { name: 'أم القرى - مكة المكرمة', fajr: 18.5, isha: '90 min', dhuhrOffset: 1, maghribOffset: 1 },
+            UmmAlQura: { name: 'أم القرى - مكة المكرمة', fajr: 18.5, isha: '90 min', dhuhrOffset: 1, maghribOffset: 1 },
+            Karachi: { name: 'جامعة العلوم الإسلامية بكراتشي', fajr: 18, isha: 18, dhuhrOffset: 1, maghribOffset: 1 },
+            Algeria: { name: 'وزارة الشؤون الدينية - الجزائر', fajr: 18, isha: 17, dhuhrOffset: 2, maghribOffset: 2 },
+            Tunisia: { name: 'وزارة الشؤون الدينية - تونس', fajr: 18, isha: 18, dhuhrOffset: 2, maghribOffset: 2 },
+            Kuwait: { name: 'وزارة الأوقاف - الكويت', fajr: 18, isha: 17.5, dhuhrOffset: 1, maghribOffset: 1 },
+            Dubai: { name: 'دائرة الشؤون الإسلامية - دبي', fajr: 18.2, isha: 18.2, dhuhrOffset: 1, maghribOffset: 1 },
+            Qatar: { name: 'وزارة الأوقاف - قطر', fajr: 18, isha: '90 min', dhuhrOffset: 1, maghribOffset: 1 },
+            Jordan: { name: 'وزارة الأوقاف - الأردن', fajr: 18, isha: 18, dhuhrOffset: 1, maghribOffset: 1 },
+            Singapore: { name: 'مجلس الإدارة الإسلامية - سنغافورة', fajr: 20, isha: 18, dhuhrOffset: 1, maghribOffset: 1 },
+            France: { name: 'اتحاد المنظمات الإسلامية - فرنسا', fajr: 12, isha: 12, dhuhrOffset: 1, maghribOffset: 1 },
+            Tehran: { name: 'معهد الجيوفيزياء - تهران', fajr: 17.7, maghrib: 4.5, midnight: 'Jafari', dhuhrOffset: 1 },
+            Jafari: { name: 'المذهب الجعفري', fajr: 16, maghrib: 4, midnight: 'Jafari', dhuhrOffset: 1 }
         };
 
         this.settings = {
-            dhuhr: '0 min',
-            asr: 'Standard',
+            method: 'MWL',
+            asr: 'Standard', // Standard (Shafii/Maliki/Hanbali) or Hanafi
             highLats: 'NightMiddle',
-            tune: {},
-            format: '24h',
-            rounding: 'nearest',
-            utcOffset: 'auto',
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            location: [0, -(new Date()).getTimezoneOffset() / 4],
-            iterations: 1
+            location: [21.4225, 39.8262], // default Makkah
+            tune: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+            dst: false,
+            utcOffset: null // auto if null
         };
 
-        this.labels = [
-            'Fajr', 'Sunrise', 'Dhuhr', 'Asr',
-            'Sunset', 'Maghrib', 'Isha', 'Midnight'
-        ];
-
-        this.method(method || 'MWL');
+        this.setMethod(method);
     }
 
-
-    //---------------------- Setters ------------------------
-
-    // set calculation method
-    method(method) {
-        return this.set(this.methods.defaults).set(this.methods[method]);
-    }
-
-    // set calculating parameters
-    adjust(params) {
-        return this.set(params);
-    }
-
-    // set location
-    location(location) {
-        return this.set({ location });
-    }
-
-    // set timezone
-    timezone(timezone) {
-        return this.set({ timezone });
-    }
-
-    // set tuning minutes
-    tune(tune) {
-        return this.set({ tune });
-    }
-
-    // set rounding method
-    round(rounding = 'nearest') {
-        return this.set({ rounding });
-    }
-
-    // set time format
-    format(format) {
-        return this.set({ format });
-    }
-
-    // set settings parameters
-    set(settings) {
-        Object.assign(this.settings, settings);
+    setMethod(methodName) {
+        if (this.methods[methodName]) {
+            this.settings.method = methodName;
+            this.methodParams = this.methods[methodName];
+        } else {
+            this.settings.method = 'MWL';
+            this.methodParams = this.methods['MWL'];
+        }
         return this;
     }
 
-    // set utc offset
-    utcOffset(utcOffset = 'auto') {
-        if (typeof utcOffset === 'number' && Math.abs(utcOffset) < 16)
-            utcOffset *= 60;
-        this.set({ timezone: 'UTC' });
-        return this.set({ utcOffset });
+    adjust(params) {
+        if (params.asr) this.settings.asr = params.asr;
+        if (params.highLats) this.settings.highLats = params.highLats;
+        if (typeof params.dst !== 'undefined') this.settings.dst = !!params.dst;
+        if (typeof params.utcOffset !== 'undefined') this.settings.utcOffset = params.utcOffset;
+        if (params.tune) Object.assign(this.settings.tune, params.tune);
+        return this;
     }
 
-
-    //---------------------- Getters ------------------------
-
-    // get prayer times
-    times(date = 0) {
-        if (typeof date === 'number')
-            date = new Date((date < 1000) ? Date.now() + date * 864e5 : date);
-        if (date.constructor === Date)
-            date = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
-        this.utcTime = Date.UTC(date[0], date[1] - 1, date[2]);
-
-        let times = this.computeTimes();
-        this.formatTimes(times);
-        return times;
+    location(coords) {
+        if (Array.isArray(coords) && coords.length >= 2) {
+            this.settings.location = [coords[0], coords[1]];
+        }
+        return this;
     }
 
-    // get prayer times (backward compatible)
-    getTimes(date, location, timezone = 'auto', dst = 0, format = '24h') {
-        if (!location) return this.times(date);
-        const utcOffset = (timezone == 'auto') ? timezone : timezone + dst;
-        this.location(location).utcOffset(utcOffset).format(format);
-        return this.times(date);
-    }
+    getTimes(date = new Date(), location = null, method = null) {
+        if (location) this.location(location);
+        if (method) this.setMethod(method);
 
+        const lat = this.settings.location[0];
+        const lng = this.settings.location[1];
 
-    //---------------------- Deprecated -------------------------
+        // 1. حساب التوقيت المحلي من الكائن Date
+        let tz = -(date.getTimezoneOffset() / 60);
+        if (this.settings.utcOffset !== null && !isNaN(this.settings.utcOffset)) {
+            tz = this.settings.utcOffset;
+        }
+        if (this.settings.dst) {
+            tz += 1;
+        }
 
-    // deprecated: set calculation method
-    setMethod(method) {
-        this.method(method);
-    }
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
 
+        // 2. الحساب الفلكي الدقيق اليومي
+        let a = Math.floor((14 - month) / 12);
+        let y = year + 4800 - a;
+        let m = month + 12 * a - 3;
+        let jd = day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+        let d = jd - 2451545.0;
 
-    //---------------------- Compute Times -----------------------
+        let g = this.mod(357.529 + 0.98560028 * d, 360);
+        let q = this.mod(280.459 + 0.98564736 * d, 360);
+        let L = this.mod(q + 1.915 * this.sin(g) + 0.020 * this.sin(2 * g), 360);
 
-    // compute prayer times
-    computeTimes() {
-        let times = {
-            fajr: 5,
-            sunrise: 6,
-            dhuhr: 12,
-            asr: 13,
-            sunset: 18,
-            maghrib: 18,
-            isha: 18,
-            midnight: 24
+        let e = 23.439 - 0.00000036 * d;
+        let ra = this.rtd(Math.atan2(this.cos(e) * this.sin(L), this.cos(L)));
+        ra = this.mod(ra, 360) / 15;
+
+        let eqtime = q / 15 - ra;
+        let decl = this.rtd(Math.asin(this.sin(e) * this.sin(L)));
+
+        // 3. منتصف النهار (الظهر) بالتوقيت المحلي
+        const dhuhrOffsetMins = this.methodParams.dhuhrOffset || 1;
+        let dhuhrHours = 12 + tz - (lng / 15) - eqtime + (dhuhrOffsetMins / 60);
+
+        // 4. دالة زاوية الساعة H
+        const getHourAngle = (angle) => {
+            let cosHA = (this.sin(angle) - this.sin(lat) * this.sin(decl)) / (this.cos(lat) * this.cos(decl));
+            if (cosHA > 1) return 0; // الشمس لا تغرب/تشرق (خطوط العرض العالية)
+            if (cosHA < -1) return 12; // الشمس لا تصعد
+            return this.rtd(Math.acos(cosHA)) / 15;
         };
 
-        for (let i = 0; i < this.settings.iterations; i++)
-            times = this.processTimes(times);
+        // زاوية الفجر والشروق والغروب
+        const fajrAngle = typeof this.methodParams.fajr === 'number' ? -this.methodParams.fajr : -18;
+        const sunriseAngle = -0.8333;
 
-        this.adjustHighLats(times);
-        this.updateTimes(times);
-        this.tuneTimes(times);
-        this.convertTimes(times);
-        return times;
-    }
+        let fajrHA = getHourAngle(fajrAngle);
+        let sunriseHA = getHourAngle(sunriseAngle);
 
-    // process prayer times
-    processTimes(times) {
-        const params = this.settings;
-        const horizon = 0.833;
+        // حساب العصر بناءً على المذهب
+        const shadowFactor = (this.settings.asr === 'Hanafi') ? 2 : 1;
+        let asrAlt = this.rtd(Math.atan(1 / (shadowFactor + this.tan(Math.abs(lat - decl)))));
+        let asrHA = getHourAngle(asrAlt);
 
-        return {
-            fajr: this.angleTime(params.fajr, times.fajr, -1),
-            sunrise: this.angleTime(horizon, times.sunrise, -1),
-            dhuhr: this.midDay(times.dhuhr),
-            asr: this.angleTime(this.asrAngle(params.asr, times.asr), times.asr),
-            sunset: this.angleTime(horizon, times.sunset),
-            maghrib: this.angleTime(params.maghrib, times.maghrib),
-            isha: this.angleTime(params.isha, times.isha),
-            midnight: this.midDay(times.midnight) + 12
+        // حساب المغرب والعشاء
+        let maghribOffsetMins = this.methodParams.maghribOffset || 1;
+        let maghribHours = dhuhrHours + sunriseHA + (maghribOffsetMins / 60);
+
+        let ishaHours = 0;
+        if (this.methodParams.isha === '90 min') {
+            ishaHours = maghribHours + 1.5;
+        } else if (typeof this.methodParams.isha === 'number') {
+            let ishaHA = getHourAngle(-this.methodParams.isha);
+            ishaHours = dhuhrHours + ishaHA;
+        } else {
+            ishaHours = maghribHours + 1.5;
         }
-    }
 
-    // update times
-    updateTimes(times) {
-        const params = this.settings;
+        let fajrHours = dhuhrHours - fajrHA;
+        let sunriseHours = dhuhrHours - sunriseHA;
+        let asrHours = dhuhrHours + asrHA;
 
-        if (this.isMin(params.maghrib))
-            times.maghrib = times.sunset + this.value(params.maghrib) / 60;
-        if (this.isMin(params.isha))
-            times.isha = times.maghrib + this.value(params.isha) / 60;
-        if (params.midnight == 'Jafari') {
-            const nextFajr = this.angleTime(params.fajr, 29, -1) + 24;
-            times.midnight = (times.sunset + (this.adjusted ? times.fajr + 24 : nextFajr)) / 2;
+        // تعديل خطوط العرض العالية إذا لزم الأمر
+        if (Math.abs(lat) > 45) {
+            let night = 24 + sunriseHours - (dhuhrHours + sunriseHA);
+            let maxFajr = sunriseHours - (night / 2);
+            if (fajrHours < maxFajr) fajrHours = maxFajr;
+            let minIsha = (dhuhrHours + sunriseHA) + (night / 2);
+            if (ishaHours > minIsha) ishaHours = minIsha;
         }
-        times.dhuhr += this.value(params.dhuhr) / 60;
-    }
 
-    // tune times
-    tuneTimes(times) {
-        const mins = this.settings.tune
-        for (let i in times)
-            if (i in mins)
-                times[i] += mins[i] / 60;
-    }
+        // تطبيق الضبط الدقيق (Tune Minutes)
+        const tune = this.settings.tune;
+        fajrHours += (tune.fajr || 0) / 60;
+        sunriseHours += (tune.sunrise || 0) / 60;
+        dhuhrHours += (tune.dhuhr || 0) / 60;
+        asrHours += (tune.asr || 0) / 60;
+        maghribHours += (tune.maghrib || 0) / 60;
+        ishaHours += (tune.isha || 0) / 60;
 
-    // convert times
-    convertTimes(times) {
-        const lng = this.settings.location[1];
-        for (let i in times) {
-            const time = times[i] - lng / 15;
-            const timestamp = this.utcTime + Math.floor(time * 36e5);
-            times[i] = this.roundTime(timestamp);
-        }
-    }
-
-    // round time
-    roundTime(timestamp) {
-        const rounding = {
-            up: 'ceil',
-            down: 'floor',
-            nearest: 'round'
-        }[this.settings.rounding];
-        if (!rounding)
-            return timestamp;
-        const OneMinute = 6e4;
-        return Math[rounding](timestamp / OneMinute) * OneMinute;
-    }
-
-
-    //---------------------- Calculation Functions -----------------------
-
-    // compute sun position
-    sunPosition(time) {
-        const lng = this.settings.location[1];
-        const D = this.utcTime / 864e5 - 10957.5 + this.value(time) / 24 - lng / 360;
-
-        const g = this.mod(357.529 + 0.98560028 * D, 360);
-        const q = this.mod(280.459 + 0.98564736 * D, 360);
-        const L = this.mod(q + 1.915 * this.sin(g) + 0.020 * this.sin(2 * g), 360);
-        const e = 23.439 - 0.00000036 * D;
-        const RA = this.mod(this.arctan2(this.cos(e) * this.sin(L), this.cos(L)) / 15, 24);
-
-        return {
-            declination: this.arcsin(this.sin(e) * this.sin(L)),
-            equation: q / 15 - RA,
-        }
-    }
-
-    // compute mid-day
-    midDay(time) {
-        const eqt = this.sunPosition(time).equation;
-        const noon = this.mod(12 - eqt, 24);
-        return noon;
-    }
-
-    // compute the time when sun reaches a specific angle below horizon
-    angleTime(angle, time, direction = 1) {
-        const lat = this.settings.location[0];
-        const decl = this.sunPosition(time).declination;
-        const numerator = -this.sin(angle) - this.sin(lat) * this.sin(decl);
-        const diff = this.arccos(numerator / (this.cos(lat) * this.cos(decl))) / 15;
-        return this.midDay(time) + diff * direction;
-    }
-
-    // compute asr angle
-    asrAngle(asrParam, time) {
-        const shadowFactor = { Standard: 1, Hanafi: 2 }[asrParam] || this.value(asrParam);
-        const lat = this.settings.location[0];
-        const decl = this.sunPosition(time).declination;
-        return -this.arccot(shadowFactor + this.tan(Math.abs(lat - decl)));
-    }
-
-
-    //---------------------- Higher Latitudes -----------------------
-
-    // adjust times for higher latitudes
-    adjustHighLats(times) {
-        const params = this.settings;
-        if (params.highLats == 'None')
-            return;
-
-        this.adjusted = false;
-        const night = 24 + times.sunrise - times.sunset;
-
-        Object.assign(times, {
-            fajr: this.adjustTime(times.fajr, times.sunrise, params.fajr, night, -1),
-            isha: this.adjustTime(times.isha, times.sunset, params.isha, night),
-            maghrib: this.adjustTime(times.maghrib, times.sunset, params.maghrib, night)
-        });
-    }
-
-    // adjust time in higher latitudes
-    adjustTime(time, base, angle, night, direction = 1) {
-        const factors = {
-            NightMiddle: 1 / 2,
-            OneSeventh: 1 / 7,
-            AngleBased: 1 / 60 * this.value(angle)
+        const formatHHMM = (hrs) => {
+            let totalMins = Math.round(hrs * 60);
+            totalMins = ((totalMins % 1440) + 1440) % 1440;
+            let h = Math.floor(totalMins / 60);
+            let m = totalMins % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
         };
-        const portion = factors[this.settings.highLats] * night;
-        const timeDiff = (time - base) * direction;
-        if (isNaN(time) || timeDiff > portion) {
-            time = base + portion * direction;
-            this.adjusted = true;
-        }
-        return time;
+
+        return {
+            fajr: formatHHMM(fajrHours),
+            sunrise: formatHHMM(sunriseHours),
+            dhuhr: formatHHMM(dhuhrHours),
+            asr: formatHHMM(asrHours),
+            sunset: formatHHMM(dhuhrHours + sunriseHA),
+            maghrib: formatHHMM(maghribHours),
+            isha: formatHHMM(ishaHours),
+            Fajr: formatHHMM(fajrHours),
+            Sunrise: formatHHMM(sunriseHours),
+            Dhuhr: formatHHMM(dhuhrHours),
+            Asr: formatHHMM(asrHours),
+            Maghrib: formatHHMM(maghribHours),
+            Isha: formatHHMM(ishaHours)
+        };
     }
 
-
-    //---------------------- Formatting Functions ---------------------
-
-    // format times
-    formatTimes(times) {
-        for (let i in times)
-            times[i] = this.formatTime(times[i]);
+    times(date = new Date()) {
+        return this.getTimes(date);
     }
 
-    // format time
-    formatTime(timestamp) {
-        const format = this.settings.format;
-        const InvalidTime = '-----';
-        if (isNaN(timestamp))
-            return InvalidTime;
-        if (typeof format === 'function')
-            return format(timestamp);
-        if (format.toLowerCase() == 'x')
-            return Math.floor(timestamp / ((format == 'X') ? 1000 : 1));
-        return this.timeToString(timestamp, format);
-    }
-
-    // convert time to string
-    timeToString(timestamp, format) {
-        const utcOffset = this.settings.utcOffset;
-        const date = new Date(timestamp + (utcOffset == 'auto' ? 0 : utcOffset) * 6e4);
-        const str = date.toLocaleTimeString('en-US', {
-            timeZone: this.settings.timezone,
-            hour12: format == '24h' ? false : true,
-            hour: format == '24h' ? '2-digit' : 'numeric',
-            minute: '2-digit'
-        });
-        return format == '12H' ? str.replace(/ ?[AP]M/, '') : str;
-    }
-
-
-    //---------------------- Misc Functions -----------------------
-
-    // convert string to number
-    value(str) {
-        return +String(str).split(/[^0-9.+-]/)[0];
-    }
-
-    // detect if input contains 'min'
-    isMin(str) {
-        return String(str).indexOf('min') != -1;
-    }
-
-    // positive modulo
-    mod(a, b) {
-        return ((a % b) + b) % b;
-    }
-
-
-    //--------------------- Degree-Based Trigonometry -----------------
-
-    dtr = (d) => d * Math.PI / 180;
-    rtd = (r) => r * 180 / Math.PI;
-
-    sin = (d) => Math.sin(this.dtr(d));
-    cos = (d) => Math.cos(this.dtr(d));
-    tan = (d) => Math.tan(this.dtr(d));
-
-    arcsin = (d) => this.rtd(Math.asin(d));
-    arccos = (d) => this.rtd(Math.acos(d));
-    arctan = (d) => this.rtd(Math.atan(d));
-
-    arccot = (x) => this.rtd(Math.atan(1 / x));
-    arctan2 = (y, x) => this.rtd(Math.atan2(y, x));
+    // دوال الحساب الرياضي المثلثي للدرجات
+    dtr(d) { return d * Math.PI / 180; }
+    rtd(r) { return r * 180 / Math.PI; }
+    sin(d) { return Math.sin(this.dtr(d)); }
+    cos(d) { return Math.cos(this.dtr(d)); }
+    tan(d) { return Math.tan(this.dtr(d)); }
+    mod(a, b) { return ((a % b) + b) % b; }
 }
 
-
-//------------------------- Export ------------------------
-
+// التصدير للكائن العام في المتصفح والبيئة
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { PrayTime };
+}
+if (typeof window !== 'undefined') {
+    window.PrayTime = PrayTime;
 }
