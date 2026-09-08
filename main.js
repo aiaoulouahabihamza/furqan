@@ -54,7 +54,10 @@ function updateMiniPrayerTimesUI() {
         if (unified && unified.timings) {
             const miniLoc = document.getElementById('miniLocationDisplay');
             if (miniLoc) {
-                miniLoc.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${unified.cityName}`;
+                const cleanName = (typeof window.cleanLocationName === 'function')
+                    ? window.cleanLocationName(unified.cityName)
+                    : (unified.cityName || '').replace(/\s*\(?\s*gps\s*\)?/gi, '').trim();
+                miniLoc.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${cleanName || 'موقعك الحالي'}`;
             }
 
             if (document.getElementById('miniFajr')) document.getElementById('miniFajr').textContent = unified.timings.Fajr;
@@ -75,9 +78,14 @@ updateMiniPrayerTimesUI();
 function precacheAdhanAudioFiles() {
     if ('caches' in window) {
         const audioFiles = [
-            '/audio/adhan_makkah.mp3',
-            '/audio/adhan_qatami.mp3',
-            '/audio/adhan_afasy.mp3'
+            '/audio/macharialafasi.mp3',
+            '/audio/yassiradosari.mp3',
+            '/audio/nasiralqatami.mp3',
+            '/audio/3omaralqzabri.mp3',
+            '/audio/ahmedanafis.mp3',
+            '/audio/islamsobhi.mp3',
+            '/audio/wadiaalyamani.mp3',
+            '/audio/anasatazi.mp3'
         ];
         caches.open('mishkat-cache-v3').then(cache => {
             audioFiles.forEach(file => {

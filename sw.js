@@ -3,16 +3,35 @@ const CACHE_NAME = 'furqan-pwa-cache-v1';
 
 // Core assets to cache on install
 const PRE_CACHE_ASSETS = [
-  './',
-  './index.html',
-  './style.css',
-  './variables.css',
-  './main.js',
-  './settings.js',
-  './praytime.js',
-  './global-audio.js',
-  './android-bridge.js',
-  './manifest.json'
+  '/',
+  '/index.html',
+  '/style.css',
+  '/variables.css',
+  '/main.js',
+  '/settings.js',
+  '/praytime.js',
+  '/global-audio.js',
+  '/android-bridge.js',
+  '/manifest.json',
+  '/quran/index.html',
+  '/quran/style.css',
+  '/quran/main.js',
+  '/quran/page.html',
+  '/quran/page.css',
+  '/quran/page.js',
+  '/sunah/index.html',
+  '/sunah/style.css',
+  '/sunah/main.js',
+  '/recitations/index.html',
+  '/recitations/style.css',
+  '/recitations/main.js',
+  '/prayer/index.html',
+  '/prayer/style.css',
+  '/prayer/main.js',
+  '/adhkar/index.html',
+  '/adhkar/style.css',
+  '/adhkar/main.js',
+  '/settings/index.html'
 ];
 
 // Install Event

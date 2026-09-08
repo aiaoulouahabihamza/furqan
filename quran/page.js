@@ -869,7 +869,7 @@ document.getElementById('ayahActionShare').addEventListener('click', () => {
     closeAyahSheet();
 });
 
-// ===== آليات وإدارة مودال التفسير والبيان التفاعلي الحركي =====
+// ===== آليات وإدارة مودال التفسير والبيان التفاعلي الحركي السريع =====
 const tafsirModal = document.getElementById('tafsirModal');
 const tafsirModalBackdrop = document.getElementById('tafsirModalBackdrop');
 const closeTafsirBtn = document.getElementById('closeTafsirBtn');
@@ -878,14 +878,22 @@ const tafsirVerseInfo = document.getElementById('tafsirVerseInfo');
 const tafsirContentText = document.getElementById('tafsirContentText');
 const tafsirLoading = document.getElementById('tafsirLoading');
 
+window.closeTafsirModal = function() {
+    if (tafsirModal) {
+        tafsirModal.style.display = 'none';
+        tafsirModal.classList.remove('active');
+    }
+};
+
 let tafsirActiveAyah = null; // { surah, verse, arabicText }
 
+// جلب التفسير بسرعة فائقة وتخزين السورة كاملة عند أول طلب
 async function loadTafsir(surah, verse) {
     if (!tafsirLoading) return;
     tafsirLoading.style.display = 'flex';
     if (tafsirContentText) tafsirContentText.textContent = '';
     
-    // التخزين المحلي للتفسير الميسر لضمان العمل 100% دون إنترنت
+    // 1. فحص التخزين المحلي الفوري
     const cacheKey = `tafsir_muyassar_${surah}_${verse}`;
     const cachedTafsir = localStorage.getItem(cacheKey);
     if (cachedTafsir) {
@@ -894,15 +902,35 @@ async function loadTafsir(surah, verse) {
         return;
     }
     
-    const edition = 'ar.muyassar';
-    const apiUrl = `https://api.alquran.cloud/v1/ayah/${surah}:${verse}/${edition}`;
-    
     try {
-        const res = await fetchJsonCached(apiUrl);
-        if (res && res.code === 200 && res.data && res.data.text) {
-            const tafsirText = res.data.text;
+        // 2. جلب تفسير السورة كاملة دفعة واحدة وتخزينها لسرعة 0ms في باقي آيات السورة
+        const surahUrl = `https://api.alquran.cloud/v1/surah/${surah}/ar.muyassar`;
+        const res = await fetchJsonCached(surahUrl);
+        if (res && res.code === 200 && res.data && res.data.ayahs) {
+            let targetText = "";
+            res.data.ayahs.forEach(a => {
+                try {
+                    localStorage.setItem(`tafsir_muyassar_${surah}_${a.numberInSurah}`, a.text);
+                    if (a.numberInSurah === parseInt(verse, 10)) {
+                        targetText = a.text;
+                    }
+                } catch (e) {}
+            });
+
+            if (targetText && tafsirContentText) {
+                tafsirContentText.textContent = targetText;
+                tafsirLoading.style.display = 'none';
+                return;
+            }
+        }
+
+        // 3. مسار بديل للآية المنفردة
+        const singleUrl = `https://api.alquran.cloud/v1/ayah/${surah}:${verse}/ar.muyassar`;
+        const singleRes = await fetchJsonCached(singleUrl);
+        if (singleRes && singleRes.code === 200 && singleRes.data && singleRes.data.text) {
+            const tafsirText = singleRes.data.text;
             if (tafsirContentText) tafsirContentText.textContent = tafsirText;
-            localStorage.setItem(cacheKey, tafsirText);
+            try { localStorage.setItem(cacheKey, tafsirText); } catch (e) {}
         } else {
             throw new Error("Invalid API response");
         }

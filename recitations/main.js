@@ -424,14 +424,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     ];
 
-    function getAudioUrlForSurah(reciter, surahNumber) {
-        if (typeof reciter.getUrl === 'function') {
-            return reciter.getUrl(surahNumber);
+    function resolveReciter(reciterOrId) {
+        if (!reciterOrId) return RECITERS_LIST[0];
+        if (typeof reciterOrId === 'string') {
+            return RECITERS_LIST.find(r => r.identifier === reciterOrId) || RECITERS_LIST[0];
         }
-        return `https://cdn.islamic.network/quran/audio-surah/128/${reciter.identifier}/${surahNumber}.mp3`;
+        if (reciterOrId.identifier) {
+            const found = RECITERS_LIST.find(r => r.identifier === reciterOrId.identifier);
+            if (found) return found;
+        }
+        return (typeof reciterOrId.getUrl === 'function') ? reciterOrId : RECITERS_LIST[0];
     }
 
-    let selectedReciter = JSON.parse(localStorage.getItem('selectedReciter')) || RECITERS_LIST[0];
+    function getAudioUrlForSurah(reciter, surahNumber) {
+        const r = resolveReciter(reciter);
+        if (typeof r.getUrl === 'function') {
+            return r.getUrl(surahNumber);
+        }
+        return `https://server11.mp3quran.net/koshi/${String(surahNumber).padStart(3, '0')}.mp3`;
+    }
+
+    let selectedReciter = (function() {
+        try {
+            const saved = localStorage.getItem('selectedReciter');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                return resolveReciter(parsed);
+            }
+        } catch (e) {}
+        return RECITERS_LIST[0];
+    })();
     let favoritesSurahs = JSON.parse(localStorage.getItem('favAudioSurahs')) || [];
 
     // ============================================
@@ -773,7 +795,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (btnEl) {
             btnEl.classList.add('downloading');
-            btnEl.innerHTML = '<i class="fa-solid fa-spinner spin"></i>';
+            btnEl.innerHTML = '<span class="download-progress-text">0%</span>';
             btnEl.title = 'جاري التحميل...';
         }
 
@@ -793,7 +815,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!response.ok) throw new Error(`Proxy HTTP ${response.status}`);
             }
 
-            const blob = await response.blob();
+            const contentLengthHeader = response.headers.get('content-length');
+            const totalBytes = contentLengthHeader ? parseInt(contentLengthHeader, 10) : 0;
+
+            let blob;
+            if (response.body && totalBytes > 0) {
+                const reader = response.body.getReader();
+                const chunks = [];
+                let receivedBytes = 0;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    receivedBytes += value.length;
+                    const percent = Math.min(99, Math.round((receivedBytes / totalBytes) * 100));
+                    if (btnEl) {
+                        btnEl.innerHTML = `<span class="download-progress-text">${percent}%</span>`;
+                    }
+                }
+                blob = new Blob(chunks, { type: 'audio/mpeg' });
+            } else {
+                // محاكاة تدريجية في حال غياب رأس الحجم
+                let fakeProgress = 15;
+                const interval = setInterval(() => {
+                    if (fakeProgress < 90) {
+                        fakeProgress += Math.floor(Math.random() * 15) + 5;
+                        if (btnEl) btnEl.innerHTML = `<span class="download-progress-text">${fakeProgress}%</span>`;
+                    }
+                }, 200);
+                blob = await response.blob();
+                clearInterval(interval);
+            }
+
+            if (btnEl) {
+                btnEl.innerHTML = `<span class="download-progress-text">100%</span>`;
+            }
 
             await QuranAudioDB.saveAudio(selectedReciter.identifier, surahNumber, blob, {
                 reciterName: selectedReciter.name,
@@ -803,7 +860,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             downloadedKeysSet.add(`${selectedReciter.identifier}_${surahNumber}`);
 
-            showToast(`تم تحميل سورة ${surah.name} بنجاح للعمل بدون نت!`);
+            showToast(`تم تحميل سورة ${surah.name} بنجاح للعمل بدون نت! ✨`);
             renderSurahs();
             renderRecitersCards();
         } catch (err) {
@@ -833,57 +890,95 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ============================================
     // 8. تشغيل الصوت والتحكم الرئيسي (أوفلاين وأونلاين)
     // ============================================
+    let currentAudioSessionId = 0;
+
     async function playSurahByIndex(index) {
         if (index < 0 || (allSurahs.length > 0 && index >= allSurahs.length)) return;
 
+        const sessionId = ++currentAudioSessionId;
         currentSurahIndex = index;
         const surah = allSurahs[currentSurahIndex] || { number: index + 1, name: `سورة رقم ${index + 1}` };
         currentPlayingSurahNumber = surah.number;
         hasTriedAudioFallback = false;
 
-        let audioSrcUrl = null;
-        let isOfflineSource = false;
+        const sources = [];
 
         // 1. فحص هل السورة محملة في الذاكرة المحلية أوفلاين
         try {
             const cachedItem = await QuranAudioDB.getAudio(selectedReciter.identifier, surah.number);
-            if (cachedItem && cachedItem.blob) {
-                audioSrcUrl = URL.createObjectURL(cachedItem.blob);
-                isOfflineSource = true;
+            if (cachedItem && cachedItem.blob && cachedItem.blob.size > 1000) {
+                const blobUrl = URL.createObjectURL(cachedItem.blob);
+                sources.push({ url: blobUrl, isOffline: true });
             }
         } catch (e) {
-            console.error('خطأ قراءة الذاكرة الأوفلاين:', e);
+            console.warn('تنبيه قراءة الذاكرة الأوفلاين:', e);
         }
 
-        // 2. إذا لم تكن محملة، استخدام رابط البث الشبكي المباشر
-        if (!audioSrcUrl) {
-            audioSrcUrl = getAudioUrlForSurah(selectedReciter, surah.number);
+        // 2. مصادر الشبكة
+        const primaryUrl = getAudioUrlForSurah(selectedReciter, surah.number) || `https://server11.mp3quran.net/koshi/${String(surah.number).padStart(3, '0')}.mp3`;
+        sources.push({ url: primaryUrl, isOffline: false });
+        sources.push({ url: `/api/proxy-audio?url=${encodeURIComponent(primaryUrl)}`, isOffline: false });
+        
+        // خوادم بديلة عالية الموثوقية
+        const fallbackCdn = `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${surah.number}.mp3`;
+        sources.push({ url: fallbackCdn, isOffline: false });
+        sources.push({ url: `/api/proxy-audio?url=${encodeURIComponent(fallbackCdn)}`, isOffline: false });
+
+        setupMediaSession(surah);
+        fetchAyahsTextForPlayer(surah.number);
+
+        executeAudioSourceChain(sources, 0, sessionId, surah);
+    }
+
+    function executeAudioSourceChain(sources, sourceIdx, sessionId, surah) {
+        if (sessionId !== currentAudioSessionId) return;
+
+        if (sourceIdx >= sources.length) {
+            isAudioBuffering = false;
+            isPlaying = false;
+            updatePlayerUI();
+            if (!navigator.onLine) {
+                showToast('أنت أوفلاين وهذه السورة غير محملة، يرجى الاتصال بالإنترنت.');
+            } else {
+                showToast('تعذر تحميل المصدر الصوتي حالياً، يرجى المحاولة لاحقاً.');
+            }
+            return;
         }
+
+        const source = sources[sourceIdx];
+        if (offlinePlayingBadge) {
+            offlinePlayingBadge.style.display = source.isOffline ? 'inline-flex' : 'none';
+        }
+
+        if (source.isOffline && sourceIdx === 0) {
+            showToast(`تشغيل سورة ${surah.name} من الذاكرة (بدون نت)`);
+        }
+
+        isPlaying = true;
+        isAudioBuffering = !source.isOffline;
+        updatePlayerUI();
 
         try {
             globalAudioPlayer.pause();
         } catch (e) {}
 
-        globalAudioPlayer.src = audioSrcUrl;
+        globalAudioPlayer.src = source.url;
 
-        if (offlinePlayingBadge) {
-            offlinePlayingBadge.style.display = isOfflineSource ? 'inline-flex' : 'none';
+        let hasHandledAttempt = false;
+        function tryNextSource() {
+            if (hasHandledAttempt) return;
+            hasHandledAttempt = true;
+            if (sessionId !== currentAudioSessionId) return;
+            executeAudioSourceChain(sources, sourceIdx + 1, sessionId, surah);
         }
-
-        if (isOfflineSource) {
-            showToast(`تشغيل سورة ${surah.name} من الذاكرة (بدون نت)`);
-        }
-
-        isPlaying = true;
-        isAudioBuffering = !isOfflineSource; // Audio loads instantly if offline
-        updatePlayerUI();
-
-        setupMediaSession(surah);
-        fetchAyahsTextForPlayer(surah.number);
 
         const playPromise = globalAudioPlayer.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
+                if (sessionId !== currentAudioSessionId) {
+                    try { globalAudioPlayer.pause(); } catch (e) {}
+                    return;
+                }
                 isAudioBuffering = false;
                 isPlaying = true;
                 updatePlayerUI();
@@ -891,15 +986,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (err.name === 'AbortError' || (err.message && err.message.includes('interrupted'))) {
                     return;
                 }
-                console.error('فشل تشغيل الصوت:', err);
-                isAudioBuffering = false;
-                isPlaying = false;
-                updatePlayerUI();
-                if (!isOfflineSource && !navigator.onLine) {
-                    showToast('أنت أوفلاين وهذه السورة غير محملة بعد، يرجى الاتصال بالنت أو اختيار سورة محملة.');
-                } else {
-                    showToast('تعذر تشغيل الصوت من المصدر. تأكد من اتصال النت.');
-                }
+                tryNextSource();
             });
         }
     }
@@ -928,7 +1015,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 updatePlayerUI();
             }).catch(err => {
                 if (err.name === 'AbortError' || (err.message && err.message.includes('interrupted'))) return;
-                console.error('فشل الاستئناف:', err);
                 isAudioBuffering = false;
                 isPlaying = false;
                 updatePlayerUI();
@@ -1100,28 +1186,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         updatePlayerUI();
     });
 
-    globalAudioPlayer.addEventListener('error', () => {
+    globalAudioPlayer.addEventListener('error', (e) => {
+        // يتم التعامل مع الانتقال بين المصادر البديلة بسلاسة داخل executeAudioSourceChain
         isAudioBuffering = false;
         isPlaying = false;
         updatePlayerUI();
-
-        if (!hasTriedAudioFallback && currentPlayingSurahNumber) {
-            hasTriedAudioFallback = true;
-            console.warn('Primary audio source failed, trying fallback CDN...');
-            const fallbackUrl = `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${currentPlayingSurahNumber}.mp3`;
-            globalAudioPlayer.src = fallbackUrl;
-            globalAudioPlayer.play().then(() => {
-                isPlaying = true;
-                isAudioBuffering = false;
-                updatePlayerUI();
-                showToast('تم التبديل إلى مصدر صوت بديل بنجاح');
-            }).catch(err => {
-                console.error('Fallback audio play failed:', err);
-                showToast('فشل تشغيل الصوت: تأكد من اتصال الإنترنت.');
-            });
-        } else {
-            showToast('فشل تشغيل الصوت: تأكد من اتصال الإنترنت.');
-        }
     });
 
     globalAudioPlayer.addEventListener('timeupdate', () => {

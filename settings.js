@@ -5,128 +5,55 @@
 (function () {
     'use strict';
 
-    // قائمة المؤذنين المعتمدة الشاملة مع ملفات الصوت في مجلد /audio/ ومسارات احتياطية متعددة
+    // قائمة المؤذنين والقراء المحددة المعتمدة حصرياً
     window.ADHAN_RECITERS = [
         {
             id: 'alafasi',
             name: 'الشيخ مشاري راشد العفاسي',
-            file: '/audio/adhan_alafasi.mp3',
-            sources: [
-                '/audio/adhan_alafasi.mp3',
-                '/audio/adhan_afasy.mp3',
-                '/audio/alafasi.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/alafasi_new.mp3',
-                'https://server8.mp3quran.net/afs/adhan.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
+            file: '/audio/macharialafasi.mp3',
+            sources: ['/audio/macharialafasi.mp3', '/audio/adhan_alafasi.mp3']
         },
         {
             id: 'aldosari',
             name: 'الشيخ ياسر الدوسري',
-            file: '/audio/adhan_aldosari.mp3',
-            sources: [
-                '/audio/adhan_aldosari.mp3',
-                '/audio/adhan_dossari.mp3',
-                '/audio/adhan_yasser.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/hamd_aldaghiri.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
+            file: '/audio/yassiradosari.mp3',
+            sources: ['/audio/yassiradosari.mp3', '/audio/adhan_aldosari.mp3']
         },
         {
             id: 'alqatami',
             name: 'الشيخ ناصر القطامي',
-            file: '/audio/adhan_alqatami.mp3',
-            sources: [
-                '/audio/adhan_alqatami.mp3',
-                '/audio/adhan_qatami.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/naser_qotami2.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
-        },
-        {
-            id: 'abdelbasset',
-            name: 'الشيخ عبد الباسط عبد الصمد',
-            file: '/audio/adhan_abdelbasset.mp3',
-            sources: [
-                '/audio/adhan_abdelbasset.mp3',
-                '/audio/adhan_abdulbasit.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/adhan_abdul_baset.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
-        },
-        {
-            id: 'makkah',
-            name: 'أذان الحرم المكي الشريف (علي ملا)',
-            file: '/audio/adhan_makkah.mp3',
-            sources: [
-                '/audio/adhan_makkah.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/adhan_makkah.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
-        },
-        {
-            id: 'madinah',
-            name: 'أذان المسجد النبوي الشريف (عصام بخاري)',
-            file: '/audio/adhan_madinah.mp3',
-            sources: [
-                '/audio/adhan_madinah.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/adhan_madina.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
-        },
-        {
-            id: 'maghribi',
-            name: 'الأذان المغربي (جامع القرويين والأندلس)',
-            file: '/audio/adhan_maghribi.mp3',
-            sources: [
-                '/audio/adhan_maghribi.mp3',
-                '/audio/adhan_morocco.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/adhan_halab.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
-        },
-        {
-            id: 'egypt',
-            name: 'الأذان المصري (الجامع الأزهر)',
-            file: '/audio/adhan_egypt.mp3',
-            sources: [
-                '/audio/adhan_egypt.mp3',
-                '/audio/adhan_egypt_refaat.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/adhan_egypt.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
-        },
-        {
-            id: 'mansoor',
-            name: 'الشيخ منصور السالمي',
-            file: '/audio/adhan_mansoor.mp3',
-            sources: [
-                '/audio/adhan_mansoor.mp3',
-                '/audio/adhan_salimi.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/masnsour_salemi.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
+            file: '/audio/nasiralqatami.mp3',
+            sources: ['/audio/nasiralqatami.mp3', '/audio/adhan_alqatami.mp3']
         },
         {
             id: 'islam_sobhi',
             name: 'القارئ إسلام صبحي',
-            file: '/audio/adhan_islam_sobhi.mp3',
-            sources: [
-                '/audio/adhan_islam_sobhi.mp3',
-                '/audio/adhan_sobhi.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/islam_sobhi.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
+            file: '/audio/islamsobhi.mp3',
+            sources: ['/audio/islamsobhi.mp3', '/audio/adhan_islam_sobhi.mp3']
         },
         {
-            id: 'ghamdi',
-            name: 'الشيخ سعد الغامدي',
-            file: '/audio/adhan_ghamdi.mp3',
-            sources: [
-                '/audio/adhan_ghamdi.mp3',
-                'https://raw.githubusercontent.com/IslamAlorabI/SalatTimes-MP3Adhan/main/Adhan/saad_alghamedi_.mp3',
-                '/audio/adhan_makkah.mp3'
-            ]
+            id: 'qzabri',
+            name: 'الشيخ عمر القزابري',
+            file: '/audio/3omaralqzabri.mp3',
+            sources: ['/audio/3omaralqzabri.mp3', '/audio/adhan_qzabri.mp3']
+        },
+        {
+            id: 'anafis',
+            name: 'الشيخ أحمد النفيس',
+            file: '/audio/ahmedanafis.mp3',
+            sources: ['/audio/ahmedanafis.mp3', '/audio/adhan_anafis.mp3']
+        },
+        {
+            id: 'yamani',
+            name: 'الشيخ وديع اليمني',
+            file: '/audio/wadiaalyamani.mp3',
+            sources: ['/audio/wadiaalyamani.mp3', '/audio/adhan_yamani.mp3']
+        },
+        {
+            id: 'tazi',
+            name: 'القارئ أنس التازي',
+            file: '/audio/anasatazi.mp3',
+            sources: ['/audio/anasatazi.mp3', '/audio/adhan_tazi.mp3']
         }
     ];
 
@@ -323,12 +250,64 @@
     };
 
     // ============================================
+    // 2.1. منظومة تنقية وتحديد أسماء المواقع الهرمية بدون لواحق إدارية أو GPS
+    // ============================================
+    window.cleanLocationName = function (rawName) {
+        if (!rawName) return '';
+        let name = rawName.toString().trim();
+        // إزالة أي إشارة لكلمة GPS نهائياً بأي صيغة
+        name = name.replace(/\s*\(?\s*gps\s*\)?/gi, '');
+        // إزالة الكلمات والبادئات الإدارية مثل: جماعة، بلدية، قيادة، دائرة، عمالة، إقليم، محافظة، ولاية، قرية
+        name = name.replace(/^(جماعة\s+قروية\s+|جماعة\s+حضرية\s+|جماعة\s+|بلدية\s+|قيادة\s+|دائرة\s+|عمالة\s+|إقليم\s+|محافظة\s+|ولاية\s+|قرية\s+|commune\s+de\s+|commune\s+|municipality\s+of\s+|ville\s+de\s+)/i, '');
+        name = name.replace(/\s+/g, ' ').trim();
+        return name;
+    };
+
+    window.extractHierarchicalLocationName = function (address) {
+        if (!address) return '';
+        // 1. القرية / الحي الصغير (village / hamlet / neighbourhood)
+        const village = address.village || address.hamlet || address.neighbourhood || address.suburb || address.quarter || address.residential || address.isolated_dwelling;
+        if (village) return window.cleanLocationName(village);
+
+        // 2. البلدية / الجماعة (municipality / district)
+        const municipality = address.municipality || address.district || address.city_district || address.subdistrict || address.commune;
+        if (municipality) return window.cleanLocationName(municipality);
+
+        // 3. المدينة / المركز (town / city)
+        const city = address.town || address.city;
+        if (city) return window.cleanLocationName(city);
+
+        // 4. المحافظة / الإقليم (county / state)
+        const state = address.county || address.province || address.state || address.region || address.state_district;
+        if (state) return window.cleanLocationName(state);
+
+        return window.cleanLocationName(address.country || '');
+    };
+
+    window.reverseGeocodeLocation = async function (lat, lng) {
+        try {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=18&addressdetails=1&accept-language=ar`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.address) {
+                    const cleanName = window.extractHierarchicalLocationName(data.address);
+                    if (cleanName) return cleanName;
+                }
+            }
+        } catch (e) {
+            console.warn('Reverse geocoding error:', e);
+        }
+        return '';
+    };
+
+    // ============================================
     // 3. خوارزمية حساب مواقيت الصلاة المحلية أوفلاين 100%
     // ============================================
     function calculateUnifiedPrayerTimes() {
         try {
             const savedLocation = localStorage.getItem('fur9an_user_location') || localStorage.getItem('prayerCity');
-            let lat = 33.5731, lng = -7.5898, cityName = 'الدار البيضاء (المغرب)', country = 'MA';
+            let lat = 33.5731, lng = -7.5898, cityName = 'الدار البيضاء', country = 'MA';
 
             if (savedLocation) {
                 try {
@@ -337,13 +316,13 @@
                     if (parsed.latitude && parsed.longitude) {
                         lat = parsed.latitude;
                         lng = parsed.longitude;
-                        cityName = parsed.name || parsed.city || cityName;
+                        cityName = window.cleanLocationName(parsed.name || parsed.city || cityName);
                     } else if (parsed.lat && parsed.lng) {
                         lat = parsed.lat;
                         lng = parsed.lng;
-                        cityName = parsed.city || parsed.name || cityName;
+                        cityName = window.cleanLocationName(parsed.city || parsed.name || cityName);
                     } else if (parsed.name) {
-                        cityName = parsed.name;
+                        cityName = window.cleanLocationName(parsed.name);
                     }
                 } catch (e) {}
             }
@@ -654,15 +633,16 @@
             if (diff === 0 && !adhanNotifiedFlags[pKey + '_' + now.toDateString()]) {
                 adhanNotifiedFlags[pKey + '_' + now.toDateString()] = true;
                 const pName = prayerNamesAr[pKey] || pKey;
-                const msgTitle = `حان الآن موعد صلاة ${pName}`;
-                const msgBody = `الله أكبر، حان وقت صلاة ${pName} في ${unifiedData.cityName}`;
+                const cityStr = unifiedData.cityName || 'موقعك الحالي';
+                const msgTitle = `الله أكبر — حان الآن موعد صلاة ${pName}`;
+                const msgBody = `حان الآن موعد صلاة ${pName} حسب توقيت مدينة ${cityStr}`;
 
                 if (window.Fur9anBridge && window.Fur9anBridge.sendNotification) {
                     window.Fur9anBridge.sendNotification(msgTitle, msgBody, 200, pKey);
                 }
 
                 // عرض لوحة الأذان وتشغيل الصوت
-                window.showPrayerTimePopup(pKey, pName, unifiedData.cityName);
+                window.showPrayerTimePopup(pKey, pName, cityStr);
             }
         });
     }

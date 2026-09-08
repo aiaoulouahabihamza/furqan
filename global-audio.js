@@ -161,63 +161,211 @@
         { number: 114, name: 'سُورَةُ النَّاسِ', numberOfAyahs: 6 }
     ];
 
-    // 3. قائمة القراء الأساسية
+    // 3. قائمة القراء الشاملة (جميع الروايات أوفلاين وأونلاين)
     const RECITERS = [
+        // --- رواية ورش عن نافع ---
         {
             identifier: 'ar.elayounelkouchi',
             name: 'الشيخ العيون الكوشي',
             style: 'رواية ورش عن نافع — المغرب',
+            rewayah: 'warsh',
             getUrl: (num) => `https://server11.mp3quran.net/koshi/${String(num).padStart(3, '0')}.mp3`
         },
         {
             identifier: 'ar.omarkabbaj',
             name: 'الشيخ عمر القزابري',
             style: 'رواية ورش عن نافع — المغرب',
+            rewayah: 'warsh',
             getUrl: (num) => `https://server9.mp3quran.net/omar_warsh/${String(num).padStart(3, '0')}.mp3`
         },
         {
             identifier: 'ar.abdulbasitwarsh',
             name: 'الشيخ عبد الباسط عبد الصمد',
             style: 'رواية ورش عن نافع — مرتل',
+            rewayah: 'warsh',
             getUrl: (num) => `https://server7.mp3quran.net/basit/Rewayat-Warsh-A-n-Nafi/${String(num).padStart(3, '0')}.mp3`
         },
         {
+            identifier: 'ar.husarywarsh',
+            name: 'الشيخ محمود خليل الحصري',
+            style: 'رواية ورش عن نافع — مرتل',
+            rewayah: 'warsh',
+            getUrl: (num) => `https://server13.mp3quran.net/husr/Rewayat-Warsh-A-n-Nafi/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.yaseenjazairi',
+            name: 'الشيخ ياسين الجزائري',
+            style: 'رواية ورش عن نافع — الجزائر',
+            rewayah: 'warsh',
+            getUrl: (num) => `https://server11.mp3quran.net/qari/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.abdulazizsheim',
+            name: 'الشيخ عبد العزيز سحيم',
+            style: 'رواية ورش عن نافع — مرتل',
+            rewayah: 'warsh',
+            getUrl: (num) => `https://server16.mp3quran.net/a_sheim/Rewayat-Warsh-A-n-Nafi/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.earawi',
+            name: 'الشيخ محمد الأيراوي',
+            style: 'رواية ورش عن نافع — طريق الأزرق',
+            rewayah: 'warsh',
+            getUrl: (num) => `https://server6.mp3quran.net/earawi/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.ifrad',
+            name: 'الشيخ رشيد إفراد',
+            style: 'رواية ورش عن نافع — مرتل',
+            rewayah: 'warsh',
+            getUrl: (num) => `https://server12.mp3quran.net/ifrad/${String(num).padStart(3, '0')}.mp3`
+        },
+
+        // --- رواية قالون عن نافع ---
+        {
+            identifier: 'ar.husaryqaloon',
+            name: 'الشيخ محمود خليل الحصري',
+            style: 'رواية قالون عن نافع — مرتل',
+            rewayah: 'qaloon',
+            getUrl: (num) => `https://server13.mp3quran.net/husr/Rewayat-Qalon-A-n-Nafi/${String(num).padStart(3, '0')}.mp3`
+        },
+
+        // --- رواية الدوري عن أبي عمرو ---
+        {
+            identifier: 'ar.husaryduri',
+            name: 'الشيخ محمود خليل الحصري',
+            style: 'رواية الدوري عن أبي عمرو — مرتل',
+            rewayah: 'duri',
+            getUrl: (num) => `https://server13.mp3quran.net/husr/Rewayat-Aldori-A-n-Abi-Amr/${String(num).padStart(3, '0')}.mp3`
+        },
+
+        // --- رواية حفص عن عاصم ---
+        {
             identifier: 'ar.alafasy',
             name: 'الشيخ مشاري راشد العفاسي',
-            style: 'رواية حفص عن عاصم',
+            style: 'رواية حفص عن عاصم — مرتل',
+            rewayah: 'hafs',
             getUrl: (num) => `https://server8.mp3quran.net/afs/${String(num).padStart(3, '0')}.mp3`
         },
         {
-            identifier: 'ar.abdurrahmaansudais',
-            name: 'الشيخ عبد الرحمن السديس',
-            style: 'رواية حفص — إمام الحرم المكي',
-            getUrl: (num) => `https://server11.mp3quran.net/sds/${String(num).padStart(3, '0')}.mp3`
+            identifier: 'ar.abdulbasitmurattal',
+            name: 'الشيخ عبد الباسط عبد الصمد',
+            style: 'رواية حفص عن عاصم — مرتل',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server7.mp3quran.net/basit/${String(num).padStart(3, '0')}.mp3`
         },
         {
-            identifier: 'ar.saudalshuraim',
-            name: 'الشيخ سعود الشريم',
-            style: 'رواية حفص عن عاصم',
-            getUrl: (num) => `https://server7.mp3quran.net/shur/${String(num).padStart(3, '0')}.mp3`
-        },
-        {
-            identifier: 'ar.mahermuaiqly',
-            name: 'الشيخ ماهر المعيقلي',
-            style: 'رواية حفص عن عاصم',
-            getUrl: (num) => `https://server12.mp3quran.net/maher/${String(num).padStart(3, '0')}.mp3`
+            identifier: 'ar.abdulbasitmujawwad',
+            name: 'الشيخ عبد الباسط عبد الصمد',
+            style: 'رواية حفص عن عاصم — مجود',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server7.mp3quran.net/basit/Almusshaf-Al-Mojawwad/${String(num).padStart(3, '0')}.mp3`
         },
         {
             identifier: 'ar.minshawi',
             name: 'الشيخ محمد صديق المنشاوي',
-            style: 'المصحف المرتل',
+            style: 'رواية حفص عن عاصم — مرتل',
+            rewayah: 'hafs',
             getUrl: (num) => `https://server10.mp3quran.net/minsh/${String(num).padStart(3, '0')}.mp3`
         },
         {
+            identifier: 'ar.minshawimujawwad',
+            name: 'الشيخ محمد صديق المنشاوي',
+            style: 'رواية حفص عن عاصم — مجود',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server10.mp3quran.net/minsh/Almusshaf-Al-Mojawwad/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.mahermuaiqly',
+            name: 'الشيخ ماهر المعيقلي',
+            style: 'إمام الحرم المكي الشريف',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server12.mp3quran.net/maher/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.husary',
+            name: 'الشيخ محمود خليل الحصري',
+            style: 'رواية حفص عن عاصم — مرتل',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server13.mp3quran.net/husr/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.yasseraddossari',
+            name: 'الشيخ ياسر الدوسري',
+            style: 'إمام الحرم المكي الشريف',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server11.mp3quran.net/yasser/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.ghamadi',
+            name: 'الشيخ سعد الغامدي',
+            style: 'رواية حفص عن عاصم — مرتل',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server7.mp3quran.net/s_gmd/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.ajamy',
+            name: 'الشيخ أحمد بن علي العجمي',
+            style: 'رواية حفص عن عاصم — مرتل',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server10.mp3quran.net/ajm/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.shaatree',
+            name: 'الشيخ أبو بكر الشاطري',
+            style: 'رواية حفص عن عاصم — مرتل',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server11.mp3quran.net/shatri/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.saoodshuraym',
+            name: 'الشيخ سعود الشريم',
+            style: 'إمام الحرم المكي الشريف السابق',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server7.mp3quran.net/shur/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
             identifier: 'ar.hudhaify',
-            name: 'الشيخ علي الحذيفي',
-            style: 'رواية قالون عن نافع',
-            getUrl: (num) => `https://server9.mp3quran.net/hthfi_qalon/${String(num).padStart(3, '0')}.mp3`
+            name: 'الشيخ علي بن عبد الرحمن الحذيفي',
+            style: 'إمام المسجد النبوي الشريف',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server9.mp3quran.net/hthfi/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.muhammadayyub',
+            name: 'الشيخ محمد أيوب',
+            style: 'إمام المسجد النبوي الشريف السابق',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server8.mp3quran.net/ayyub/${String(num).padStart(3, '0')}.mp3`
+        },
+        {
+            identifier: 'ar.hanirifai',
+            name: 'الشيخ هاني الرفاعي',
+            style: 'رواية حفص عن عاصم — مرتل',
+            rewayah: 'hafs',
+            getUrl: (num) => `https://server8.mp3quran.net/hani/${String(num).padStart(3, '0')}.mp3`
         }
     ];
+
+    function resolveReciter(reciterOrId) {
+        if (!reciterOrId) return RECITERS[0];
+        if (typeof reciterOrId === 'string') {
+            return RECITERS.find(r => r.identifier === reciterOrId) || RECITERS[0];
+        }
+        if (reciterOrId.identifier) {
+            const found = RECITERS.find(r => r.identifier === reciterOrId.identifier);
+            if (found) return found;
+        }
+        return (typeof reciterOrId.getUrl === 'function') ? reciterOrId : RECITERS[0];
+    }
+
+    function getReciterAudioUrl(reciter, surahNum) {
+        const r = resolveReciter(reciter);
+        if (typeof r.getUrl === 'function') {
+            return r.getUrl(surahNum);
+        }
+        return `https://server11.mp3quran.net/koshi/${String(surahNum).padStart(3, '0')}.mp3`;
+    }
 
     // 4. كائن التحكم الصوتي الشامل (Singleton Audio Engine)
     class Fur9anAudioEngine {
@@ -230,6 +378,7 @@
             this.isPlaying = false;
             this.repeatMode = 0; // 0: None, 1: Repeat One, 2: Repeat All
             this.blobUrl = null;
+            this._sessionId = 0;
 
             this.loadState();
             this.initAudioEvents();
@@ -314,31 +463,80 @@
         }
 
         async playSurah(surahNum, reciterObj = null) {
-            if (reciterObj) this.currentReciter = reciterObj;
-            if (surahNum) this.currentSurah = surahNum;
+            if (reciterObj) this.currentReciter = resolveReciter(reciterObj);
+            if (surahNum) this.currentSurah = Math.min(114, Math.max(1, surahNum));
 
             if (this.blobUrl) {
-                URL.revokeObjectURL(this.blobUrl);
+                try { URL.revokeObjectURL(this.blobUrl); } catch (e) {}
                 this.blobUrl = null;
             }
 
-            // فحص وجود الملف أوفلاين في IndexedDB
-            const offlineRecord = await AudioDB.getAudio(this.currentReciter.identifier, this.currentSurah);
-            if (offlineRecord && offlineRecord.blob) {
-                this.blobUrl = URL.createObjectURL(offlineRecord.blob);
-                this.audio.src = this.blobUrl;
-            } else {
-                this.audio.src = this.currentReciter.getUrl(this.currentSurah);
+            const sessionId = ++this._sessionId;
+            const sources = [];
+
+            // 1. فحص وجود الملف أوفلاين في IndexedDB
+            try {
+                const offlineRecord = await AudioDB.getAudio(this.currentReciter.identifier, this.currentSurah);
+                if (offlineRecord && offlineRecord.blob && offlineRecord.blob.size > 1000) {
+                    this.blobUrl = URL.createObjectURL(offlineRecord.blob);
+                    sources.push({ url: this.blobUrl, isOffline: true });
+                }
+            } catch (e) {
+                console.warn('Offline audio read error:', e);
             }
 
-            this.audio.play().then(() => {
-                this.isPlaying = true;
-                this.saveState();
+            // 2. مصادر الشبكة
+            const directUrl = getReciterAudioUrl(this.currentReciter, this.currentSurah) || `https://server11.mp3quran.net/koshi/${String(this.currentSurah).padStart(3, '0')}.mp3`;
+            sources.push({ url: directUrl, isOffline: false });
+            sources.push({ url: `/api/proxy-audio?url=${encodeURIComponent(directUrl)}`, isOffline: false });
+
+            // خادم بديل موثوق
+            const fallbackCdn = `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${this.currentSurah}.mp3`;
+            sources.push({ url: fallbackCdn, isOffline: false });
+            sources.push({ url: `/api/proxy-audio?url=${encodeURIComponent(fallbackCdn)}`, isOffline: false });
+
+            this.executeSourceChain(sources, 0, sessionId);
+        }
+
+        executeSourceChain(sources, sourceIdx, sessionId) {
+            if (sessionId !== this._sessionId) return;
+
+            if (sourceIdx >= sources.length) {
+                this.isPlaying = false;
                 this.updateUI();
-            }).catch((err) => {
-                console.warn('Playback request error:', err);
-                this.updateUI();
-            });
+                return;
+            }
+
+            const source = sources[sourceIdx];
+            try { this.audio.pause(); } catch (e) {}
+
+            this.audio.src = source.url;
+
+            let handled = false;
+            const tryNext = () => {
+                if (handled) return;
+                handled = true;
+                if (sessionId !== this._sessionId) return;
+                this.executeSourceChain(sources, sourceIdx + 1, sessionId);
+            };
+
+            const playPromise = this.audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    if (sessionId !== this._sessionId) {
+                        try { this.audio.pause(); } catch (e) {}
+                        return;
+                    }
+                    this.isPlaying = true;
+                    this.saveState();
+                    this.updateUI();
+                }).catch((err) => {
+                    if (err.name === 'AbortError' || (err.message && err.message.includes('interrupted'))) {
+                        return;
+                    }
+                    tryNext();
+                });
+            }
         }
 
         togglePlay() {
@@ -447,7 +645,56 @@
                 window.Fur9anBridge.updateMediaNotification(surahName, reciterName, this.isPlaying);
             }
 
+            // تحديث MediaSession API لمنسق إشعارات النظام في أندرويد
+            this.updateMediaSession(surahName, reciterName);
+
+            // إدارة إبقاء الشاشة مضاءة أثناء استماع القراءة
+            if (window.Fur9anBridge) {
+                if (this.isPlaying) {
+                    window.Fur9anBridge.requestWakeLock();
+                } else {
+                    window.Fur9anBridge.releaseWakeLock();
+                }
+            }
+
             this.updateRepeatUI();
+        }
+
+        updateMediaSession(surahName, reciterName) {
+            if ('mediaSession' in navigator) {
+                try {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: surahName || this.getSurahName(this.currentSurah),
+                        artist: reciterName || this.currentReciter.name,
+                        album: 'القرآن الكريم — منصة الفرقان',
+                        artwork: [
+                            { src: '/data/images/logo.png', sizes: '96x96', type: 'image/png' },
+                            { src: '/data/images/logo.png', sizes: '512x512', type: 'image/png' }
+                        ]
+                    });
+
+                    navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
+
+                    navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
+                    navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
+                    navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSurah());
+                    navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSurah());
+                    navigator.mediaSession.setActionHandler('seekbackward', () => {
+                        this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
+                    });
+                    navigator.mediaSession.setActionHandler('seekforward', () => {
+                        this.audio.currentTime = Math.min(this.audio.duration || 0, this.audio.currentTime + 10);
+                    });
+                    try {
+                        navigator.mediaSession.setActionHandler('stop', () => {
+                            this.audio.pause();
+                            this.audio.currentTime = 0;
+                        });
+                    } catch (e) {}
+                } catch (e) {
+                    console.warn('MediaSession handler error:', e);
+                }
+            }
         }
 
         updateProgressUI() {

@@ -9,7 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/icons.css" />
     <!-- المتغيرات الشاملة (الألوان، الثيمات، الخطوط) -->
     <link rel="stylesheet" href="/variables.css" />
     <link rel="stylesheet" href="/settings/style.css" />
@@ -47,26 +48,26 @@
                 <div class="settings-section">
                     <div class="settings-section-title"><i class="fa-solid fa-palette"></i> مظهر التطبيق والألوان</div>
                     <div class="theme-grid" id="settingsThemeGrid">
-                        <!-- Themes will be here -->
+                        <!-- Themes -->
                         <button class="theme-option" data-theme-val="emerald">
                             <div class="palette-swatches">
-                                <span class="swatch" style="background:#10828D;"></span>
-                                <span class="swatch" style="background:#12557B;"></span>
-                                <span class="swatch" style="background:#A3E062;"></span>
-                                <span class="swatch" style="background:#F2F3EE;"></span>
+                                <span class="swatch" style="background:#10455B;"></span>
+                                <span class="swatch" style="background:#FFAF20;"></span>
+                                <span class="swatch" style="background:#F9F3ED;"></span>
+                                <span class="swatch" style="background:#FFFFFF;"></span>
                             </div>
-                            <span class="theme-name">الزمرد الأصيل (الافتراضي)</span>
+                            <span class="theme-name">الزمرد والبترولي (الافتراضي)</span>
                         </button>
-                        <button class="theme-option" data-theme-val="theme-375">
+                        <button class="theme-option" data-theme-val="theme-coral-turquoise">
                             <div class="palette-swatches">
-                                <span class="swatch" style="background:#435892;"></span>
-                                <span class="swatch" style="background:#393F50;"></span>
-                                <span class="swatch" style="background:#BCAA8A;"></span>
-                                <span class="swatch" style="background:#F2EEE7;"></span>
+                                <span class="swatch" style="background:#30BCC9;"></span>
+                                <span class="swatch" style="background:#F6404F;"></span>
+                                <span class="swatch" style="background:#FADA80;"></span>
+                                <span class="swatch" style="background:#FAF3E3;"></span>
                             </div>
-                            <span class="theme-name">كحلي فولاذي وذهبي</span>
+                            <span class="theme-name">شاطئ المرجان والفيروز</span>
                         </button>
-                        <button class="theme-option" data-theme-val="theme-356">
+                        <button class="theme-option" data-theme-val="theme-forest-ocean">
                             <div class="palette-swatches">
                                 <span class="swatch" style="background:#4B8564;"></span>
                                 <span class="swatch" style="background:#0E5072;"></span>
@@ -75,32 +76,77 @@
                             </div>
                             <span class="theme-name">عشب الغابات والمحيط</span>
                         </button>
-                        <button class="theme-option" data-theme-val="theme-319">
+                        <button class="theme-option" data-theme-val="theme-plum-sunset">
                             <div class="palette-swatches">
-                                <span class="swatch" style="background:#FCBE07;"></span>
-                                <span class="swatch" style="background:#272727;"></span>
-                                <span class="swatch" style="background:#427F2F;"></span>
-                                <span class="swatch" style="background:#E9E3D5;"></span>
+                                <span class="swatch" style="background:#8D4051;"></span>
+                                <span class="swatch" style="background:#FF943F;"></span>
+                                <span class="swatch" style="background:#FBF0E8;"></span>
+                                <span class="swatch" style="background:#FFFFFF;"></span>
                             </div>
-                            <span class="theme-name">شروق الذهب والزيتون</span>
+                            <span class="theme-name">العقيق الغروبي والبرتقالي</span>
                         </button>
-                        <button class="theme-option" data-theme-val="theme-341">
+                        <button class="theme-option" data-theme-val="theme-mint-peach">
                             <div class="palette-swatches">
-                                <span class="swatch" style="background:#3F88EB;"></span>
-                                <span class="swatch" style="background:#404F68;"></span>
-                                <span class="swatch" style="background:#3AAB87;"></span>
-                                <span class="swatch" style="background:#D1D9DE;"></span>
+                                <span class="swatch" style="background:#25CED1;"></span>
+                                <span class="swatch" style="background:#FF8A5B;"></span>
+                                <span class="swatch" style="background:#F4F4F4;"></span>
+                                <span class="swatch" style="background:#FFFFFF;"></span>
                             </div>
-                            <span class="theme-name">الأزرق السماوي والفضة</span>
+                            <span class="theme-name">الفيروز واليوسفي</span>
                         </button>
-                        <button class="theme-option" data-theme-val="theme-127">
+                        <button class="theme-option" data-theme-val="theme-olive-spring">
                             <div class="palette-swatches">
-                                <span class="swatch" style="background:#4A515F;"></span>
-                                <span class="swatch" style="background:#C7D3D6;"></span>
-                                <span class="swatch" style="background:#FFCA28;"></span>
-                                <span class="swatch" style="background:#EFF1F2;"></span>
+                                <span class="swatch" style="background:#33363D;"></span>
+                                <span class="swatch" style="background:#96C65E;"></span>
+                                <span class="swatch" style="background:#CCCAB0;"></span>
+                                <span class="swatch" style="background:#EDEFDF;"></span>
                             </div>
-                            <span class="theme-name">رمادي الصخر وشمس الذهب</span>
+                            <span class="theme-name">الزيتون الأندلسي والربيع</span>
+                        </button>
+                        <button class="theme-option" data-theme-val="theme-slate-sand">
+                            <div class="palette-swatches">
+                                <span class="swatch" style="background:#557F9F;"></span>
+                                <span class="swatch" style="background:#E7D6AC;"></span>
+                                <span class="swatch" style="background:#9D8888;"></span>
+                                <span class="swatch" style="background:#F7F2D7;"></span>
+                            </div>
+                            <span class="theme-name">ندى السماء والصحراء</span>
+                        </button>
+                        <button class="theme-option" data-theme-val="theme-golden-sunrise">
+                            <div class="palette-swatches">
+                                <span class="swatch" style="background:#F97350;"></span>
+                                <span class="swatch" style="background:#FAD06C;"></span>
+                                <span class="swatch" style="background:#B7AC9A;"></span>
+                                <span class="swatch" style="background:#F7F2E5;"></span>
+                            </div>
+                            <span class="theme-name">الشروق الذهبي والحجر</span>
+                        </button>
+                        <button class="theme-option" data-theme-val="theme-lagoon-breeze">
+                            <div class="palette-swatches">
+                                <span class="swatch" style="background:#0096D1;"></span>
+                                <span class="swatch" style="background:#3EBDC6;"></span>
+                                <span class="swatch" style="background:#A8EAD5;"></span>
+                                <span class="swatch" style="background:#FFF4EA;"></span>
+                            </div>
+                            <span class="theme-name">نسيم البحر والزلال</span>
+                        </button>
+                        <button class="theme-option" data-theme-val="theme-astral-teal">
+                            <div class="palette-swatches">
+                                <span class="swatch" style="background:#353755;"></span>
+                                <span class="swatch" style="background:#5BD3C7;"></span>
+                                <span class="swatch" style="background:#E0E4EE;"></span>
+                                <span class="swatch" style="background:#FFFFFF;"></span>
+                            </div>
+                            <span class="theme-name">الليل الفلكي والفيروز</span>
+                        </button>
+                        <button class="theme-option" data-theme-val="theme-deep-abyss">
+                            <div class="palette-swatches">
+                                <span class="swatch" style="background:#002C3E;"></span>
+                                <span class="swatch" style="background:#78BCC4;"></span>
+                                <span class="swatch" style="background:#F7444E;"></span>
+                                <span class="swatch" style="background:#F7F8F3;"></span>
+                            </div>
+                            <span class="theme-name">المحيط العميق والمرجان</span>
                         </button>
                         <button class="theme-option" data-theme-val="dark">
                             <div class="palette-swatches">
@@ -257,7 +303,7 @@
 
                 <!-- 4) تنبيهات الأذكار -->
                 <div class="settings-section">
-                    <div class="settings-section-title"><i class="fa-solid fa-book-open-reader"></i> إشعارات الأذكار</div>
+                    <div class="settings-section-title"><i class="fa-solid fa-book-open-reader"></i> إشعارات الأذكار اليومية</div>
                     <div class="settings-field switch-field">
                         <label>أذكار الصباح (بعد الشروق)</label>
                         <label class="furqan-switch"><input type="checkbox" id="notifMorning"><span class="slider"></span></label>
@@ -273,6 +319,22 @@
                     <div class="settings-field switch-field">
                         <label>أذكار الاستيقاظ (مع الفجر)</label>
                         <label class="furqan-switch"><input type="checkbox" id="notifWakeup"><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <!-- 5) تذكير الورد اليومي للقرآن -->
+                <div class="settings-section">
+                    <div class="settings-section-title"><i class="fa-solid fa-book-bookmark"></i> تذكير الورد اليومي للقراءة</div>
+                    <div class="settings-field switch-field">
+                        <div>
+                            <label style="display: block; font-weight: 700; margin-bottom: 2px;">تفعيل تذكير الورد اليومي</label>
+                            <span style="font-size: 12px; color: var(--color-text-light);">إشعار محلي يومي لتذكيرك بقراءة وردك من القرآن الكريم</span>
+                        </div>
+                        <label class="furqan-switch"><input type="checkbox" id="notifQuranWird"><span class="slider"></span></label>
+                    </div>
+                    <div class="settings-field custom-field-row" style="margin-top: 8px;">
+                        <label><i class="fa-solid fa-clock"></i> وقت التذكير اليومي:</label>
+                        <input type="time" id="quranWirdTime" value="20:00" style="padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.15); font-family: inherit; font-size: 15px; font-weight: 600; background: var(--color-surface); color: var(--color-text); text-align: center;">
                     </div>
                 </div>
 

@@ -3,6 +3,7 @@
    ================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css');
 
 @font-face {
     font-family: 'Maghrabi';
@@ -107,71 +108,95 @@
 
 /* 0. ثيم الزمرد الأصيل المفضل للقرآن (Emerald / Petrol) */
 [data-theme="emerald"] {
-    --color-bg: #F2F3EE;
+    --color-bg: #F9F3ED;
     --color-surface: #FFFFFF;
     --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #E8EAE2;
-    --color-bg-hover: rgba(16, 130, 141, 0.08); 
-    --color-primary: #10828D;
-    --color-primary-rgb: 16, 130, 141;
-    --color-primary-light: #259AA6;
-    --color-primary-dark: #12557B;
-    --color-herbal: #A3E062;
-    --color-herbal-rgb: 163, 224, 98;
-    --color-herbal-light: #C4F082;
-    --color-herbal-dark: #7DB83C;
-    --color-gold: #10828D;
-    --color-gold-light: rgba(163, 224, 98, 0.25);
-    --color-gold-dark: #12557B;
+    --color-bg-secondary: #EFE6DC;
+    --color-bg-hover: rgba(16, 69, 91, 0.08); 
+    --color-primary: #10455B;
+    --color-primary-rgb: 16, 69, 91;
+    --color-primary-light: #1D627E;
+    --color-primary-dark: #0A2D3C;
+    --color-herbal: #FFAF20;
+    --color-herbal-rgb: 255, 175, 32;
+    --color-herbal-light: #FFC45E;
+    --color-herbal-dark: #D48C0F;
+    --color-gold: #FFAF20;
+    --color-gold-light: rgba(255, 175, 32, 0.25);
+    --color-gold-dark: #10455B;
     --color-text: #0E2A36;
     --color-text-light: #3D5A6C;
     --color-text-lighter: #6B8896;
-    --color-border: rgba(18, 85, 123, 0.16);
-    --color-border-light: rgba(163, 224, 98, 0.25);
-    --glass-bg: rgba(242, 243, 238, 0.85);
-    --glass-card: rgba(255, 255, 255, 0.78);
-    --glass-shadow: 0 6px 20px -2px rgba(18, 85, 123, 0.08);
-    --gradient-primary: linear-gradient(135deg, #10828D 0%, #12557B 100%);
-    --gradient-sky: linear-gradient(135deg, #10828D 0%, #259AA6 100%);
-    --gradient-herbal: linear-gradient(135deg, #10828D 0%, #A3E062 100%);
-    --shadow-sm: 0 1px 4px rgba(18, 85, 123, 0.05);
-    --shadow-card: 0 4px 16px -2px rgba(18, 85, 123, 0.07);
-    --shadow-hover: 0 8px 22px -4px rgba(16, 130, 141, 0.14);
-    --shadow-glow: 0 0 16px rgba(163, 224, 98, 0.35);
+    --color-border: rgba(16, 69, 91, 0.15);
+    --color-border-light: rgba(255, 175, 32, 0.25);
+    --glass-bg: rgba(249, 243, 237, 0.88);
+    --glass-card: rgba(255, 255, 255, 0.85);
+    --glass-shadow: 0 6px 20px -2px rgba(16, 69, 91, 0.08);
+    --gradient-primary: linear-gradient(135deg, #10455B 0%, #1D627E 100%);
+    --gradient-sky: linear-gradient(135deg, #10455B 0%, #FFAF20 100%);
+    --gradient-herbal: linear-gradient(135deg, #10455B 0%, #FFAF20 100%);
+    --shadow-sm: 0 1px 4px rgba(16, 69, 91, 0.05);
+    --shadow-card: 0 4px 16px -2px rgba(16, 69, 91, 0.07);
+    --shadow-hover: 0 8px 22px -4px rgba(16, 69, 91, 0.14);
+    --shadow-glow: 0 0 16px rgba(255, 175, 32, 0.35);
 }
 
-/* 1. ثيم ألوان #375 (افتراضي الجذور) */
-[data-theme="theme-375"] {
-    --color-bg: #F2EEE7;
+/* 1. ثيم البترولي والذهب العسلي (#10455B / #FFAF20 / #F9F3ED / #FFFFFF) */
+[data-theme="theme-ocean-amber"] {
+    --color-bg: #F9F3ED;
     --color-surface: #FFFFFF;
     --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #E8E3DA;
-    --color-bg-hover: rgba(67, 88, 146, 0.08); 
-    --color-primary: #435892;
-    --color-primary-rgb: 67, 88, 146;
-    --color-primary-light: #5B72B3;
-    --color-primary-dark: #393F50;
-    --color-herbal: #BCAA8A;
-    --color-herbal-light: #D4C5AC;
-    --color-herbal-dark: #A18E6E;
-    --color-text: #2D3342;
-    --color-text-light: #545D73;
-    --color-border: rgba(67, 88, 146, 0.16);
-    --gradient-primary: linear-gradient(135deg, #435892 0%, #BCAA8A 100%);
+    --color-bg-secondary: #EFE7DE;
+    --color-bg-hover: rgba(16, 69, 91, 0.08); 
+    --color-primary: #10455B;
+    --color-primary-rgb: 16, 69, 91;
+    --color-primary-light: #20627E;
+    --color-primary-dark: #0A2E3D;
+    --color-herbal: #FFAF20;
+    --color-herbal-rgb: 255, 175, 32;
+    --color-herbal-light: #FFC55B;
+    --color-herbal-dark: #D48C0F;
+    --color-text: #0E2936;
+    --color-text-light: #3D5A6C;
+    --color-border: rgba(16, 69, 91, 0.16);
+    --gradient-primary: linear-gradient(135deg, #10455B 0%, #FFAF20 100%);
 }
 
-/* 2. ثيم ألوان #356 (عشب الغابات والأزرق العميق) */
-[data-theme="theme-356"] {
+/* 2. ثيم شاطئ المرجان والفيروز (#30BCC9 / #FAF3E3 / #FADA80 / #F6404F) */
+[data-theme="theme-coral-turquoise"] {
+    --color-bg: #FAF3E3;
+    --color-surface: #FFFFFF;
+    --color-bg-card: #FFFFFF;
+    --color-bg-secondary: #F0E6CE;
+    --color-bg-hover: rgba(48, 188, 201, 0.09);
+    --color-primary: #30BCC9;
+    --color-primary-rgb: 48, 188, 201;
+    --color-primary-light: #52CFDC;
+    --color-primary-dark: #1F8D98;
+    --color-herbal: #F6404F;
+    --color-herbal-rgb: 246, 64, 79;
+    --color-herbal-light: #F86E7A;
+    --color-herbal-dark: #D62332;
+    --color-gold: #FADA80;
+    --color-text: #1E3033;
+    --color-text-light: #4A6367;
+    --color-border: rgba(48, 188, 201, 0.2);
+    --gradient-primary: linear-gradient(135deg, #30BCC9 0%, #1F8D98 100%);
+}
+
+/* 3. ثيم عشب الغابات والمحيط (#4B8564 / #0E5072 / #E9694B / #E7E2D8) */
+[data-theme="theme-forest-ocean"], [data-theme="theme-356"] {
     --color-bg: #E7E2D8;
     --color-surface: #FFFFFF;
     --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #DFD9CE;
+    --color-bg-secondary: #DDD6C9;
     --color-bg-hover: rgba(75, 133, 100, 0.08);
     --color-primary: #4B8564;
     --color-primary-rgb: 75, 133, 100;
     --color-primary-light: #64A37E;
     --color-primary-dark: #0E5072;
     --color-herbal: #E9694B;
+    --color-herbal-rgb: 233, 105, 75;
     --color-herbal-light: #F2907A;
     --color-herbal-dark: #C94C30;
     --color-text: #0E2A36;
@@ -180,67 +205,180 @@
     --gradient-primary: linear-gradient(135deg, #4B8564 0%, #0E5072 100%);
 }
 
-/* 3. ثيم ألوان #319 (شروق الذهب والزيتون) */
-[data-theme="theme-319"] {
-    --color-bg: #E9E3D5;
+/* 4. ثيم العقيق الغروبي والبرتقالي (#8D4051 / #FF943F / #FBF0E8 / #FFFFFF) */
+[data-theme="theme-plum-sunset"] {
+    --color-bg: #FBF0E8;
     --color-surface: #FFFFFF;
     --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #DDD5C4;
-    --color-bg-hover: rgba(66, 127, 47, 0.08);
-    --color-primary: #FCBE07;
-    --color-primary-rgb: 252, 190, 7;
-    --color-primary-light: #FFD459;
-    --color-primary-dark: #272727;
-    --color-herbal: #427F2F;
-    --color-herbal-light: #61A34C;
-    --color-herbal-dark: #2D5C1E;
-    --color-text: #272727;
-    --color-text-light: #525252;
-    --color-border: rgba(66, 127, 47, 0.16);
-    --gradient-primary: linear-gradient(135deg, #FCBE07 0%, #427F2F 100%);
+    --color-bg-secondary: #F3DECE;
+    --color-bg-hover: rgba(141, 64, 81, 0.08);
+    --color-primary: #8D4051;
+    --color-primary-rgb: 141, 64, 81;
+    --color-primary-light: #AB576B;
+    --color-primary-dark: #652734;
+    --color-herbal: #FF943F;
+    --color-herbal-rgb: 255, 148, 63;
+    --color-herbal-light: #FFAD6A;
+    --color-herbal-dark: #DE721D;
+    --color-text: #32161D;
+    --color-text-light: #6B434C;
+    --color-border: rgba(141, 64, 81, 0.16);
+    --gradient-primary: linear-gradient(135deg, #8D4051 0%, #FF943F 100%);
 }
 
-/* 4. ثيم ألوان #341 (الأزرق السماوي والفضة) */
-[data-theme="theme-341"] {
-    --color-bg: #D1D9DE;
+/* 5. ثيم الفيروز واليوسفي النضر (#25CED1 / #F4F4F4 / #FFFFFF / #FF8A5B) */
+[data-theme="theme-mint-peach"] {
+    --color-bg: #F4F4F4;
     --color-surface: #FFFFFF;
     --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #C0CBD1;
-    --color-bg-hover: rgba(63, 136, 235, 0.08);
-    --color-primary: #3F88EB;
-    --color-primary-rgb: 63, 136, 235;
-    --color-primary-light: #6AA4F2;
-    --color-primary-dark: #404F68;
-    --color-herbal: #3AAB87;
-    --color-herbal-light: #5CC7A5;
-    --color-herbal-dark: #238968;
-    --color-text: #232B38;
-    --color-text-light: #4A5668;
-    --color-border: rgba(63, 136, 235, 0.16);
-    --gradient-primary: linear-gradient(135deg, #3F88EB 0%, #3AAB87 100%);
+    --color-bg-secondary: #E5E7E8;
+    --color-bg-hover: rgba(37, 206, 209, 0.08);
+    --color-primary: #1CAFB2;
+    --color-primary-rgb: 28, 175, 178;
+    --color-primary-light: #25CED1;
+    --color-primary-dark: #12797B;
+    --color-herbal: #FF8A5B;
+    --color-herbal-rgb: 255, 138, 91;
+    --color-herbal-light: #FFA680;
+    --color-herbal-dark: #D9693B;
+    --color-text: #192D2E;
+    --color-text-light: #4A6364;
+    --color-border: rgba(28, 175, 178, 0.18);
+    --gradient-primary: linear-gradient(135deg, #1CAFB2 0%, #12797B 100%);
 }
 
-/* 5. ثيم ألوان #127 (رمادي الصخر والذهب المبهج) */
-[data-theme="theme-127"] {
-    --color-bg: #EFF1F2;
+/* 6. ثيم الزيتون والربيع النضر (#33363D / #CCCAB0 / #EDEFDF / #96C65E) */
+[data-theme="theme-olive-spring"] {
+    --color-bg: #EDEFDF;
     --color-surface: #FFFFFF;
     --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #E0E4E6;
-    --color-bg-hover: rgba(74, 81, 95, 0.08);
-    --color-primary: #4A515F;
-    --color-primary-rgb: 74, 81, 95;
-    --color-primary-light: #677080;
-    --color-primary-dark: #2B303B;
-    --color-herbal: #FFCA28;
-    --color-herbal-light: #FFD85E;
-    --color-herbal-dark: #D6A411;
-    --color-text: #21262F;
-    --color-text-light: #4E5664;
-    --color-border: rgba(74, 81, 95, 0.16);
-    --gradient-primary: linear-gradient(135deg, #4A515F 0%, #FFCA28 100%);
+    --color-bg-secondary: #DDDDC8;
+    --color-bg-hover: rgba(150, 198, 94, 0.12);
+    --color-primary: #33363D;
+    --color-primary-rgb: 51, 54, 61;
+    --color-primary-light: #4C515C;
+    --color-primary-dark: #1F2126;
+    --color-herbal: #96C65E;
+    --color-herbal-rgb: 150, 198, 94;
+    --color-herbal-light: #B0DD7E;
+    --color-herbal-dark: #78A542;
+    --color-gold: #CCCAB0;
+    --color-text: #212328;
+    --color-text-light: #4D535E;
+    --color-border: rgba(51, 54, 61, 0.16);
+    --gradient-primary: linear-gradient(135deg, #33363D 0%, #96C65E 100%);
 }
 
-/* 6. الوضع الليلي الكحلي والذهبي الفاخر */
+/* 7. ثيم ندى السماء والصحراء (#557F9F / #F7F2D7 / #E7D6AC / #9D8888) */
+[data-theme="theme-slate-sand"] {
+    --color-bg: #F7F2D7;
+    --color-surface: #FFFFFF;
+    --color-bg-card: #FFFFFF;
+    --color-bg-secondary: #EBE4C0;
+    --color-bg-hover: rgba(85, 127, 159, 0.09);
+    --color-primary: #557F9F;
+    --color-primary-rgb: 85, 127, 159;
+    --color-primary-light: #729AB8;
+    --color-primary-dark: #3B5D77;
+    --color-herbal: #E7D6AC;
+    --color-herbal-rgb: 231, 214, 172;
+    --color-herbal-light: #F2E5C5;
+    --color-herbal-dark: #BFAB7E;
+    --color-gold: #9D8888;
+    --color-text: #223746;
+    --color-text-light: #4E687A;
+    --color-border: rgba(85, 127, 159, 0.18);
+    --gradient-primary: linear-gradient(135deg, #557F9F 0%, #3B5D77 100%);
+}
+
+/* 8. ثيم الشروق الذهبي والحجر (#F97350 / #FAD06C / #F7F2E5 / #B7AC9A) */
+[data-theme="theme-golden-sunrise"] {
+    --color-bg: #F7F2E5;
+    --color-surface: #FFFFFF;
+    --color-bg-card: #FFFFFF;
+    --color-bg-secondary: #EAE2CF;
+    --color-bg-hover: rgba(249, 115, 80, 0.08);
+    --color-primary: #E8603C;
+    --color-primary-rgb: 232, 96, 60;
+    --color-primary-light: #F97350;
+    --color-primary-dark: #BF4120;
+    --color-herbal: #FAD06C;
+    --color-herbal-rgb: 250, 208, 108;
+    --color-herbal-light: #FFE08F;
+    --color-herbal-dark: #D4A73F;
+    --color-gold: #B7AC9A;
+    --color-text: #3B241A;
+    --color-text-light: #6E5143;
+    --color-border: rgba(232, 96, 60, 0.18);
+    --gradient-primary: linear-gradient(135deg, #E8603C 0%, #FAD06C 100%);
+}
+
+/* 9. ثيم نسيم البحر والزلال (#0096D1 / #FFF4EA / #A8EAD5 / #3EBDC6) */
+[data-theme="theme-lagoon-breeze"] {
+    --color-bg: #FFF4EA;
+    --color-surface: #FFFFFF;
+    --color-bg-card: #FFFFFF;
+    --color-bg-secondary: #F5E4D4;
+    --color-bg-hover: rgba(0, 150, 209, 0.08);
+    --color-primary: #0096D1;
+    --color-primary-rgb: 0, 150, 209;
+    --color-primary-light: #2DB4EC;
+    --color-primary-dark: #006E9C;
+    --color-herbal: #3EBDC6;
+    --color-herbal-rgb: 62, 189, 198;
+    --color-herbal-light: #6FD3DA;
+    --color-herbal-dark: #239AA2;
+    --color-gold: #A8EAD5;
+    --color-text: #0E3040;
+    --color-text-light: #3A5F71;
+    --color-border: rgba(0, 150, 209, 0.16);
+    --gradient-primary: linear-gradient(135deg, #0096D1 0%, #3EBDC6 100%);
+}
+
+/* 10. ثيم الليل الفلكي والفيروز (#353755 / #FFFFFF / #E0E4EE / #5BD3C7) */
+[data-theme="theme-astral-teal"] {
+    --color-bg: #E0E4EE;
+    --color-surface: #FFFFFF;
+    --color-bg-card: #FFFFFF;
+    --color-bg-secondary: #CED3E0;
+    --color-bg-hover: rgba(53, 55, 85, 0.08);
+    --color-primary: #353755;
+    --color-primary-rgb: 53, 55, 85;
+    --color-primary-light: #4E5178;
+    --color-primary-dark: #222339;
+    --color-herbal: #5BD3C7;
+    --color-herbal-rgb: 91, 211, 199;
+    --color-herbal-light: #83E3DA;
+    --color-herbal-dark: #37B3A6;
+    --color-text: #1E2033;
+    --color-text-light: #4C506F;
+    --color-border: rgba(53, 55, 85, 0.16);
+    --gradient-primary: linear-gradient(135deg, #353755 0%, #5BD3C7 100%);
+}
+
+/* 11. ثيم المحيط العميق والمرجان (#002C3E / #78BCC4 / #F7F8F3 / #F7444E) */
+[data-theme="theme-deep-abyss"] {
+    --color-bg: #F7F8F3;
+    --color-surface: #FFFFFF;
+    --color-bg-card: #FFFFFF;
+    --color-bg-secondary: #E6EAE0;
+    --color-bg-hover: rgba(0, 44, 62, 0.08);
+    --color-primary: #002C3E;
+    --color-primary-rgb: 0, 44, 62;
+    --color-primary-light: #0D4760;
+    --color-primary-dark: #001A25;
+    --color-herbal: #F7444E;
+    --color-herbal-rgb: 247, 68, 78;
+    --color-herbal-light: #FA7078;
+    --color-herbal-dark: #D4252F;
+    --color-gold: #78BCC4;
+    --color-text: #00202D;
+    --color-text-light: #2D4E5D;
+    --color-border: rgba(0, 44, 62, 0.16);
+    --gradient-primary: linear-gradient(135deg, #002C3E 0%, #78BCC4 100%);
+}
+
+/* 12. الوضع الليلي الكحلي والذهبي الفاخر */
 [data-theme="dark"] {
     --color-bg: #151821;             /* كحلي ليلي فاخر جداً */
     --color-surface: #1E2230;        /* بطاقات داكنة مصقولة */
@@ -263,6 +401,7 @@
     --glass-card: rgba(30, 34, 48, 0.95);
     --shadow-card: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
     --shadow-glow: 0 0 20px rgba(188, 170, 138, 0.25);
+}
 
 /* ==================================================================
    تأثيرات حركية أنيقة

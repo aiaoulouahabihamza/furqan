@@ -1,0 +1,80 @@
+/* ضبط حازم ومطلق لأحجام وأبعاد أيقونات Font Awesome لمنع الضخامة أثناء التحميل (Anti-FOUC) */
+
+i[class*="fa-"],
+i.fa-solid,
+i.fa-regular,
+i.fa-brands,
+i.fas,
+i.far,
+i.fab,
+svg.svg-inline--fa {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 1.15em !important;
+    height: 1.15em !important;
+    max-width: 1.5em !important;
+    max-height: 1.5em !important;
+    font-size: inherit;
+    line-height: 1 !important;
+    vertical-align: -0.15em !important;
+    box-sizing: border-box !important;
+    font-style: normal !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transition: transform var(--transition-normal, 0.2s ease), color var(--transition-normal, 0.2s ease);
+}
+
+/* منع تكرار الأيقونات وتراكبها فوق بعضها البعض */
+i[class*="fa-"] > svg {
+    display: none !important;
+}
+
+i[class*="fa-"] > svg:only-child {
+    display: inline-block !important;
+}
+
+/* الأيقونات التفاعلية والأزرار */
+.btn i,
+.nav-item i,
+.action-btn i,
+.quick-btn i,
+.icon-btn i,
+.header-btn i,
+.back-btn i,
+.setting-icon i,
+.nav-icon i {
+    width: 1em !important;
+    height: 1em !important;
+    font-size: 1.1em;
+}
+
+/* الأيقونات في الكروت الرئيسية */
+.feature-icon i,
+.card-icon i,
+.category-icon i {
+    width: 1.8rem !important;
+    height: 1.8rem !important;
+    max-width: 2rem !important;
+    max-height: 2rem !important;
+}
+
+/* حركة الدوران للأيقونات المتحركة */
+.fa-spin,
+.fa-spinner,
+.fa-circle-notch {
+    animation: appIconSpin 1s infinite linear;
+}
+
+@keyframes appIconSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

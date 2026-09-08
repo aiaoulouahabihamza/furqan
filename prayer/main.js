@@ -72,11 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (stored && stored !== 'undefined' && stored !== 'null') {
             const parsed = JSON.parse(stored);
             if (parsed && parsed.name) {
-                // إذا كان الاسم مسجلاً بالصيغة القديمة "موقعي الحالي"، نقوم بترقيته فوراً لأقرب مدينة حقيقية
-                if (parsed.name.includes('موقع') && parsed.latitude && parsed.longitude) {
-                    const closest = findClosestCity(parsed.latitude, parsed.longitude);
-                    parsed.name = `${closest.name} (GPS)`;
-                }
+                parsed.name = (typeof window.cleanLocationName === 'function')
+                    ? window.cleanLocationName(parsed.name)
+                    : parsed.name.replace(/\s*\(?\s*gps\s*\)?/gi, '').trim();
                 currentCity = parsed;
             }
         }
@@ -383,25 +381,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // تحديد الموقع عبر GPS فقط (بناءً على طلب المستخدم، تم إلغاء التحديد عبر الشبكة IP تماماً)
-    function handleGpsDetection() {
-        showLocationStatus('جاري تحديد موقعك الجغرافي بدقة عبر الـ GPS...', 'info');
+    // تحديد الموقع التلقائي بدقة (مع المعالجة الهرمية والتنقية التامة)
+    async function handleGpsDetection() {
+        showLocationStatus('جاري تحديد موقعك الجغرافي بدقة...', 'info');
 
-        if (window.Fur9anBridge && typeof window.Fur9anBridge.requestNativeLocation === 'function') {
+        if (window.Fur9anBridge && typeof window.Fur9anBridge.isAndroidWrapper === 'function' && window.Fur9anBridge.isAndroidWrapper()) {
             window.Fur9anBridge.requestNativeLocation();
             return;
         }
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                (pos) => {
+                async (pos) => {
                     const lat = pos.coords.latitude;
                     const lng = pos.coords.longitude;
                     const resolvedCountry = getCountryFromCoordinates(lat, lng);
                     const closestCity = findClosestCity(lat, lng);
 
+                    let resolvedName = '';
+                    if (typeof window.reverseGeocodeLocation === 'function') {
+                        resolvedName = await window.reverseGeocodeLocation(lat, lng);
+                    }
+                    if (!resolvedName) {
+                        resolvedName = (typeof window.cleanLocationName === 'function')
+                            ? window.cleanLocationName(closestCity.name)
+                            : closestCity.name.replace(/\s*\(?\s*gps\s*\)?/gi, '').trim();
+                    }
+
                     currentCity = {
-                        name: `${closestCity.name} (GPS)`,
+                        name: resolvedName,
                         country: resolvedCountry,
                         latitude: lat,
                         longitude: lng,
@@ -409,25 +417,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
 
                     calculateAndDisplayPrayerTimes();
-                    showLocationStatus(`تم تحديد موقعك بدقة في ${closestCity.name} عبر الـ GPS!`, 'success');
+                    showLocationStatus(`تم تحديد موقعك بدقة: ${resolvedName}`, 'success');
                     closeCityModal();
                 },
                 (err) => {
-                    console.warn('GPS failed or blocked:', err);
-                    let errMsg = 'تعذر تحديد الموقع الجغرافي (يرجى تفعيل الـ GPS وإعطاء الإذن)؛ يرجى اختيار مدينتك يدوياً.';
+                    console.warn('Location detection error:', err);
+                    let errMsg = 'تعذر تحديد الموقع الجغرافي تلقائياً؛ يرجى اختيار مدينتك يدوياً.';
                     
-                    // إذا كان التطبيق يعمل داخل إطار Iframe (مثل بيئة معاينة AI Studio)
                     const isInIframe = window.self !== window.top;
                     if (err.code === 1) { // Permission Denied
                         if (isInIframe) {
-                            errMsg = 'تم حجب الـ GPS بواسطة إطار المعاينة. يرجى فتح التطبيق في نافذة مستقلة (Tab جديدة) عبر المتصفح لتفعيل طلب الإذن بنجاح!';
+                            errMsg = 'تم حجب الإذن بواسطة إطار المعاينة. يرجى فتح التطبيق في نافذة مستقلة لتفعيل طلب الإذن بنجاح.';
                         } else {
-                            errMsg = 'تم رفض إذن تحديد الموقع. يرجى تفعيل إذن الموقع الجغرافي من إعدادات المتصفح وقفل الـ GPS وإعادة المحاولة.';
+                            errMsg = 'تم رفض إذن تحديد الموقع. يرجى تفعيل إذن الموقع من إعدادات المتصفح وإعادة المحاولة.';
                         }
                     } else if (err.code === 2) { // Position Unavailable
-                        errMsg = 'موقع الـ GPS غير متوفر حالياً. يرجى التأكد من تشغيل الـ GPS في جهازك أو اختيار المدينة يدوياً.';
+                        errMsg = 'خدمة الموقع غير متوفرة حالياً. يرجى التأكد من تشغيل الموقع في جهازك أو اختيار المدينة يدوياً.';
                     } else if (err.code === 3) { // Timeout
-                        errMsg = 'انتهت مهلة جلب موقع الـ GPS. يرجى إعادة المحاولة أو اختيار مدينتك يدوياً.';
+                        errMsg = 'انتهت مهلة جلب الموقع. يرجى إعادة المحاولة أو اختيار مدينتك يدوياً.';
                     }
                     
                     showLocationStatus(errMsg, 'error');
@@ -435,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { timeout: 10000, enableHighAccuracy: true }
             );
         } else {
-            showLocationStatus('المتصفح لا يدعم تحديد الموقع الجغرافي الـ GPS؛ يرجى اختيار المدينة يدوياً.', 'error');
+            showLocationStatus('المتصفح لا يدعم تحديد الموقع التلقائي؛ يرجى اختيار المدينة يدوياً.', 'error');
         }
     }
 

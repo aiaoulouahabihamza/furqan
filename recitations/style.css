@@ -547,9 +547,28 @@ body {
 }
 
 .download-surah-btn.downloading {
-    background: var(--color-herbal-light);
-    color: var(--color-primary-dark);
+    background: rgba(16, 130, 141, 0.12);
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
     pointer-events: none;
+    font-family: monospace, sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    animation: pulseBorder 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseBorder {
+    0% { transform: scale(1); border-color: var(--color-primary); }
+    50% { transform: scale(1.06); border-color: var(--color-herbal-dark); }
+    100% { transform: scale(1); border-color: var(--color-primary); }
+}
+
+.download-progress-text {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: -0.5px;
 }
 
 .surah-offline-tag {

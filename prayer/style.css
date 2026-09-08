@@ -290,11 +290,20 @@ i {
 
 /* ===== بطاقة الصلاة القادمة (Hero Card) ===== */
 .next-prayer-card {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark, #0a3822) 100%);
+    background-image: 
+        linear-gradient(135deg, rgba(var(--color-primary-rgb, 16, 69, 91), 0.72) 0%, rgba(10, 45, 60, 0.82) 100%),
+        url('/images/prayer_bg.jpg'),
+        url('/images/masjed.jpg'),
+        url('/data/images/masjed.jpg'),
+        url('/images/prayer_bg.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     color: #ffffff;
     border-radius: var(--radius-card, 20px);
     padding: 24px 20px;
-    box-shadow: 0 12px 28px rgba(15, 81, 50, 0.25);
+    box-shadow: 0 12px 28px rgba(16, 69, 91, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     display: flex;
     flex-direction: column;
     align-items: center;

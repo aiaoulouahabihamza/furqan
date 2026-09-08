@@ -86,17 +86,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const recitersListContainer = document.getElementById('settingsRecitersList');
     const reciterHiddenInput = document.getElementById('settingsReciterSelect');
     const reciters = window.ADHAN_RECITERS || [
-        { id: 'alafasi', name: 'الشيخ مشاري راشد العفاسي', file: '/audio/adhan_alafasi.mp3' },
-        { id: 'aldosari', name: 'الشيخ ياسر الدوسري', file: '/audio/adhan_aldosari.mp3' },
-        { id: 'alqatami', name: 'الشيخ ناصر القطامي', file: '/audio/adhan_alqatami.mp3' },
-        { id: 'abdelbasset', name: 'الشيخ عبد الباسط عبد الصمد', file: '/audio/adhan_abdelbasset.mp3' },
-        { id: 'makkah', name: 'أذان الحرم المكي الشريف (علي ملا)', file: '/audio/adhan_makkah.mp3' },
-        { id: 'madinah', name: 'أذان المسجد النبوي الشريف (عصام بخاري)', file: '/audio/adhan_madinah.mp3' },
-        { id: 'maghribi', name: 'الأذان المغربي (جامع القرويين والأندلس)', file: '/audio/adhan_maghribi.mp3' },
-        { id: 'egypt', name: 'الأذان المصري (الجامع الأزهر)', file: '/audio/adhan_egypt.mp3' },
-        { id: 'mansoor', name: 'الشيخ منصور السالمي', file: '/audio/adhan_mansoor.mp3' },
-        { id: 'islam_sobhi', name: 'القارئ إسلام صبحي', file: '/audio/adhan_islam_sobhi.mp3' },
-        { id: 'ghamdi', name: 'الشيخ سعد الغامدي', file: '/audio/adhan_ghamdi.mp3' }
+        { id: 'alafasi', name: 'الشيخ مشاري راشد العفاسي', file: '/audio/macharialafasi.mp3' },
+        { id: 'aldosari', name: 'الشيخ ياسر الدوسري', file: '/audio/yassiradosari.mp3' },
+        { id: 'alqatami', name: 'الشيخ ناصر القطامي', file: '/audio/nasiralqatami.mp3' },
+        { id: 'islam_sobhi', name: 'القارئ إسلام صبحي', file: '/audio/islamsobhi.mp3' },
+        { id: 'qzabri', name: 'الشيخ عمر القزابري', file: '/audio/3omaralqzabri.mp3' },
+        { id: 'anafis', name: 'الشيخ أحمد النفيس', file: '/audio/ahmedanafis.mp3' },
+        { id: 'yamani', name: 'الشيخ وديع اليمني', file: '/audio/wadiaalyamani.mp3' },
+        { id: 'tazi', name: 'القارئ أنس التازي', file: '/audio/anasatazi.mp3' }
     ];
 
     let currentReciterVal = settings.adhanReciter || 'alafasi';
@@ -213,12 +210,18 @@ document.addEventListener('DOMContentLoaded', () => {
         notifMorning: settings.azkarNotifs.morning,
         notifEvening: settings.azkarNotifs.evening,
         notifSleep: settings.azkarNotifs.sleep,
-        notifWakeup: settings.azkarNotifs.wakeup
+        notifWakeup: settings.azkarNotifs.wakeup,
+        notifQuranWird: settings.quranWirdNotif !== false
     };
 
     for (const [id, value] of Object.entries(toggleIds)) {
         const el = document.getElementById(id);
         if (el) el.checked = !!value;
+    }
+
+    const quranWirdTimeEl = document.getElementById('quranWirdTime');
+    if (quranWirdTimeEl) {
+        quranWirdTimeEl.value = settings.quranWirdTime || '20:00';
     }
 
     // 7. حفظ الإعدادات
@@ -263,7 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 evening: document.getElementById('notifEvening') ? document.getElementById('notifEvening').checked : true,
                 sleep: document.getElementById('notifSleep') ? document.getElementById('notifSleep').checked : true,
                 wakeup: document.getElementById('notifWakeup') ? document.getElementById('notifWakeup').checked : true
-            }
+            },
+            quranWirdNotif: document.getElementById('notifQuranWird') ? document.getElementById('notifQuranWird').checked : true,
+            quranWirdTime: document.getElementById('quranWirdTime') ? document.getElementById('quranWirdTime').value : '20:00'
         };
 
         // حفظ في التخزين المحلي
@@ -271,6 +276,11 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('selectedAdhanReciter', reciter);
         localStorage.setItem('prayer_setup_completed', 'true');
         localStorage.setItem('fur9an_prayer_onboarding_done', 'true');
+        
+        // جدولة الإشعارات المحلية
+        if (window.Fur9anBridge && typeof window.Fur9anBridge.scheduleLocalNotifications === 'function') {
+            window.Fur9anBridge.scheduleLocalNotifications(newSettings);
+        }
         
         // إشعار بالنجاح (اهتزاز إن وجد)
         if (navigator.vibrate) navigator.vibrate(50);

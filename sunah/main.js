@@ -869,25 +869,27 @@ window.addEventListener('scroll', () => {
     lastScroll = currentScroll;
 });
 
-// ===== 12. التهيئة والبدء =====
+// دالة الرجوع المخصصة لربطها مع زر الأندرويد الأصلي
+window.handleStageBack = function() {
+    if (currentStage === 3) {
+        switchToStage2(activeBookId, true);
+        return true;
+    } else if (currentStage === 2) {
+        switchToStage1(true);
+        return true;
+    }
+    return false;
+};
+
+// ===== 13. التهيئة والبدء =====
 initNavigation();
 
 console.log('🌙 الفرقان - السنة النبوية الشريفة متصلة بالكامل');
 
-// التعامل مع زر الرجوع الفعلي للأندرويد (Cordova backbutton)
+// التعامل مع زر الرجوع الفعلي للأندرويد
 document.addEventListener('deviceready', () => {
     document.addEventListener('backbutton', (e) => {
-        if (typeof currentStage !== 'undefined') {
-            if (currentStage === 3) {
-                switchToStage2(activeBookId, true);
-                return;
-            } else if (currentStage === 2) {
-                switchToStage1(true);
-                return;
-            }
-        }
-        
-        // العودة للرئيسية
+        if (window.handleStageBack()) return;
         window.location.href = '/index.html';
     }, false);
 }, false);
