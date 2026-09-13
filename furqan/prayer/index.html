@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - مواقيت الصلاة</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/icons.css" />
+    
+    <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/prayer/style.css" />
+</head>
+<body>
+
+    <!-- ===== الشريط العلوي الفاخر ===== -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" onclick="if(window.history.length > 1){ window.history.back(); return false; }" aria-label="الرجوع">
+                <i class="fa-solid fa-chevron-right"></i>
+            </a>
+            
+            <div class="header-title">
+                <h1><i class="fa-solid fa-mosque header-icon-gold"></i> أوقات الصلاة</h1>
+            </div>
+
+            <div class="header-actions">
+                <button class="header-action-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" title="الإعدادات">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== المحتوى ===== -->
+    <main class="main-content">
+
+        <!-- ===== بطاقة الموقع الجغرافي المطورة ===== -->
+        <div class="location-card" id="locationCard">
+            <div class="location-card-top">
+                <div class="location-main-info">
+                    <div class="location-pin-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div class="location-text-group">
+                        <div class="city-name-wrapper">
+                            <h2 id="cityDisplay">جاري تحديد الموقع...</h2>
+                            <span class="accuracy-badge" id="accuracyBadge">
+                                <span class="status-dot success"></span>
+                                <span id="accuracyText">موقع دقيق</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="location-card-middle">
+                <div class="location-sub-badge" id="methodBadge">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <span id="calcMethodText">طريقة الحساب: جاري التحميل...</span>
+                </div>
+            </div>
+
+            <div class="location-actions-row">
+                <button type="button" class="btn-location-action btn-gps-detect" id="detectGpsQuickBtn">
+                    <i class="fa-solid fa-crosshairs"></i>
+                    <span>تحديد موقعي التلقائي</span>
+                </button>
+                <button type="button" class="btn-location-action btn-change-city" id="changeCityBtn">
+                    <i class="fa-solid fa-city"></i>
+                    <span>تغيير المدينة</span>
+                </button>
+            </div>
+
+            <div class="location-status" id="locationStatus" style="display: none;">
+                <span class="status-dot"></span>
+                <span class="status-text">جاري التحديث...</span>
+            </div>
+        </div>
+
+        <!-- ===== الصلاة القادمة ===== -->
+        <div class="next-prayer-card">
+            <div class="next-prayer-header">
+                <span>الصلاة القادمة</span>
+                <i class="fa-regular fa-bell"></i>
+            </div>
+            <div class="next-prayer-name" id="nextPrayerName">--</div>
+            <div class="next-prayer-countdown" id="nextPrayerCountdown">--:--:--</div>
+            <div class="next-prayer-time" id="nextPrayerTime">--:--</div>
+        </div>
+
+        <!-- ===== قائمة الصلوات ===== -->
+        <div class="prayer-times-grid">
+
+            <!-- الفجر -->
+            <div class="prayer-item" data-prayer="Fajr">
+                <div class="prayer-icon p-fajr">
+                    <i class="fa-solid fa-cloud-moon"></i>
+                </div>
+                <div class="prayer-info">
+                    <span class="prayer-name">الفجر</span>
+                    <span class="prayer-time" id="FajrTime">--:--</span>
+                </div>
+                <div class="prayer-remaining" id="FajrRemaining">--</div>
+            </div>
+
+            <!-- الظهر -->
+            <div class="prayer-item" data-prayer="Dhuhr">
+                <div class="prayer-icon p-dhuhr">
+                    <i class="fa-solid fa-sun"></i>
+                </div>
+                <div class="prayer-info">
+                    <span class="prayer-name">الظهر</span>
+                    <span class="prayer-time" id="DhuhrTime">--:--</span>
+                </div>
+                <div class="prayer-remaining" id="DhuhrRemaining">--</div>
+            </div>
+
+            <!-- العصر -->
+            <div class="prayer-item" data-prayer="Asr">
+                <div class="prayer-icon p-asr">
+                    <i class="fa-solid fa-cloud-sun"></i>
+                </div>
+                <div class="prayer-info">
+                    <span class="prayer-name">العصر</span>
+                    <span class="prayer-time" id="AsrTime">--:--</span>
+                </div>
+                <div class="prayer-remaining" id="AsrRemaining">--</div>
+            </div>
+
+            <!-- المغرب -->
+            <div class="prayer-item" data-prayer="Maghrib">
+                <div class="prayer-icon p-maghrib">
+                    <i class="fa-solid fa-mountain-sun"></i>
+                </div>
+                <div class="prayer-info">
+                    <span class="prayer-name">المغرب</span>
+                    <span class="prayer-time" id="MaghribTime">--:--</span>
+                </div>
+                <div class="prayer-remaining" id="MaghribRemaining">--</div>
+            </div>
+
+            <!-- العشاء -->
+            <div class="prayer-item" data-prayer="Isha">
+                <div class="prayer-icon p-isha">
+                    <i class="fa-solid fa-moon"></i>
+                </div>
+                <div class="prayer-info">
+                    <span class="prayer-name">العشاء</span>
+                    <span class="prayer-time" id="IshaTime">--:--</span>
+                </div>
+                <div class="prayer-remaining" id="IshaRemaining">--</div>
+            </div>
+
+        </div>
+
+        <!-- ===== أذكار بعد الصلاة ===== -->
+        <div class="prayer-azkar-section">
+            <div class="azkar-header">
+                <span class="azkar-title-main">
+                    <i class="fa-solid fa-kaaba"></i> أذكار بعد الصلاة المفروضة
+                </span>
+                <div class="azkar-nav-btns">
+                    <button class="btn-azkar-nav" id="prevAzkarBtn">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <button class="btn-azkar-nav" id="nextAzkarBtn">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="azkar-slider-container" id="azkarSlider">
+                <!-- سيتم ملء الأذكار برمجياً للتفاعلية التامة والتحكم بالعداد -->
+            </div>
+            
+            <div class="azkar-progress-bar">
+                <div class="azkar-progress-fill" id="azkarProgressFill"></div>
+            </div>
+        </div>
+
+    </main>
+
+
+
+    <!-- ===== مودال تغيير المدينة ===== -->
+    <div class="modal-overlay" id="cityModal">
+        <div class="modal-content city-modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-location-dot"></i> تغيير المدينة</h2>
+                <button class="modal-close" id="cityModalClose">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="city-modal-body">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="cityModalInput" placeholder="ابحث عن مدينة..." />
+                </div>
+                <div class="city-suggestions" id="citySuggestions"></div>
+                <div id="modalLocationStatus" style="display: none; padding: 10px; margin-bottom: 12px; border-radius: var(--radius); font-size: 13px; text-align: center; font-weight: 500; transition: var(--transition);"></div>
+                <button type="button" id="detectLocationModalBtn" class="btn-primary full-width" style="margin-bottom: 8px;">
+                    <i class="fa-solid fa-crosshairs"></i> تحديد الموقع الجغرافي دقيقاً
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== نافذة إعداد الصلاة والمذهب لأول مرة (تظهر مرة واحدة) ===== -->
+    <div class="modal-overlay" id="prayerOnboardingModal" style="display: none;">
+        <div class="modal-content onboarding-modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-sliders" style="color:var(--color-primary);"></i> ضبط إعدادات الصلاة</h2>
+                <button class="modal-close" id="prayerOnboardingClose">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="onboarding-modal-body">
+                <p class="onboarding-intro">
+                    يرجى ضبط خيارات المذهب، طريقة الحساب، وصوت المؤذن المفضل لحساب الأوقات بدقة تامة 100% أوفلاين بدون إنترنت.
+                </p>
+
+                <!-- المذهب الفقهي -->
+                <div class="setup-group">
+                    <label class="setup-label"><i class="fa-solid fa-scale-balanced"></i> المذهب الفقهي (تحديد وقت صلاة العصر)</label>
+                    <div class="madhab-options-grid" id="onboardingMadhabGrid">
+                        <div class="madhab-card-option selected" data-madhab="maliki">المذهب المالكي (المغرب وشمال إفريقيا)</div>
+                        <div class="madhab-card-option" data-madhab="shafii">المذهب الشافعي</div>
+                        <div class="madhab-card-option" data-madhab="hanbali">المذهب الحنبلي</div>
+                        <div class="madhab-card-option" data-madhab="hanafi">المذهب الحنفي (العصر المتأخر)</div>
+                    </div>
+                </div>
+
+                <!-- طريقة الحساب حسب البلد -->
+                <div class="setup-group">
+                    <label class="setup-label"><i class="fa-solid fa-earth-africa"></i> طريقة الحساب المعتمدة حسب البلد</label>
+                    <select id="onboardingCalcMethodSelect" class="setup-select">
+                        <option value="Morocco" selected>المملكة المغربية (وزارة الأوقاف والشؤون الإسلامية)</option>
+                        <option value="Makkah">أم القرى - المملكة العربية السعودية</option>
+                        <option value="Egypt">الهيئة المصرية العامة للمساحة</option>
+                        <option value="Algeria">وزارة الشؤون الدينية - الجزائر</option>
+                        <option value="Tunisia">ديوان الإفتاء - تونس</option>
+                        <option value="Gulf">دول الخليج العربي الموحد</option>
+                        <option value="Kuwait">دولة الكويت</option>
+                        <option value="Qatar">دولة قطر</option>
+                        <option value="Jordan">المملكة الأردنية الهاشمية</option>
+                        <option value="Turkey">رئاسة الشؤون الدينية بتركيا (ديانت)</option>
+                        <option value="MWL">رابطة العالم الإسلامي (عام)</option>
+                        <option value="ISNA">الجمعية الإسلامية لشمال أمريكا (ISNA)</option>
+                        <option value="France">اتحاد المنظمات الإسلامية بفرنسا</option>
+                        <option value="Karachi">جامعة العلوم الإسلامية بكراتشي</option>
+                    </select>
+                </div>
+
+                <!-- تعديل التاريخ الهجري -->
+                <div class="setup-group">
+                    <label class="setup-label"><i class="fa-solid fa-calendar-day"></i> ضبط التاريخ الهجري وفق رؤية الهلال</label>
+                    <select id="onboardingHijriAdjustmentSelect" class="setup-select">
+                        <option value="-1">المملكة المغربية (-1 يوم عن تقويم أم القرى)</option>
+                        <option value="0" selected>المملكة العربية السعودية / أم القرى (مطابق 0)</option>
+                        <option value="1">تقديم يوم واحد (+1 يوم)</option>
+                        <option value="-2">تأخير يومين (-2 يوم)</option>
+                    </select>
+                </div>
+
+                <!-- اختيار المؤذن وتجربة الصوت -->
+                <div class="setup-group">
+                    <label class="setup-label"><i class="fa-solid fa-microphone-lines"></i> اختيار المؤذن وتجربة الصوت الفورية</label>
+                    <div class="reciters-preview-list" id="onboardingRecitersList">
+                        <!-- سيتم توليد المؤذنين برمجياً مع أزرار المعاينة الفورية -->
+                    </div>
+                </div>
+
+                <button type="button" id="saveOnboardingBtn" class="btn-primary full-width" style="margin-top: 14px;">
+                    <i class="fa-solid fa-check"></i> حفظ ومتابعة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/android-bridge.js"></script>
+    <script src="/praytime.js"></script>
+    <script src="/settings.js"></script>
+    <script src="/global-audio.js"></script>
+    <script src="/prayer/main.js"></script>
+</body>
+</html>

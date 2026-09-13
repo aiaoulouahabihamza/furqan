@@ -1,114 +1,216 @@
 /**
  * android-bridge.js
- * الجسر البرمجي الموحد لربط منصة الفرقان الرقمية بتطبيق الأندرويد الأصلي
- * مخصص للبناء والتجميع عبر Termux للأندرويد
+ * الجسر البرمجي الموحد عالي الاعتمادية لربط منصة الفرقان الرقمية بتطبيق الأندرويد الأصلي والويب
+ * مصمم ومحسن للبناء والتجميع (Termux / Cordova / Capacitor / WebView) والنشر الإنتاجي
  */
 
 (function() {
     'use strict';
 
-    // 1. تعريف واجهة الجسر للويب مع توفير محاكاة (Fallback) للويب العادي
+    // اسم مجلد التنزيلات الموحد لجميع ملفات المنصة
+    const FUR9AN_DOWNLOAD_DIR = 'الفرقان';
+
+    // 1. تعريف كائن الجسر الموحد
     const Fur9anBridge = {
+        // التحقق من العمل داخل بيئة الأندرويد الأصلية
         isAndroidWrapper: function() {
-            return typeof window.AndroidFur9anApp !== 'undefined';
+            return typeof window.AndroidFur9anApp !== 'undefined' || 
+                   typeof window.FurqanAndroidInterface !== 'undefined' ||
+                   (typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+        },
+
+        getNativeApp: function() {
+            return window.AndroidFur9anApp || window.FurqanAndroidInterface || null;
+        },
+
+        // تنزيل أي ملف من الموقع وحفظه في مجلد مخصص باسم "الفرقان"
+        downloadFile: function(url, filename, folderName = FUR9AN_DOWNLOAD_DIR) {
+            if (!url) {
+                console.error('📱 [Bridge] Download failed: No URL provided');
+                return;
+            }
+
+            const cleanTitle = (filename || 'ملف_الفرقان').trim();
+            const nativeApp = this.getNativeApp();
+
+            // 1. أندرويد الأصلي: توجيه التنزيل لمجلد "الفرقان" في وحدة التخزين
+            if (nativeApp && typeof nativeApp.downloadFile === 'function') {
+                try {
+                    nativeApp.downloadFile(url, cleanTitle, folderName);
+                    console.log(`📱 [Bridge] تم إرسال أمر التنزيل للأندرويد: ${cleanTitle} في مجلد [${folderName}]`);
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(`جاري تنزيل الملف في مجلد "${folderName}"... 📥`, 'success');
+                    }
+                    return;
+                } catch (e) {
+                    console.error('📱 [Bridge] فشل استدعاء التنزيل الأصلي للأندرويد:', e);
+                }
+            }
+
+            // 2. كاباسيتور Filesystem إذا كان متوفراً
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) {
+                console.log(`📱 [Bridge] محاولة التنزيل عبر Capacitor Filesystem في مجلد ${folderName}`);
+            }
+
+            // 3. متصفح الويب القياسي (Web Fallback) مع توجيه المجلد والاسم
+            try {
+                if (typeof window.showToast === 'function') {
+                    window.showToast(`جاري تنزيل وحفظ الملف في مجلد "${folderName}"... 📥`, 'success');
+                }
+
+                // صياغة اسم التنزيل مع مجلد الفرقان
+                const sanitizedName = cleanTitle.replace(/[\/\\?%*:|"<>]/g, '_');
+                const downloadFilename = `${folderName} - ${sanitizedName}`;
+                
+                let safeUrl = url.replace(/^http:\/\//i, 'https://');
+                let targetUrl = safeUrl;
+
+                // استخدام خادم التنزيل الوسيط لضمان فرض هيدرات Attachment إذا كان رابط خارجي
+                if (safeUrl.startsWith('http')) {
+                    targetUrl = `/api/download-file?url=${encodeURIComponent(safeUrl)}&filename=${encodeURIComponent(downloadFilename)}`;
+                }
+
+                const link = document.createElement('a');
+                link.href = targetUrl;
+                link.setAttribute('download', downloadFilename);
+                link.setAttribute('target', '_blank');
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => {
+                    if (document.body.contains(link)) {
+                        document.body.removeChild(link);
+                    }
+                }, 2000);
+            } catch (err) {
+                console.error('📱 [Bridge] خطأ في تنزيل الملف عبر الويب:', err);
+            }
+        },
+
+        // معالجة حلول وقت الصلاة وتشغيل التنبيه الموحد بدون كود HTML غير منسق
+        onPrayerTimeTriggered: function(prayerKey, prayerNameAr, cityName, reciterObj) {
+            console.log(`🕌 [Bridge] حان وقت صلاة ${prayerNameAr} في ${cityName}`);
+            
+            const title = `🕌 حان الآن موعد صلاة ${prayerNameAr}`;
+            const body = `حسب التوقيت المحلي لمدينة ${cityName || 'موقعك الحالي'}`;
+            
+            // 1. إرسال إشعار فوري للنظام
+            this.sendNotification(title, body, null, prayerKey);
+
+            // 2. إخطار الأندرويد الأصلي لتشغيل الأذان في الخلفية أو المنبه
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.triggerAdhan === 'function') {
+                try {
+                    nativeApp.triggerAdhan(prayerKey, (reciterObj && reciterObj.id) ? reciterObj.id : 'alafasi');
+                } catch (e) {
+                    console.error('📱 [Bridge] خطأ في تشغيل أذان الأندرويد الأصلي:', e);
+                }
+            }
+
+            // 3. إظهار إشعار Toast أنيق داخل الواجهة بدلاً من المودال غير المنسق
+            if (typeof window.showToast === 'function') {
+                window.showToast(`${title} - ${body} 🕋`, 'success');
+            }
         },
 
         // مزامنة الإعدادات مع تطبيق الأندرويد الأصلي
         syncSettingsToAndroid: function(settings) {
-            if (this.isAndroidWrapper()) {
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.saveSettings === 'function') {
                 try {
-                    window.AndroidFur9anApp.saveSettings(JSON.stringify(settings));
-                    console.log('📱 تم مزامنة الإعدادات مع الأندرويد');
+                    nativeApp.saveSettings(JSON.stringify(settings));
+                    console.log('📱 [Bridge] تم مزامنة الإعدادات مع الأندرويد');
                 } catch (e) {
-                    console.error('📱 خطأ في مزامنة الإعدادات:', e);
+                    console.error('📱 [Bridge] خطأ في مزامنة الإعدادات:', e);
                 }
-            } else {
-                console.log('💻 محاكاة الويب: تم حفظ الإعدادات محلياً فقط', settings);
             }
         },
 
-        // مزامنة مواقيت الصلاة لتطبيق الأندرويد الأصلي لجدولة منبه الأذان
+        // مزامنة مواقيت الصلاة لتطبيق الأندرويد لجدولة الأذان بدقة أوفلاين
         syncPrayerTimesToAndroid: function(prayerTimesData) {
-            if (this.isAndroidWrapper()) {
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.savePrayerTimes === 'function') {
                 try {
-                    window.AndroidFur9anApp.savePrayerTimes(JSON.stringify(prayerTimesData));
-                    console.log('📱 تم مزامنة مواقيت الصلاة مع الأندرويد لجدولة الأذان');
+                    nativeApp.savePrayerTimes(JSON.stringify(prayerTimesData));
+                    console.log('📱 [Bridge] تم مزامنة مواقيت الصلاة مع الأندرويد لجدولة الأذان');
                 } catch (e) {
-                    console.error('📱 خطأ في مزامنة مواقيت الصلاة:', e);
+                    console.error('📱 [Bridge] خطأ في مزامنة مواقيت الصلاة:', e);
                 }
-            } else {
-                console.log('💻 محاكاة الويب: مواقيت الصلاة المحسوبة:', prayerTimesData);
             }
         },
 
-        // تحديث إشعار مشغل التلاوات في شريط الإشعارات بالأندرويد
-        updateMediaNotification: function(surahName, reciterName, isPlaying) {
-            if (this.isAndroidWrapper()) {
+        // تحديث إشعار مشغل التلاوات والدروس في شريط إشعارات الأندرويد
+        updateMediaNotification: function(title, subtitle, isPlaying) {
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.updateMediaNotification === 'function') {
                 try {
-                    window.AndroidFur9anApp.updateMediaNotification(surahName, reciterName, isPlaying);
-                    console.log(`📱 تم تحديث إشعار مشغل التلاوة: سورة ${surahName} - القارئ ${reciterName} (${isPlaying ? 'شغال' : 'واقف'})`);
+                    nativeApp.updateMediaNotification(title, subtitle, isPlaying);
+                    console.log(`📱 [Bridge] تم تحديث إشعار الصوتيات: ${title} - ${subtitle} (${isPlaying ? 'شغال' : 'متوقف'})`);
                 } catch (e) {
-                    console.error('📱 خطأ في تحديث إشعار التلاوة:', e);
+                    console.error('📱 [Bridge] خطأ في تحديث إشعار الوسائط:', e);
                 }
-            } else {
-                console.log(`💻 محاكاة الويب: إشعار التلاوة الحالي: ${surahName} - ${reciterName} - تشغيل: ${isPlaying}`);
             }
         },
 
-        // طلب جلب الموقع بدقة وإظهار حوار التفعيل الأصلي للأندرويد
+        // طلب جلب الموقع بدقة
         requestNativeLocation: function() {
-            if (this.isAndroidWrapper()) {
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.requestGPSLocation === 'function') {
                 try {
-                    window.AndroidFur9anApp.requestGPSLocation();
-                    console.log('📱 تم إرسال طلب جلب الموقع للأندرويد');
+                    nativeApp.requestGPSLocation();
+                    console.log('📱 [Bridge] تم إرسال طلب جلب الموقع للأندرويد');
+                    return;
                 } catch (e) {
-                    console.error('📱 خطأ في طلب الموقع من الأندرويد:', e);
+                    console.error('📱 [Bridge] خطأ في طلب الموقع من الأندرويد:', e);
                 }
-            } else {
-                console.log('💻 محاكاة الويب: جاري جلب الموقع من متصفح الويب...');
-                // تشغيل الجلب الاحتياطي عبر المتصفح
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            if (typeof window.onLocationReceived === 'function') {
-                                window.onLocationReceived(pos.coords.latitude, pos.coords.longitude);
-                            }
-                        },
-                        (err) => {
-                            const code = err ? err.code : 0;
-                            const msg = err ? (err.message || 'Location unavailable') : 'Permission not granted';
-                            console.warn(`💻 محاكاة الويب: تنبيه الموقع الجغرافي (${code}: ${msg})`);
-                        },
-                        { timeout: 8000, enableHighAccuracy: false, maximumAge: 60000 }
-                    );
-                }
+            }
+
+            // الجلب الاحتياطي عبر متصفح الويب
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        if (typeof window.onLocationReceived === 'function') {
+                            window.onLocationReceived(pos.coords.latitude, pos.coords.longitude);
+                        }
+                    },
+                    (err) => {
+                        console.warn('📱 [Bridge] تنبيه تحديد الموقع الجغرافي:', err ? err.message : 'غير متاح');
+                    },
+                    { timeout: 8000, enableHighAccuracy: false, maximumAge: 60000 }
+                );
             }
         },
 
-        // إطلاق إشعار أو اهتزاز أصلي عبر التطبيق
+        // إطلاق اهتزاز تفاعلي (Haptic Feedback)
         vibrate: function(ms) {
-            if (this.isAndroidWrapper()) {
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.vibrate === 'function') {
                 try {
-                    window.AndroidFur9anApp.vibrate(ms);
+                    nativeApp.vibrate(ms);
+                    return;
                 } catch (e) {}
-            } else if (navigator.vibrate) {
-                navigator.vibrate(ms);
+            }
+            if (navigator.vibrate) {
+                try { navigator.vibrate(ms); } catch (e) {}
             }
         },
 
         vibratePattern: function(patternJson) {
-            if (this.isAndroidWrapper()) {
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.vibratePattern === 'function') {
                 try {
-                    window.AndroidFur9anApp.vibratePattern(patternJson);
+                    nativeApp.vibratePattern(patternJson);
+                    return;
                 } catch (e) {}
-            } else if (navigator.vibrate) {
+            }
+            if (navigator.vibrate) {
                 try {
-                    navigator.vibrate(JSON.parse(patternJson));
+                    navigator.vibrate(typeof patternJson === 'string' ? JSON.parse(patternJson) : patternJson);
                 } catch (e) {}
             }
         },
 
-        // نظام إرسال الإشعارات والمنبهات دون تداخل أو تكرار
+        // إرسال الإشعارات مع حماية تامة من التكرار
         sendNotification: function(title, body, id, prayerKey) {
             let uniqueId = id || 100;
             if (prayerKey) {
@@ -120,28 +222,26 @@
             }
 
             const notifTag = `fur9an_notif_${uniqueId}_${prayerKey || 'general'}`;
-            
-            // حماية فائقة لمنع تكرار الإشعار نفسه أو التداخل خلال 45 ثانية
             const now = Date.now();
             if (window._lastSentNotifs && window._lastSentNotifs[notifTag] && (now - window._lastSentNotifs[notifTag] < 45000)) {
-                console.log(`📱 [Bridge] تم منع الإشعار المتكرر: [${title}]`);
                 return;
             }
             if (!window._lastSentNotifs) window._lastSentNotifs = {};
             window._lastSentNotifs[notifTag] = now;
 
-            // 1. الأندرويد الأصلي عبر JavascriptInterface
-            if (this.isAndroidWrapper()) {
+            // 1. الأندرويد الأصلي
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.triggerNotification === 'function') {
                 try {
-                    window.AndroidFur9anApp.triggerNotification(title, body, uniqueId, prayerKey || '');
-                    console.log(`📱 تم إرسال الإشعار الأصلي للأندرويد: [${title}]`);
+                    nativeApp.triggerNotification(title, body, uniqueId, prayerKey || '');
+                    console.log(`📱 [Bridge] تم إرسال الإشعار للأندرويد: [${title}]`);
                     return;
                 } catch (e) {
-                    console.error('📱 خطأ في إرسال الإشعار للأندرويد:', e);
+                    console.error('📱 [Bridge] خطأ في إرسال الإشعار للأندرويد:', e);
                 }
             }
 
-            // 2. إشعارات الويب المباشرة عبر Web Notifications API بأسلوب نقي وبدون كود جافا خارجي
+            // 2. إشعارات الويب المباشرة
             if ('Notification' in window) {
                 if (Notification.permission === 'granted') {
                     this._displayWebNotification(title, body, notifTag);
@@ -152,8 +252,6 @@
                         }
                     });
                 }
-            } else {
-                console.log(`💻 إشعار محاكى: [${title}] ${body} (ID: ${uniqueId})`);
             }
         },
 
@@ -161,7 +259,8 @@
             try {
                 const options = {
                     body: body,
-                    icon: '/icon.png',
+                    icon: '/data/images/logo.png',
+                    badge: '/data/images/logo.png',
                     tag: tag,
                     renotify: false,
                     silent: false
@@ -173,111 +272,180 @@
                 } else {
                     new Notification(title, options);
                 }
-                console.log(`🔔 تم إشعار الويب بنجاح: [${title}]`);
             } catch (err) {
-                console.warn('تنبيه إشعار الويب:', err);
+                console.warn('📱 [Bridge] إشعار الويب:', err);
             }
         },
 
-        // تنقل آمن وسريع بين الصفحات متوافق مع WebView
-        navigateTo: function(url) {
-            if (!url) return;
-            window.location.href = url;
-        },
-
-        // إيقاف صوت الأذان من الأندرويد بشكل كامل
+        // إيقاف صوت الأذان من الأندرويد
         stopAndroidAdhan: function() {
-            if (this.isAndroidWrapper()) {
+            const nativeApp = this.getNativeApp();
+            if (nativeApp && typeof nativeApp.stopAdhan === 'function') {
                 try {
-                    window.AndroidFur9anApp.stopAdhan();
+                    nativeApp.stopAdhan();
                 } catch (e) {}
             }
+            if (typeof window.stopAdhanPlayback === 'function') {
+                window.stopAdhanPlayback();
+            }
         },
 
-        // منع الشاشة من وضع النوم (Screen Wake Lock / KeepAwake API)
+        // منع إغلاق الشاشة أثناء القراءة (Screen Wake Lock)
         requestWakeLock: async function() {
             try {
                 if ('wakeLock' in navigator && !this._wakeLockSentinel) {
                     this._wakeLockSentinel = await navigator.wakeLock.request('screen');
-                    console.log('🔒 Screen WakeLock activated');
                 }
-            } catch (e) {
-                console.warn('WakeLock error:', e);
-            }
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.KeepAwake) {
-                try { window.Capacitor.Plugins.KeepAwake.keepAwake(); } catch(e){}
-            }
+            } catch (e) {}
         },
 
         releaseWakeLock: function() {
             if (this._wakeLockSentinel) {
-                try {
-                    this._wakeLockSentinel.release();
-                } catch (e) {}
+                try { this._wakeLockSentinel.release(); } catch (e) {}
                 this._wakeLockSentinel = null;
-            }
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.KeepAwake) {
-                try { window.Capacitor.Plugins.KeepAwake.allowSleep(); } catch(e){}
-            }
-        },
-
-        // جدولة الإشعارات المحلية لتذكير الورد اليومي والصلوات عبر Capacitor / Web
-        scheduleLocalNotifications: function(settings) {
-            const config = settings || (typeof window.getAppSettings === 'function' ? window.getAppSettings() : {});
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
-                try {
-                    const Ln = window.Capacitor.Plugins.LocalNotifications;
-                    Ln.requestPermissions().then(permission => {
-                        if (permission.display === 'granted') {
-                            const notifications = [];
-
-                            // تذكير الورد اليومي للقرآن
-                            if (config.quranWirdNotif !== false && config.quranWirdTime) {
-                                const parts = config.quranWirdTime.split(':');
-                                const hrs = parseInt(parts[0], 10) || 20;
-                                const mins = parseInt(parts[1], 10) || 0;
-                                notifications.push({
-                                    title: '📖 تذكير الورد اليومي للقرآن الكريم',
-                                    body: 'حان الآن وقت قراءة وردك اليومي من كتاب الله الكريم، بارك الله في وقتك.',
-                                    id: 999,
-                                    schedule: { on: { hour: hrs, minute: mins }, repeats: true },
-                                    smallIcon: 'ic_stat_quran',
-                                    actionTypeId: 'OPEN_QURAN'
-                                });
-                            }
-
-                            if (notifications.length > 0) {
-                                Ln.schedule({ notifications });
-                                console.log('📱 تم جدولة الإشعارات المحلية عبر Capacitor');
-                            }
-                        }
-                    });
-                } catch(e) {
-                    console.warn('Capacitor LocalNotifications schedule error:', e);
-                }
             }
         }
     };
 
-    // تصدير الجسر على المستوى العالمي
+    // تصدير الجسر ودالة التنزيل العامة
     window.Fur9anBridge = Fur9anBridge;
+    window.downloadFur9anFile = function(url, filename) {
+        Fur9anBridge.downloadFile(url, filename, FUR9AN_DOWNLOAD_DIR);
+    };
 
-    // --- دوال الاستقبال العامة (التي يستدعيها كود الأندرويد WebView ليرسل لنا تحديثات) ---
+    // =========================================================================
+    // 2. نظام محاكاة ومعالجة زر الرجوع الشامل للأندرويد (Android Back Handler)
+    // =========================================================================
 
-    // 1. يستدعيها الأندرويد بعد جلب الموقع بنجاح من مستشعر الموقع وإذن الجهاز
-    window.onLocationReceived = async function(lat, lng) {
-        console.log(`📱 تم استقبال إحداثيات الموقع الحقيقية من الأندرويد: ${lat}, ${lng}`);
+    window.onAndroidBackPressed = function() {
+        console.log('📱 [Bridge] التقاط حدث زر الرجوع للأندرويد');
+
+        // أولوية 1: إغلاق أي نافذة منبثقة أو مودال نشط
+        const activeModals = document.querySelectorAll(
+            '.modal-overlay.active, .modal-overlay[style*="flex"], .modal-overlay[style*="block"], ' +
+            '#tafsirModal[style*="flex"], #tafsirModal[style*="block"], #ayahSheet.active, #ayahSheetBackdrop.active, ' +
+            '#batchDownloadModal[style*="flex"], #cityModal.active, #profileModal.active, #bookDetailModal.active, ' +
+            '#lecturePartsModal.active, #furqanUpdatePopup.active, .drawer-overlay.active, #fatwaDrawerOverlay.active, ' +
+            '.adhan-overlay-card.active, #adhanAlertModal.active, .modal-backdrop[style*="flex"]'
+        );
+
+        if (activeModals && activeModals.length > 0) {
+            let closedAny = false;
+            activeModals.forEach(m => {
+                if (m.id === 'tafsirModal' && typeof window.closeTafsirModal === 'function') {
+                    window.closeTafsirModal();
+                    closedAny = true;
+                } else if (m.id === 'cityModal' && typeof window.closeCityModal === 'function') {
+                    window.closeCityModal();
+                    closedAny = true;
+                } else if (m.id === 'bookDetailModal') {
+                    m.classList.remove('active');
+                    m.style.display = 'none';
+                    closedAny = true;
+                } else if (m.id === 'lecturePartsModal') {
+                    m.classList.remove('active');
+                    m.style.display = 'none';
+                    closedAny = true;
+                } else if (m.id === 'furqanUpdatePopup') {
+                    m.classList.remove('active');
+                    closedAny = true;
+                } else {
+                    m.classList.remove('active');
+                    m.style.display = 'none';
+                    closedAny = true;
+                }
+            });
+            if (closedAny) return 'MODAL_CLOSED';
+        }
+
+        // أولوية 2: إغلاق القوائم الجانبية ومربعات البحث النشطة
+        const openDrawers = document.querySelectorAll('.drawer-overlay.active, .drawer-content.active, #fatwaDrawer.active');
+        if (openDrawers && openDrawers.length > 0) {
+            openDrawers.forEach(d => d.classList.remove('active'));
+            return 'DRAWER_CLOSED';
+        }
+
+        // أولوية 3: صفحات التبديل والمراحل المتعددة
+        if (typeof window.handleStageBack === 'function') {
+            const handled = window.handleStageBack();
+            if (handled) return 'STAGE_BACK';
+        }
+
+        // أولوية 4: إذا كان في صفحة تفاصيل فرعية (view.html)، العودة لقسم الفهرس التابع له
+        const currentPath = window.location.pathname;
         
+        if (currentPath.includes('/fatwas/view') || currentPath.endsWith('/fatwas/view.html')) {
+            window.location.href = '/fatwas/index.html';
+            return 'SUBPAGE_BACK';
+        }
+        if (currentPath.includes('/lectures/view') || currentPath.endsWith('/lectures/view.html')) {
+            window.location.href = '/lectures/index.html';
+            return 'SUBPAGE_BACK';
+        }
+        if (currentPath.includes('/quran/page') || currentPath.endsWith('/quran/page.html')) {
+            window.location.href = '/quran/index.html';
+            return 'SUBPAGE_BACK';
+        }
+
+        // أولوية 5: إذا كان في أي صفحة داخلية أخرى، الرجوع للصفحة الرئيسية
+        const isHomePage = currentPath === '/' || 
+                           currentPath === '/index.html' || 
+                           currentPath.endsWith('/index.html') && !currentPath.includes('/', 1) || 
+                           currentPath === '';
+
+        if (!isHomePage) {
+            // محاولة الرجوع بالسجل أولاً إذا وجد، وإلا الذهاب للرئيسية
+            if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+                window.history.back();
+            } else {
+                window.location.href = '/index.html';
+            }
+            return 'NAVIGATED_BACK';
+        }
+
+        // إذا كان في الرئيسية يرسل إشارة للأندرويد
+        return 'EXIT_APP';
+    };
+
+    // الاستماع لزر الرجوع في Cordova / Capacitor
+    document.addEventListener('backbutton', function(e) {
+        if (e) e.preventDefault();
+        window.onAndroidBackPressed();
+    }, false);
+
+    // الاستماع لزر Escape من لوحة المفاتيح
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            window.onAndroidBackPressed();
+        }
+    });
+
+    // ربط أزرار الرجوع في الهيدر لجميع الصفحات تلقائياً
+    document.addEventListener('DOMContentLoaded', function() {
+        const headerBackButtons = document.querySelectorAll('#headerBackBtn, .header-content .back-btn, .fixed-header .back-btn');
+        headerBackButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // إذا كان الزر يحتوي على رابط مباشر نتركه أو نطبق العودة الذكية
+                const href = btn.getAttribute('href');
+                if (!href || href === '#' || href === 'javascript:void(0)') {
+                    e.preventDefault();
+                    window.onAndroidBackPressed();
+                }
+            });
+        });
+    });
+
+    // الاستقبالات العامة من كود WebView
+    window.onLocationReceived = async function(lat, lng) {
+        console.log(`📱 [Bridge] تم استقبال الإحداثيات: ${lat}, ${lng}`);
         const parsedLat = parseFloat(lat);
         const parsedLng = parseFloat(lng);
         const resolvedCountry = (parsedLng >= -17 && parsedLng < -1) ? 'MA' : 'SA';
         
-        let resolvedName = '';
+        let resolvedName = 'موقعك الحالي';
         if (typeof window.reverseGeocodeLocation === 'function') {
-            resolvedName = await window.reverseGeocodeLocation(parsedLat, parsedLng);
-        }
-        if (!resolvedName) {
-            resolvedName = 'موقعك الحالي';
+            const name = await window.reverseGeocodeLocation(parsedLat, parsedLng);
+            if (name) resolvedName = name;
         }
 
         const cleanLoc = {
@@ -291,97 +459,32 @@
         localStorage.setItem('prayerCity', JSON.stringify(cleanLoc));
         localStorage.setItem('fur9an_user_location', JSON.stringify(cleanLoc));
 
-        // عرض تنبيه بنجاح التحديد
         if (typeof window.showToast === 'function') {
-            window.showToast(`تم تحديد موقعك بنجاح: ${resolvedName} 📍`);
+            window.showToast(`تم تحديد موقعك بنجاح: ${resolvedName} 📍`, 'success');
         }
 
-        // تحديث أوقات الصلاة في كامل الواجهات
         if (typeof window.calculateUnifiedPrayerTimes === 'function') {
             window.calculateUnifiedPrayerTimes();
         }
         if (typeof window.updateAllPrayerTimesUI === 'function') {
             window.updateAllPrayerTimesUI();
         }
-
-        // إذا كان هناك صفحة صلاة مفتوحة، نقوم بإعادة تحميل محتواها أو تحديثه فوراً
-        const path = window.location.pathname;
-        if (path.includes('/prayer/') || path.includes('prayer')) {
-            window.location.reload();
-        }
     };
 
-    // 2. يستدعيها الأندرويد عند ضغط المستخدم على أزرار إشعار مشغل التلاوة (شاشة القفل أو شريط الإشعارات)
     window.onMediaCommandReceived = function(command) {
-        console.log(`📱 استقبلت منصة الفرقان أمراً من مشغل الأندرويد: ${command}`);
         if (window.Fur9anAudio) {
             switch (command) {
-                case 'play':
-                    if (!window.Fur9anAudio.isPlaying) window.Fur9anAudio.togglePlay();
-                    break;
-                case 'pause':
-                    if (window.Fur9anAudio.isPlaying) window.Fur9anAudio.togglePlay();
-                    break;
-                case 'next':
-                    window.Fur9anAudio.nextSurah();
-                    break;
-                case 'prev':
-                    window.Fur9anAudio.prevSurah();
-                    break;
-                case 'stop':
-                    if (window.Fur9anAudio.isPlaying) window.Fur9anAudio.togglePlay();
-                    break;
+                case 'play': if (!window.Fur9anAudio.isPlaying) window.Fur9anAudio.togglePlay(); break;
+                case 'pause': if (window.Fur9anAudio.isPlaying) window.Fur9anAudio.togglePlay(); break;
+                case 'next': if (typeof window.Fur9anAudio.nextSurah === 'function') window.Fur9anAudio.nextSurah(); break;
+                case 'prev': if (typeof window.Fur9anAudio.prevSurah === 'function') window.Fur9anAudio.prevSurah(); break;
+                case 'stop': if (window.Fur9anAudio.isPlaying) window.Fur9anAudio.togglePlay(); break;
             }
         }
     };
 
-    // 3. يستدعيها الأندرويد لإيقاف صوت الأذان المشغل في الويب عند ضغط زر إيقاف الإشعار
     window.onStopAdhanReceived = function() {
-        console.log('📱 استلم أمر إيقاف الأذان من الأندرويد');
-        if (typeof window.stopAdhanPlayback === 'function') {
-            window.stopAdhanPlayback();
-        }
-    };
-
-    // 4. يستدعيها الأندرويد عند ضغط زر الرجوع الفعلي للهاتف (Hardware Back Button) لمنع إغلاق التطبيق المفاجئ
-    window.onAndroidBackPressed = function() {
-        console.log('📱 تم التقاط ضغطة زر الرجوع من الأندرويد');
-
-        // إغلاق أي نافذة منبثقة أو مودال نشط أولاً
-        const activeModals = document.querySelectorAll(
-            '.modal-overlay.active, .modal-overlay[style*="flex"], #tafsirModal[style*="flex"], #batchDownloadModal[style*="flex"], #cityModal.active, #profileModal.active, .modal-backdrop[style*="flex"]'
-        );
-
-        if (activeModals && activeModals.length > 0) {
-            activeModals.forEach(m => {
-                if (m.id === 'tafsirModal' && typeof window.closeTafsirModal === 'function') {
-                    window.closeTafsirModal();
-                } else if (m.id === 'cityModal' && typeof window.closeCityModal === 'function') {
-                    window.closeCityModal();
-                } else {
-                    m.style.display = 'none';
-                    m.classList.remove('active');
-                }
-            });
-            return 'MODAL_CLOSED';
-        }
-
-        // في صفحات المراحل المتعددة (السنة النبوية، التلاوات)
-        if (typeof window.handleStageBack === 'function') {
-            const handled = window.handleStageBack();
-            if (handled) return 'STAGE_BACK';
-        }
-
-        // الرجوع بالصفحة في سجل المتصفح
-        const currentPath = window.location.pathname;
-        const isHomePage = currentPath === '/' || currentPath === '/index.html' || currentPath.endsWith('/index.html') || currentPath === '';
-        
-        if (!isHomePage) {
-            window.location.href = '/index.html';
-            return 'NAVIGATED_HOME';
-        }
-
-        return 'EXIT_APP';
+        Fur9anBridge.stopAndroidAdhan();
     };
 
 })();

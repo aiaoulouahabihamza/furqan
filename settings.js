@@ -85,7 +85,7 @@
 
     // 1. القيم الافتراضية
     const DEFAULT_SETTINGS = {
-        theme: 'emerald',
+        theme: 'light',
         preAdhanMinutes: 5,
         adhanReciter: 'alafasi',
         madhab: 'maliki',
@@ -130,20 +130,10 @@
         }
     };
 
-    // تطبيق الثيم المختار
-    window.applyAppTheme = function (themeName) {
-        const settings = getAppSettings();
-        const theme = themeName || settings.theme;
-        if (theme === 'default' || theme === 'emerald') {
-            document.documentElement.removeAttribute('data-theme');
-        } else {
-            document.documentElement.setAttribute('data-theme', theme);
-        }
-        localStorage.setItem('theme', theme);
-        if (themeName && settings.theme !== themeName) {
-            settings.theme = themeName;
-            localStorage.setItem('fur9an_settings', JSON.stringify(settings));
-        }
+    // تطبيق الهوية الرسمية لمنصة الفرقان
+    window.applyAppTheme = function () {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
     };
 
     // تفعيل الثيم فور التحميل
@@ -536,7 +526,7 @@
         }
     };
 
-    // لوحة وتنبيه حان الآن موعد الصلاة
+    // معالجة حلول وقت الصلاة وتشغيل الأذان بالتكامل مع الجسر البرمجي
     window.showPrayerTimePopup = function (prayerKey, prayerNameAr, cityName) {
         const settings = getAppSettings();
         const reciterId = settings.adhanReciter || 'alafasi';
@@ -549,37 +539,10 @@
         }
         activeAdhanAudio = window.playAdhanWithFallbacks(reciterId);
 
-        // 3. عرض المودال داخل الصفحة
-        let modal = document.getElementById('adhanAlertModal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'adhanAlertModal';
-            modal.className = 'adhan-alert-modal';
-            modal.innerHTML = `
-                <div class="adhan-alert-card">
-                    <div class="adhan-alert-icon"><i class="fa-solid fa-mosque"></i></div>
-                    <div class="adhan-alert-title">حان الآن موعد صلاة <span id="adhanAlertPrayerName"></span></div>
-                    <div class="adhan-alert-desc" id="adhanAlertCity"></div>
-                    <div class="adhan-alert-reciter" id="adhanAlertReciter"></div>
-                    <div class="adhan-alert-actions">
-                        <button class="adhan-alert-btn stop" onclick="window.stopAdhanPlayback()"><i class="fa-solid fa-volume-xmark"></i> إيقاف الأذان</button>
-                        <a href="/adkar/index.html" class="adhan-alert-btn adkar" onclick="window.stopAdhanPlayback()"><i class="fa-solid fa-hands-praying"></i> أذكار بعد الصلاة</a>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
+        // إخطار الجسر الموحد بالأذان والتنبيهات
+        if (window.Fur9anBridge && typeof window.Fur9anBridge.onPrayerTimeTriggered === 'function') {
+            window.Fur9anBridge.onPrayerTimeTriggered(prayerKey, prayerNameAr, cityName, reciterObj);
         }
-
-        const nameEl = document.getElementById('adhanAlertPrayerName');
-        const cityEl = document.getElementById('adhanAlertCity');
-        const reciterEl = document.getElementById('adhanAlertReciter');
-
-        if (nameEl) nameEl.textContent = prayerNameAr;
-        if (cityEl) cityEl.textContent = `حسب التوقيت المحلي لمدينة ${cityName || ''}`;
-        if (reciterEl) reciterEl.textContent = `بصوت المؤذن: ${reciterObj.name}`;
-
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('active'), 10);
     };
 
     // ============================================
@@ -678,15 +641,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const themeToggleBtns = document.querySelectorAll('#themeToggle, .theme-toggle, .settings-btn');
-        themeToggleBtns.forEach(btn => {
-            btn.title = "إعدادات المنصة";
-            btn.innerHTML = '<i class="fa-solid fa-gear"></i>';
-            btn.onclick = function (e) {
+        // ربط زر الإعدادات في الصفحة الرئيسية فقط إن وجد
+        const homeSettingsBtn = document.getElementById('openSettingsBtn');
+        if (homeSettingsBtn) {
+            homeSettingsBtn.onclick = function (e) {
                 e.preventDefault();
                 window.location.href = '/settings/index.html';
             };
-        });
+        }
 
         // تشغيل نظام حقن التاريخ الهجري تلقائياً في ترويسة جميع صفحات التطبيق بدقة عالية عبر المكتبة
         initializeGlobalHijriHeaders();

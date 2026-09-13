@@ -5,19 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>الفرقان - التلاوات القرآنية لكبار القراء</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="/icons.css" />
     
     <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/recitations/style.css" />
 </head>
 <body>
 
-    <!-- ===== الشريط العلوي ===== -->
+    <!-- ===== الشريط العلوي الموحد ===== -->
     <header class="main-header" id="mainHeader">
         <div class="header-content">
-            <a href="/index.html" class="back-btn" aria-label="الرجوع للرئيسية" id="globalBackBtn">
+            <a href="/index.html" class="back-btn" aria-label="الرجوع للرئيسية" id="globalBackBtn" title="الرجوع للرئيسية">
                 <i class="fa-solid fa-arrow-right"></i>
             </a>
             <div class="header-title">
@@ -28,9 +29,11 @@
                     <span class="header-text" id="headerTitleText">التلاوات القرآنية</span>
                 </h1>
             </div>
-            <button class="header-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" aria-label="الإعدادات">
-                <i class="fa-solid fa-gear"></i>
-            </button>
+            <div class="header-actions">
+                <a href="/index.html" class="back-btn" title="الرئيسية" aria-label="الرئيسية">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
         </div>
     </header>
 

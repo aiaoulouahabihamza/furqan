@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if the authenticated user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // User profiles - allow read and write
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if isOwner(userId);
+      
+      // Subcollections under user
+      match /bookmarks/{bookmarkId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /khatma/{khatmaId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /logs/{logId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Top-level bookmarks collection queryable by userId
+    match /bookmarks/{bookmarkId} {
+      allow read, write: if true;
+      allow delete: if true;
+    }
+
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

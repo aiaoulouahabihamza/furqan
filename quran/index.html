@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>الفرقان - المصحف الشريف</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="/icons.css" />
     <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/quran/style.css" />
 </head>
 <body>
 
     <header class="main-header" id="mainHeader">
         <div class="header-content">
-            <a href="/index.html" class="back-btn" aria-label="رجوع">
+            <a href="/index.html" class="back-btn" id="headerBackBtn" aria-label="الرجوع للرئيسية" title="الرجوع للرئيسية">
                 <i class="fa-solid fa-arrow-right"></i>
             </a>
             <div class="header-title">
@@ -26,9 +27,14 @@
                     <span class="header-text">القرآن الكريم</span>
                 </h1>
             </div>
-            <button class="header-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" aria-label="الإعدادات">
-                <i class="fa-solid fa-gear"></i>
-            </button>
+            <div class="header-actions">
+                <button class="header-btn" id="headerBookmarksBtn" title="المرجعيات والعلامات المحفوظة">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </button>
+                <a href="/index.html" class="back-btn" title="الرئيسية" aria-label="الرئيسية">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
         </div>
     </header>
 
@@ -41,6 +47,18 @@
                     <i class="fa-solid fa-circle-xmark"></i>
                 </button>
             </div>
+        </div>
+
+        <!-- أزرار الوصول السريع لآخر قراءة والمرجعيات -->
+        <div class="quran-quick-actions" style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button id="lastReadBtn" class="quick-action-pill" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full, 9999px); color: var(--color-primary); font-size: 13px; font-weight: 700; cursor: pointer; transition: var(--transition);">
+                <i class="fa-regular fa-bookmark"></i>
+                <span>متابعة آخر قراءة</span>
+            </button>
+            <button id="bookmarksBtn" class="quick-action-pill" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full, 9999px); color: var(--color-text); font-size: 13px; font-weight: 700; cursor: pointer; transition: var(--transition);">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span>المرجعيات</span>
+            </button>
         </div>
 
         <div class="riwayah-note" id="statsBar">
@@ -71,21 +89,6 @@
             <button class="no-results-btn" id="clearSearchBtn">عرض جميع السور</button>
         </div>
     </main>
-
-    <nav class="bottom-nav" id="bottomNav">
-        <a href="/index.html" class="nav-item active">
-            <i class="fa-solid fa-house"></i>
-            <span>الرئيسية</span>
-        </a>
-        <a href="#" class="nav-item" id="lastReadBtn">
-            <i class="fa-regular fa-bookmark"></i>
-            <span>آخر قراءة</span>
-        </a>
-        <a href="#" class="nav-item" id="bookmarksBtn">
-            <i class="fa-solid fa-book-bookmark"></i>
-            <span>المرجعيات</span>
-        </a>
-    </nav>
 
     <!-- مودال العلامات المرجعية -->
     <div class="modal-overlay" id="bookmarksModal">

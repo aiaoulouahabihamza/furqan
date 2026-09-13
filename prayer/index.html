@@ -5,30 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>الفرقان - مواقيت الصلاة</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="/icons.css" />
     
     <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/prayer/style.css" />
 </head>
 <body>
 
-    <!-- ===== الشريط العلوي الفاخر ===== -->
+    <!-- ===== الشريط العلوي الموحد ===== -->
     <header class="main-header" id="mainHeader">
         <div class="header-content">
-            <a href="/index.html" class="back-btn" onclick="if(window.history.length > 1){ window.history.back(); return false; }" aria-label="الرجوع">
-                <i class="fa-solid fa-chevron-right"></i>
+            <a href="/index.html" class="back-btn" id="headerBackBtn" aria-label="الرجوع للرئيسية" title="الرجوع للرئيسية">
+                <i class="fa-solid fa-arrow-right"></i>
             </a>
             
             <div class="header-title">
-                <h1><i class="fa-solid fa-mosque header-icon-gold"></i> أوقات الصلاة</h1>
+                <h1><i class="fa-solid fa-mosque header-icon-gold"></i> مواقيت الصلاة</h1>
             </div>
 
             <div class="header-actions">
-                <button class="header-action-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" title="الإعدادات">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
+                <a href="/index.html" class="back-btn" title="الرئيسية" aria-label="الرئيسية">
+                    <i class="fa-solid fa-house"></i>
+                </a>
             </div>
         </div>
     </header>

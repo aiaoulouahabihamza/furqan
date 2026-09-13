@@ -596,6 +596,45 @@
             });
         }
 
+        ensurePersistentBar() {
+            const path = window.location.pathname;
+            const isHome = path === '/' || path === '/index.html' || path.endsWith('/index.html') || path === '';
+            const isRecitations = path.indexOf('/recitations') !== -1;
+            if (isHome || isRecitations) return null;
+
+            let persBar = document.getElementById('furqanPersistentBar');
+            if (!persBar && document.body) {
+                persBar = document.createElement('div');
+                persBar.id = 'furqanPersistentBar';
+                persBar.className = 'furqan-persistent-bar hidden';
+                persBar.innerHTML = `
+                    <div class="pers-bar-info" id="persBarInfo" onclick="window.location.href='/recitations/index.html'">
+                        <div class="pers-bar-icon" id="persBarIconBox">
+                            <i class="fa-solid fa-compact-disc spin-slow" id="persBarDisc"></i>
+                        </div>
+                        <div class="pers-bar-text">
+                            <div class="pers-bar-title" id="persBarTitle">سورة الفاتحة</div>
+                            <div class="pers-bar-reciter" id="persBarReciter">مشاري العفاسي</div>
+                        </div>
+                    </div>
+                    <div class="pers-bar-controls">
+                        <button class="pers-bar-btn" id="persPrevBtn" title="السورة السابقة"><i class="fa-solid fa-forward-step"></i></button>
+                        <button class="pers-bar-btn primary" id="persPlayBtn" title="تشغيل / إيقاف"><i class="fa-solid fa-play" id="persBarPlayIcon"></i></button>
+                        <button class="pers-bar-btn" id="persNextBtn" title="السورة التالية"><i class="fa-solid fa-backward-step"></i></button>
+                    </div>
+                `;
+                document.body.appendChild(persBar);
+
+                const playBtn = persBar.querySelector('#persPlayBtn');
+                if (playBtn) playBtn.addEventListener('click', (e) => { e.stopPropagation(); this.togglePlay(); });
+                const prevBtn = persBar.querySelector('#persPrevBtn');
+                if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); this.prevSurah(); });
+                const nextBtn = persBar.querySelector('#persNextBtn');
+                if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); this.nextSurah(); });
+            }
+            return persBar;
+        }
+
         updateUI() {
             const surahName = this.getSurahName(this.currentSurah);
             const reciterName = this.currentReciter.name;
@@ -617,10 +656,11 @@
             }
 
             // الشريط العائم الدائم
-            const persBar = document.getElementById('furqanPersistentBar');
+            const persBar = this.ensurePersistentBar();
             const persTitle = document.getElementById('persBarTitle');
             const persReciter = document.getElementById('persBarReciter');
             const persIcon = document.getElementById('persBarPlayIcon');
+            const persDisc = document.getElementById('persBarDisc');
 
             if (persBar) {
                 // إظهار الشريط فقط إذا كان الصوت مشغلاً ولم نكن في صفحة التلاوات الرئيسية
@@ -639,6 +679,10 @@
             if (persReciter) persReciter.textContent = reciterName;
             if (persIcon) {
                 persIcon.className = this.isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+            }
+            if (persDisc) {
+                if (this.isPlaying) persDisc.classList.add('playing');
+                else persDisc.classList.remove('playing');
             }
 
             if (window.Fur9anBridge && typeof window.Fur9anBridge.updateMediaNotification === 'function') {

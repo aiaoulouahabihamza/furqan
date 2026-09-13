@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - المكتبة الإسلامية الرقمية</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css?v=5" />
+    <link rel="stylesheet" href="/icons.css?v=5" />
+    <link rel="stylesheet" href="/variables.css?v=5" />
+    <link rel="stylesheet" href="/style.css?v=5" />
+    <link rel="stylesheet" href="/auth.css?v=5" />
+    
+    <style>
+        /* أنماط مخصصة وراقية جداً للمكتبة الرقمية */
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .library-main-wrap {
+            padding-bottom: 80px;
+        }
+
+        .search-section {
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(58, 155, 153, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            margin-bottom: 24px;
+        }
+
+        .search-box-inner {
+            display: flex;
+            align-items: center;
+            background: #F7FAFC;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 4px 14px;
+            transition: all 0.25s ease;
+        }
+
+        .search-box-inner:focus-within {
+            border-color: #3A9B99;
+            box-shadow: 0 0 0 3px rgba(58, 155, 153, 0.15);
+            background: #FFFFFF;
+        }
+
+        .search-box-inner input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            padding: 10px 8px;
+            font-size: 14px;
+            font-family: 'Cairo', sans-serif;
+            color: var(--color-text);
+        }
+
+        .search-box-inner i.search-icon {
+            color: #A0AEC0;
+            font-size: 16px;
+        }
+
+        /* شبكة عرض الكتب المتميزة */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .book-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid rgba(58, 155, 153, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(58, 155, 153, 0.1);
+            border-color: rgba(58, 155, 153, 0.3);
+        }
+
+        /* غلاف الكتاب بنقش إسلامي راقي */
+        .book-cover {
+            height: 160px;
+            background: linear-gradient(135deg, #2F7E7C 0%, #1E5150 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .book-cover-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .book-cover-fallback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+            text-align: center;
+            z-index: 1;
+            box-sizing: border-box;
+        }
+
+        .book-cover-fallback::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .book-cover-fallback-title {
+            color: #FFFFFF;
+            font-size: 13.5px;
+            font-weight: 800;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            direction: rtl;
+        }
+
+        .book-cover::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 10%, transparent 40%);
+            top: -50%;
+            left: -50%;
+            animation: rotateBg 40s linear infinite;
+        }
+
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .book-cover-pattern {
+            font-size: 54px;
+            color: rgba(255, 255, 255, 0.2);
+            z-index: 2;
+        }
+
+        .book-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 10;
+        }
+
+        .book-info {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .book-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 8px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 45px;
+        }
+
+        .book-author {
+            font-size: 12.5px;
+            color: #2F7E7C;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .book-desc {
+            font-size: 13px;
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 62px;
+        }
+
+        .book-actions {
+            margin-top: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-book {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-book-read {
+            background-color: #EDFDFB;
+            color: #3A9B99;
+            border: 1px solid #C6F6F1;
+        }
+
+        .btn-book-read:hover {
+            background-color: #3A9B99;
+            color: #FFFFFF;
+            border-color: #3A9B99;
+        }
+
+        .btn-book-download {
+            background-color: #3A9B99;
+            color: #FFFFFF;
+        }
+
+        .btn-book-download:hover {
+            background-color: #2D7A78;
+            box-shadow: 0 4px 10px rgba(58, 155, 153, 0.2);
+        }
+
+        /* المودال الشامل لمعاينة الكتاب وقراءة التفاصيل والـ PDF */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 12000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .book-modal {
+            background: #FFFFFF;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .book-modal-header {
+            padding: 18px 24px;
+            background: #EDFDFB;
+            border-bottom: 1px solid #C6F6F1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .book-modal-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            color: #2F7E7C;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .book-modal-close {
+            background: #E2F8F6;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: #2F7E7C;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .book-modal-close:hover {
+            background: #C6F6F1;
+            transform: rotate(90deg);
+        }
+
+        .book-modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .book-modal-meta {
+            background: #F7FAFC;
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 20px;
+        }
+
+        .book-modal-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--color-text);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .book-modal-author {
+            font-size: 13.5px;
+            color: #3A9B99;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .book-modal-desc {
+            font-size: 14px;
+            color: #4A5568;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        /* صفحة عرض الـ PDF كاملة مدمجة */
+        .pdf-fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #1A202C;
+            z-index: 15000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .pdf-fullscreen-header {
+            background: #2D3748;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 1px solid #4A5568;
+        }
+
+        .pdf-fullscreen-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFFFFF;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60%;
+        }
+
+        /* شاشة لودينغ بانتظار تحميل الكتب */
+        .skeleton-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .skeleton-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            height: 380px;
+            border: 1px solid #E2E8F0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150px;
+            height: 100%;
+            width: 150px;
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { left: 100%; }
+        }
+
+        .skeleton-cover {
+            height: 140px;
+            background: #E2E8F0;
+            border-radius: 10px;
+        }
+
+        .skeleton-line {
+            height: 16px;
+            background: #E2E8F0;
+            border-radius: 4px;
+        }
+
+        .skeleton-text {
+            height: 80px;
+            background: #E2E8F0;
+            border-radius: 8px;
+        }
+
+        .skeleton-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .skeleton-btn {
+            height: 36px;
+            background: #E2E8F0;
+            border-radius: 8px;
+        }
+
+        /* صفحة الترقيم */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-page {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            color: var(--color-text);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-page:hover {
+            border-color: #3A9B99;
+            color: #3A9B99;
+            background: #EDFDFB;
+        }
+
+        .btn-page.active {
+            background: #3A9B99;
+            color: #FFFFFF;
+            border-color: #3A9B99;
+            box-shadow: 0 4px 10px rgba(58, 155, 153, 0.2);
+        }
+
+        .btn-page-nav {
+            padding: 0 12px;
+            width: auto;
+            font-size: 12.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== الشريط العلوي الموحد ===== -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" id="headerBackBtn" aria-label="الرجوع للرئيسية" title="الرجوع للرئيسية">
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <div class="header-title">
+                <h1><i class="fa-solid fa-book-atlas"></i> المكتبة الإسلامية</h1>
+            </div>
+            <div class="header-actions">
+                <a href="/index.html" class="back-btn" title="الرئيسية" aria-label="الرئيسية">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <main class="main-content library-main-wrap">
+        <div class="fatwas-container">
+            
+            <!-- قسم البحث والتوجيه المعرفي -->
+            <div class="search-section">
+                <div class="search-box-inner">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="bookSearchInput" placeholder="ابحث عن كتب، كتيبات، أو مؤلفات دينية..." autocomplete="off" />
+                </div>
+            </div>
+
+            <div class="fatwas-status-bar" style="margin-bottom: 16px;">
+                <span class="active-category-title">الكتب والمؤلفات الإسلامية المتاحة</span>
+                <span class="fatwas-total-badge" id="booksTotalBadge">جاري التحميل...</span>
+            </div>
+
+            <!-- شبكة الكتب واللوادر -->
+            <div id="booksContainer">
+                <!-- الهياكل المؤقتة (Skeletons) ستعرض هنا أولاً -->
+                <div class="skeleton-wrapper">
+                    <div class="skeleton-card"><div class="skeleton-cover"></div><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 40%;"></div><div class="skeleton-text"></div><div class="skeleton-btns"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div></div>
+                    <div class="skeleton-card"><div class="skeleton-cover"></div><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 40%;"></div><div class="skeleton-text"></div><div class="skeleton-btns"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div></div>
+                    <div class="skeleton-card"><div class="skeleton-cover"></div><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 40%;"></div><div class="skeleton-text"></div><div class="skeleton-btns"><div class="skeleton-btn"></div><div class="skeleton-btn"></div></div></div>
+                </div>
+            </div>
+
+            <!-- أزرار الترقيم -->
+            <div class="pagination-container" id="paginationWrap" style="display:none;"></div>
+
+        </div>
+    </main>
+
+    <!-- ===== مودال تفاصيل الكتاب وقراءة الفهرس ===== -->
+    <div class="modal-overlay" id="bookDetailModal">
+        <div class="book-modal">
+            <div class="book-modal-header">
+                <h3><i class="fa-solid fa-book-open"></i> تفاصيل الكتاب</h3>
+                <button class="book-modal-close" id="bookModalCloseBtn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="book-modal-body">
+                <div class="book-modal-meta">
+                    <div class="book-modal-title" id="modalBookTitle">--</div>
+                    <div class="book-modal-author" id="modalBookAuthor"><i class="fa-solid fa-pen-nib"></i> --</div>
+                </div>
+                <div class="book-modal-desc" id="modalBookDesc">--</div>
+            </div>
+            <div class="book-modal-header" style="background: #F7FAFC; border-top: 1px solid #E2E8F0; border-bottom: none; display: flex; gap: 12px; justify-content: flex-end; padding: 12px 24px;">
+                <button class="btn-book btn-book-download" id="modalDownloadBtn" style="padding: 10px 20px; width: 100%;"><i class="fa-solid fa-download"></i> تحميل الآن بصيغة PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- جسر الأندرويد ومكتبة التنبيهات الموحدة -->
+    <script src="/android-bridge.js?v=5"></script>
+    <script src="/toast.js?v=5"></script>
+    <script src="./app.js?v=5" type="module"></script>
+</body>
+</html>

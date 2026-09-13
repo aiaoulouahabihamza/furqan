@@ -30,8 +30,13 @@ const PAGE_SIZE = 25;
 
 // عناصر DOM الرئيسية
 const loadingState = document.getElementById('loadingState');
+const sunahSearchSection = document.getElementById('sunahSearchSection');
+const sunahSearchInput = document.getElementById('sunahSearchInput');
+const sunahSearchClear = document.getElementById('sunahSearchClear');
 const booksStage = document.getElementById('booksStage');
 const booksGrid = document.getElementById('booksGrid');
+const booksNoResults = document.getElementById('booksNoResults');
+const clearSunahSearchBtn = document.getElementById('clearSunahSearchBtn');
 
 const chaptersStage = document.getElementById('chaptersStage');
 const activeBookTitle = document.getElementById('activeBookTitle');
@@ -50,10 +55,23 @@ const backToChaptersBtn = document.getElementById('backToChaptersBtn');
 const headerBackBtn = document.getElementById('headerBackBtn');
 const toastMsg = document.getElementById('toastMsg');
 
+function normalizeArabic(text) {
+    if (!text) return '';
+    return text
+        .toString()
+        .toLowerCase()
+        .replace(/[\u064B-\u0652\u0670\u0640]/g, '')
+        .replace(/[أإآٱ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .replace(/[ؤئ]/g, 'ء');
+}
+
 // ===== 4. ملاحة ذكية ثلاثية الواجهات (حل زر الرجوع بذكاء) =====
 function initNavigation() {
     // الواجهة الافتراضية الأولى
     switchToStage1(false);
+    initSunahSearch();
     
     // الاستماع لزر الرجوع في المتصفح (للبيئات التي تدعمها)
     window.addEventListener('popstate', (e) => {
@@ -459,8 +477,37 @@ function generateRangesForBook(book) {
 // ===== 6. عرض المرحلة الأولى: قائمة الكتب الشريفة التسعة =====
 function renderBooksStage() {
     loadingState.style.display = 'none';
+    if (sunahSearchSection) sunahSearchSection.style.display = 'block';
+
+    const rawQuery = (sunahSearchInput?.value || '').trim();
+    if (sunahSearchClear) {
+        sunahSearchClear.style.display = rawQuery.length > 0 ? 'flex' : 'none';
+    }
+
+    const normQuery = normalizeArabic(rawQuery);
+    let matchedBooks = BOOKS;
+
+    if (rawQuery.length > 0) {
+        matchedBooks = BOOKS.filter(book => {
+            const nameNorm = normalizeArabic(book.name);
+            const authorNorm = normalizeArabic(book.author);
+            return nameNorm.includes(normQuery) || 
+                   authorNorm.includes(normQuery) || 
+                   book.name.toLowerCase().includes(rawQuery.toLowerCase()) || 
+                   book.author.toLowerCase().includes(rawQuery.toLowerCase());
+        });
+    }
+
+    if (matchedBooks.length === 0) {
+        booksGrid.style.display = 'none';
+        if (booksNoResults) booksNoResults.style.display = 'block';
+        return;
+    }
+
+    if (booksNoResults) booksNoResults.style.display = 'none';
+    booksGrid.style.display = 'grid';
     
-    booksGrid.innerHTML = BOOKS.map(book => `
+    booksGrid.innerHTML = matchedBooks.map(book => `
         <div class="book-list-card" data-id="${book.id}">
             <div class="book-icon-wrapper">
                 <i class="fa-solid fa-book-quran"></i>
@@ -487,19 +534,93 @@ function renderBooksStage() {
     });
 }
 
+function initSunahSearch() {
+    if (sunahSearchInput) {
+        sunahSearchInput.addEventListener('input', () => {
+            if (currentStage === 2) {
+                renderChaptersStage(activeBookId);
+            } else if (currentStage === 3) {
+                // If in hadiths view, filter hadiths on screen
+                filterRenderedHadiths();
+            } else {
+                renderBooksStage();
+            }
+        });
+    }
+
+    if (sunahSearchClear) {
+        sunahSearchClear.addEventListener('click', () => {
+            if (sunahSearchInput) sunahSearchInput.value = '';
+            if (currentStage === 2) {
+                renderChaptersStage(activeBookId);
+            } else if (currentStage === 3) {
+                filterRenderedHadiths();
+            } else {
+                renderBooksStage();
+            }
+            if (sunahSearchInput) sunahSearchInput.focus();
+        });
+    }
+
+    if (clearSunahSearchBtn) {
+        clearSunahSearchBtn.addEventListener('click', () => {
+            if (sunahSearchInput) sunahSearchInput.value = '';
+            renderBooksStage();
+        });
+    }
+}
+
+function filterRenderedHadiths() {
+    const rawQuery = (sunahSearchInput?.value || '').trim();
+    if (sunahSearchClear) {
+        sunahSearchClear.style.display = rawQuery.length > 0 ? 'flex' : 'none';
+    }
+    const normQuery = normalizeArabic(rawQuery);
+    const cards = hadithsList.querySelectorAll('.hadith-card-item');
+    cards.forEach(card => {
+        if (!normQuery) {
+            card.style.display = 'block';
+            return;
+        }
+        const text = card.textContent || '';
+        const normText = normalizeArabic(text);
+        if (normText.includes(normQuery) || text.toLowerCase().includes(rawQuery.toLowerCase())) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
 // ===== 7. عرض المرحلة الثانية: الأبواب (نطاقات الأحاديث) للفئة المختارة =====
 async function renderChaptersStage(bookId) {
     const book = BOOKS.find(b => b.id === bookId);
     if (!book) return;
 
     // الحصول على الأبواب الإسلامية الحقيقية
-    const chapters = generateRangesForBook(book);
+    const rawChapters = generateRangesForBook(book);
     cachedBookData[bookId] = {
-        chapters: chapters,
+        chapters: rawChapters,
         hadiths: []
     };
 
     loadingState.style.display = 'none';
+
+    const rawQuery = (sunahSearchInput?.value || '').trim();
+    const normQuery = normalizeArabic(rawQuery);
+
+    let chapters = rawChapters;
+    if (rawQuery.length > 0) {
+        chapters = rawChapters.filter(ch => {
+            const chNorm = normalizeArabic(ch.arabic);
+            return chNorm.includes(normQuery) || ch.arabic.toLowerCase().includes(rawQuery.toLowerCase());
+        });
+    }
+
+    if (chapters.length === 0) {
+        chaptersList.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--color-text-light);">لا توجد أبواب مطابقة للبحث</div>`;
+        return;
+    }
 
     chaptersList.innerHTML = chapters.map(ch => {
         return `

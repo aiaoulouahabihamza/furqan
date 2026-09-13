@@ -64,32 +64,53 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loadingState) loadingState.style.display = state ? 'block' : 'none';
     }
 
+    function normalizeArabic(text) {
+        if (!text) return '';
+        return text
+            .toString()
+            .toLowerCase()
+            .replace(/[\u064B-\u0652\u0670\u0640]/g, '')
+            .replace(/[أإآٱ]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/ى/g, 'ي')
+            .replace(/[ؤئ]/g, 'ء');
+    }
+
     // 4. عرض القصص بناءً على التبويب والبحث
     function renderCurrentStories() {
-        const query = searchInput.value.trim().toLowerCase();
-        searchClear.style.display = query.length > 0 ? 'block' : 'none';
+        const rawQuery = searchInput.value.trim();
+        searchClear.style.display = rawQuery.length > 0 ? 'block' : 'none';
 
+        const normQuery = normalizeArabic(rawQuery);
         let filteredStories = [];
 
         if (activeTab === 'prophets') {
             filteredStories = prophetsStories.filter(p => {
-                const name = (p.name || '').toLowerCase();
-                const storyParts = (p.story || []).map(s => (s.title || '') + ' ' + (s.description || '')).join(' ').toLowerCase();
-                return name.includes(query) || storyParts.includes(query);
+                const name = p.name || '';
+                const storyParts = (p.story || []).map(s => (s.title || '') + ' ' + (s.description || '')).join(' ');
+                return normalizeArabic(name).includes(normQuery) || 
+                       normalizeArabic(storyParts).includes(normQuery) ||
+                       name.toLowerCase().includes(rawQuery.toLowerCase());
             });
             statsText.textContent = `عرض ${filteredStories.length} من قصص الأنبياء والرسل عليهم السلام`;
         } else if (activeTab === 'sahaba') {
             filteredStories = sahabaStories.filter(story => {
-                const header = (story.header || '').toLowerCase();
-                const title = (story.title || '').toLowerCase();
-                return header.includes(query) || title.includes(query);
+                const header = story.header || '';
+                const title = story.title || '';
+                return normalizeArabic(header).includes(normQuery) || 
+                       normalizeArabic(title).includes(normQuery) ||
+                       header.toLowerCase().includes(rawQuery.toLowerCase()) || 
+                       title.toLowerCase().includes(rawQuery.toLowerCase());
             });
             statsText.textContent = `عرض ${filteredStories.length} من قصص الصحابة والتابعين رضي الله عنهم`;
         } else if (activeTab === 'islamic') {
             filteredStories = islamicStories.filter(story => {
-                const header = (story.header || '').toLowerCase();
-                const title = (story.title || '').toLowerCase();
-                return header.includes(query) || title.includes(query);
+                const header = story.header || '';
+                const title = story.title || '';
+                return normalizeArabic(header).includes(normQuery) || 
+                       normalizeArabic(title).includes(normQuery) ||
+                       header.toLowerCase().includes(rawQuery.toLowerCase()) || 
+                       title.toLowerCase().includes(rawQuery.toLowerCase());
             });
             statsText.textContent = `عرض ${filteredStories.length} من أروع القصص والعبر في الإسلام`;
         }
@@ -246,6 +267,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (storyModal && storyModal.classList.contains('active')) {
                 e.preventDefault();
                 closeModal(true);
+            } else if (window.history.length > 1) {
+                e.preventDefault();
+                window.history.back();
             }
         });
     }

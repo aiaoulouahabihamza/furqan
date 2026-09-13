@@ -208,22 +208,23 @@ body {
 }
 
 .chapter-item:hover {
-    transform: translateX(-4px);
-    border-right-color: var(--color-primary);
+    transform: translateX(-3px);
+    border-right-color: var(--color-herbal, #5A8F7C);
 }
 
 .chapter-item .chapter-name {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--color-text);
 }
 
 .chapter-item .chapter-count {
-    font-size: 11px;
-    color: var(--color-text-lighter);
-    background: var(--color-bg);
-    padding: 2px 10px;
+    font-size: 10.5px;
+    color: var(--color-herbal-dark, #416B5C);
+    background: rgba(158, 187, 175, 0.18);
+    padding: 2px 8px;
     border-radius: var(--radius-full);
+    font-weight: 600;
 }
 
 .chapter-item .chapter-arrow {

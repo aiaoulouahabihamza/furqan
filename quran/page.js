@@ -20,44 +20,10 @@ function toArabicNum(n) {
 }
 
 // ===== المظهر يُدار مركزياً عبر settings.js =====
-const availableThemes = ['emerald', 'theme-375', 'theme-356', 'theme-319', 'theme-341', 'theme-127', 'dark'];
-
 function setupQuranThemeToggle() {
     if (typeof window.applyAppTheme === 'function') {
         window.applyAppTheme();
     }
-    
-    const themeBtn = document.getElementById('themeToggle');
-    if (!themeBtn) return;
-
-    themeBtn.addEventListener('click', () => {
-        let currentTheme = localStorage.getItem('theme') || 'emerald';
-        let currentIndex = availableThemes.indexOf(currentTheme);
-        if (currentIndex === -1) currentIndex = 0;
-        
-        let nextTheme = availableThemes[(currentIndex + 1) % availableThemes.length];
-        
-        if (typeof window.applyAppTheme === 'function') {
-            window.applyAppTheme(nextTheme);
-        } else {
-            if (nextTheme === 'emerald' || nextTheme === 'default') {
-                document.documentElement.removeAttribute('data-theme');
-            } else {
-                document.documentElement.setAttribute('data-theme', nextTheme);
-            }
-            localStorage.setItem('theme', nextTheme);
-        }
-
-        const icon = themeBtn.querySelector('i');
-        if (icon) {
-            if (nextTheme === 'dark') {
-                icon.className = 'fa-solid fa-moon';
-            } else {
-                icon.className = 'fa-solid fa-palette';
-            }
-        }
-        if (navigator.vibrate) navigator.vibrate(20);
-    });
 }
 
 function updateHeader(surahNameText, hizbText) {

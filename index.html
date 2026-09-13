@@ -7,7 +7,7 @@
     
     <!-- الوسوم الوصفية والمواصفات الكاملة كأندرويد وتطبيق ويب -->
     <meta name="description" content="منصة الفرقان الرقمية الشاملة - المصحف الشريف بالخط المغربي، تفسير الآيات، الأذكار النبوية اليومية، السنة النبوية المطهرة ومواقيت الصلاة الدقيقة." />
-    <meta name="theme-color" content="#0284C7" />
+    <meta name="theme-color" content="#D4C9B7" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="الفرقان" />
@@ -17,18 +17,46 @@
     <link rel="apple-touch-icon" href="/data/images/logo.png" />
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    <link rel="stylesheet" href="/icons.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css?v=5" />
+    <link rel="stylesheet" href="/icons.css?v=5" />
     
-    <link rel="stylesheet" href="variables.css" />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="/variables.css?v=5" />
+    <link rel="stylesheet" href="/style.css?v=5" />
+    <link rel="stylesheet" href="/auth.css?v=5" />
+    <link rel="manifest" href="/manifest.json">
+    <!-- نظام التنبيهات العصري الشامل (بديل alert) -->
+    <script src="/toast.js?v=5"></script>
 </head>
 <body>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('✅ Service Worker registered successfully:', reg.scope);
+                    
+                    // Check for updates
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('🔄 New Service Worker update found. Activating immediately...');
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                        });
+                    });
+                }).catch(err => {
+                    console.error('❌ Service Worker registration failed:', err);
+                });
+            });
+
+            // Reload page once when the new controller takes over to reflect updates instantly
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('🔄 Service Worker updated. Reloading page...');
+                    window.location.reload();
+                }
             });
         }
     </script>
@@ -167,26 +195,30 @@
                 <span><i class="fa-solid fa-grip"></i> الخدمات الإيمانية الشاملة</span>
             </div>
             <div class="services-grid">
-                <a href="./recitations/index.html" class="service-item">
+                <a href="/recitations/index.html" class="service-item">
                     <i class="fa-solid fa-headphones"></i>
                     <span>التلاوات والاستماع</span>
                 </a>
-                <a href="./stories/index.html" class="service-item">
+                <a href="/stories/index.html" class="service-item">
                     <i class="fa-solid fa-book-open-reader"></i>
                     <span>قصص الأنبياء</span>
                 </a>
-                <a href="./tasbeeh/index.html" class="service-item">
+                <a href="/tasbeeh/index.html" class="service-item">
                     <i class="fa-solid fa-fingerprint"></i>
                     <span>المسبحة الإلكترونية</span>
                 </a>
-                <button class="service-item" onclick="showToast('قسم السيرة النبوية قريباً بإذن الله')">
-                    <i class="fa-solid fa-kaaba"></i>
-                    <span>السيرة النبوية</span>
-                </button>
-                <button class="service-item" onclick="showToast('قسم الفتاوى والدروس قريباً بإذن الله')">
+                <a href="/fatwas/index.html" class="service-item">
                     <i class="fa-solid fa-scale-balanced"></i>
-                    <span>الفتاوى والدروس</span>
-                </button>
+                    <span>الفتاوى الشرعية</span>
+                </a>
+                <a href="/library/index.html" class="service-item">
+                    <i class="fa-solid fa-book-atlas"></i>
+                    <span>المكتبة الإسلامية</span>
+                </a>
+                <a href="/lectures/index.html" class="service-item">
+                    <i class="fa-solid fa-microphone-lines"></i>
+                    <span>الصوتيات</span>
+                </a>
             </div>
         </section>
 
@@ -230,79 +262,87 @@
     </div>
 
     <!-- ========================================= -->
-    <!-- الشريط السفلي                            -->
+    <!-- الشريط السفلي (الرئيسية في الوسط تماماً)   -->
     <!-- ========================================= -->
     <nav class="bottom-nav" id="bottomNav">
         <div class="nav-items">
-            <a href="./quran/index.html" class="nav-item" data-nav="quran">
+            <a href="/quran/index.html" class="nav-item" data-nav="quran">
                 <i class="fa-solid fa-book-quran"></i>
                 <span>القرآن</span>
             </a>
-            <a href="./adkar/index.html" class="nav-item" data-nav="adkar">
+            <a href="/adkar/index.html" class="nav-item" data-nav="adkar">
                 <i class="fa-solid fa-hands-praying"></i>
                 <span>الأذكار</span>
             </a>
-            <a href="./index.html" class="nav-item nav-home active" data-nav="home">
+            <a href="/index.html" class="nav-item nav-home active" data-nav="home">
                 <i class="fa-solid fa-house"></i>
                 <span>الرئيسية</span>
             </a>
-            <a href="./prayer/index.html" class="nav-item" data-nav="prayer">
-                <i class="fa-solid fa-mosque"></i>
-                <span>الصلاة</span>
-            </a>
-            <a href="./sunah/index.html" class="nav-item" data-nav="sunah">
+            <a href="/sunah/index.html" class="nav-item" data-nav="sunah">
                 <i class="fa-solid fa-book"></i>
                 <span>السنة</span>
+            </a>
+            <a href="/prayer/index.html" class="nav-item" data-nav="prayer">
+                <i class="fa-solid fa-mosque"></i>
+                <span>الصلاة</span>
             </a>
         </div>
     </nav>
 
     <!-- ========================================= -->
-    <!-- نافذة الترحيب والتحديثات                 -->
+    <!-- نافذة الترحيب والتحديثات المحدثة            -->
     <!-- ========================================= -->
     <div class="furqan-popup-overlay" id="furqanUpdatePopup">
         <div class="furqan-popup-card">
             <div class="furqan-popup-header">
                 <img src="./data/images/logo.png" alt="شعار الفرقان" class="furqan-popup-logo">
                 <h3 class="furqan-popup-title" style="color:var(--color-primary); font-size: 26px;">منصة الفرقان</h3>
-                <span class="furqan-popup-subtitle" style="background: rgba(14,165,233,0.15); color: var(--color-primary); padding: 4px 14px; border-radius: 20px; font-weight: 800; font-size: 12px; display: inline-block; margin-top: 4px;">الهوية  كليا  v1.0.0</span>
+                <span class="furqan-popup-subtitle" style="background: rgba(58, 155, 153, 0.15); color: #3A9B99; padding: 4px 14px; border-radius: 20px; font-weight: 800; font-size: 12px; display: inline-block; margin-top: 4px;">تحديث الإصدار الجديد v4.0.0</span>
             </div>
             <div class="furqan-popup-body" style="margin-top: 16px;">
-                <p class="furqan-popup-welcome" style="margin-bottom: 16px; color: var(--color-text-light);">أهلاً بك في <strong>منصة الفرقان</strong> بالحلّة الجديدة المميزة والانيقة:</p>
+                <p class="furqan-popup-welcome" style="margin-bottom: 16px; color: var(--color-text-light);">أهلاً بك في <strong>منصة الفرقان</strong> مع باقة الميزات والتحديثات الجديدة:</p>
                 <ul class="furqan-popup-features" style="list-style: none; padding: 0;">
                     <li>
-                        <i class="fa-solid fa-fingerprint"></i>
+                        <i class="fa-solid fa-play-circle" style="color:#3A9B99;"></i>
                         <div>
-                            <strong>المسبحة الإلكترونية الرقمية:</strong>
-                            <span>عداد تفاعلي سلس مع تحديد الهدف والدورات والتفاعل بالاهتزاز عند التسبيح.</span>
+                            <strong>المشغل الصوتي الأنيق والحديث:</strong>
+                            <span>تصميم انسيابي دافئ مع زر تحكم مركزي، وأعمدة صوتية متفاعلة، وشريط زمني دقيق للتقدم.</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-palette"></i>
+                        <i class="fa-solid fa-folder-arrow-down" style="color:#3A9B99;"></i>
                         <div>
-                            <strong>10 ثيمات ألوان جديدة وراقية:</strong>
-                            <span>اختر مظهرك المفضل (غروب، نعناع، ساحل، فيروز، كحلي، ليلي...) لراحة بصرية تامة.</span>
+                            <strong>تنزيل وحفظ الملفات في مجلد "الفرقان":</strong>
+                            <span>حفظ تلقائي لجميع الكتب والمحاضرات الصوتية في مجلد موحد باسم "الفرقان" لسهولة الوصول إليها.</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-bell"></i>
+                        <i class="fa-solid fa-mobile-screen-button" style="color:#3A9B99;"></i>
                         <div>
-                            <strong>تنبيهات مسبقة للأذان والأذكار:</strong>
-                            <span>إشعارات حقيقية للأذان والأذكار اليومية (الصباح، المساء، النوم، الاستيقاظ) بدقة عالية.</span>
+                            <strong>محاكاة ودعم زر الرجوع في الأندرويد:</strong>
+                            <span>تنقل ذكي ومرن بين كافة الأقسام (المكتبة، الفتاوى، الصوتيات والمودالات) بدون إغلاق التطبيق.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-book-open-reader" style="color:#3A9B99;"></i>
+                        <div>
+                            <strong>المكتبة والفتاوى الشرعية الموسعة:</strong>
+                            <span>آلاف الكتب والرسائل العلمية والفتاوى الفقهية الموثقة مع إمكانية القراءة والتحميل المباشر.</span>
                         </div>
                     </li>
                 </ul>
             </div>
             <div class="furqan-popup-footer" style="margin-top: 16px;">
-                <button class="btn-primary" id="closeFurqanPopup">استكشف الفرقان الآن</button>
+                <button class="btn-primary" id="closeFurqanPopup">استكشف التحديث الجديد الآن</button>
             </div>
         </div>
     </div>
 
-    <script src="/android-bridge.js"></script>
-    <script src="/praytime.js"></script>
-    <script src="/settings.js"></script>
-    <script src="/global-audio.js"></script>
-    <script src="main.js"></script>
+    <script src="/android-bridge.js?v=5"></script>
+    <script src="/praytime.js?v=5"></script>
+    <script src="/settings.js?v=5"></script>
+    <script src="/global-audio.js?v=5"></script>
+    <script src="/main.js?v=5"></script>
+    <script type="module" src="/auth.js?v=5"></script>
 </body>
 </html>

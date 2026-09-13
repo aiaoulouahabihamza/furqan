@@ -184,20 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. تهيئة الثيمات
-    const themeOptions = document.querySelectorAll('.theme-option');
-    themeOptions.forEach(btn => {
-        if (btn.dataset.themeVal === settings.theme) {
-            btn.classList.add('active');
-        }
-        btn.addEventListener('click', () => {
-            themeOptions.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            // تطبيق الثيم فورياً للمعاينة
-            window.applyAppTheme(btn.dataset.themeVal);
-        });
-    });
-
     // 6. تهيئة التنبيهات (المفاتيح)
     const toggleIds = {
         settingsDaylightSaving: settings.daylightSaving,
@@ -230,10 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
             previewAudioInstance.pause();
         }
 
-        // جمع الثيم
-        const activeThemeBtn = document.querySelector('.theme-option.active');
-        const selectedTheme = activeThemeBtn ? activeThemeBtn.dataset.themeVal : settings.theme;
-
         // جمع القوائم المنسدلة والمذهب
         const preAdhan = parseInt(document.getElementById('settingsPreAdhanSelect').value, 10);
         const madhab = (document.getElementById('settingsMadhabSelect') ? document.getElementById('settingsMadhabSelect').value : 'maliki') || 'maliki';
@@ -245,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // بناء كائن الإعدادات الجديد
         const newSettings = {
             ...settings,
-            theme: selectedTheme,
+            theme: 'light',
             madhab: madhab,
             adhanReciter: reciter,
             calcMethod: calcMethod,

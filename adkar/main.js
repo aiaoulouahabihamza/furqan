@@ -28,14 +28,31 @@ let currentView = 'categories'; // 'categories' | 'detail'
 let activeCategory = '';
 
 const loadingState = document.getElementById('loadingState');
+const adkarSearchSection = document.getElementById('adkarSearchSection');
+const adkarSearchInput = document.getElementById('adkarSearchInput');
+const adkarSearchClear = document.getElementById('adkarSearchClear');
 const categoriesView = document.getElementById('categoriesView');
 const categoriesGrid = document.getElementById('categoriesGrid');
+const adkarNoResults = document.getElementById('adkarNoResults');
+const clearAdkarSearchBtn = document.getElementById('clearAdkarSearchBtn');
 const detailView = document.getElementById('detailView');
 const azkarList = document.getElementById('azkarList');
 const activeCategoryTitle = document.getElementById('activeCategoryTitle');
 const backToCategoriesBtn = document.getElementById('backToCategoriesBtn');
 const headerBackBtn = document.getElementById('headerBackBtn');
 const toastMsg = document.getElementById('toastMsg');
+
+function normalizeArabic(text) {
+    if (!text) return '';
+    return text
+        .toString()
+        .toLowerCase()
+        .replace(/[\u064B-\u0652\u0670\u0640]/g, '')
+        .replace(/[أإآٱ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .replace(/[ؤئ]/g, 'ء');
+}
 
 // ===== 4. تحميل البيانات =====
 fetch('/data/json/azkar.json')
@@ -46,9 +63,11 @@ fetch('/data/json/azkar.json')
     .then(data => {
         allAzkar = data.data || data;
         loadingState.style.display = 'none';
+        if (adkarSearchSection) adkarSearchSection.style.display = 'block';
         
         // تهيئة ملاحة الصفحة وإظهار تصنيفات الأذكار أولاً
         initNavigation();
+        initSearch();
     })
     .catch(error => {
         console.error('خطأ الأذكار:', error);
@@ -132,10 +151,38 @@ function switchToDetailView(category, push = true) {
 
 // ===== 6. عرض مجموعات الأذكار (Stage 1) =====
 function renderCategories() {
-    // الحصول على تصنيفات فريدة
-    const categories = [...new Set(allAzkar.map(item => item.category))];
-    
-    categoriesGrid.innerHTML = categories.map(cat => {
+    const rawQuery = (adkarSearchInput?.value || '').trim();
+    if (adkarSearchClear) {
+        adkarSearchClear.style.display = rawQuery.length > 0 ? 'flex' : 'none';
+    }
+
+    const normQuery = normalizeArabic(rawQuery);
+    const allUniqueCategories = [...new Set(allAzkar.map(item => item.category))];
+
+    let matchedCategories = allUniqueCategories;
+    if (rawQuery.length > 0) {
+        matchedCategories = allUniqueCategories.filter(cat => {
+            const catNorm = normalizeArabic(cat);
+            // البحث أيضاً في نصوص الأذكار التابعة للتصنيف
+            const hasMatchingZekr = allAzkar.some(item => 
+                item.category === cat && 
+                (normalizeArabic(item.zekr || '').includes(normQuery) || 
+                 normalizeArabic(item.description || '').includes(normQuery))
+            );
+            return catNorm.includes(normQuery) || cat.toLowerCase().includes(rawQuery.toLowerCase()) || hasMatchingZekr;
+        });
+    }
+
+    if (matchedCategories.length === 0) {
+        categoriesGrid.style.display = 'none';
+        if (adkarNoResults) adkarNoResults.style.display = 'block';
+        return;
+    }
+
+    if (adkarNoResults) adkarNoResults.style.display = 'none';
+    categoriesGrid.style.display = 'grid';
+
+    categoriesGrid.innerHTML = matchedCategories.map(cat => {
         const count = allAzkar.filter(item => item.category === cat).length;
         
         return `
@@ -158,6 +205,32 @@ function renderCategories() {
             switchToDetailView(cat);
         });
     });
+}
+
+function initSearch() {
+    if (adkarSearchInput) {
+        adkarSearchInput.addEventListener('input', () => {
+            if (currentView === 'detail') {
+                switchToCategoriesView(true);
+            }
+            renderCategories();
+        });
+    }
+
+    if (adkarSearchClear) {
+        adkarSearchClear.addEventListener('click', () => {
+            if (adkarSearchInput) adkarSearchInput.value = '';
+            renderCategories();
+            if (adkarSearchInput) adkarSearchInput.focus();
+        });
+    }
+
+    if (clearAdkarSearchBtn) {
+        clearAdkarSearchBtn.addEventListener('click', () => {
+            if (adkarSearchInput) adkarSearchInput.value = '';
+            renderCategories();
+        });
+    }
 }
 
 // ===== 7. عرض تفاصيل الأذكار والعد التنازلي (Stage 2) =====

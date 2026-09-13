@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - الصوتيات</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css?v=5" />
+    <link rel="stylesheet" href="/icons.css?v=5" />
+    <link rel="stylesheet" href="/variables.css?v=5" />
+    <link rel="stylesheet" href="/style.css?v=5" />
+    <link rel="stylesheet" href="/auth.css?v=5" />
+    
+    <style>
+        /* أنماط مخصصة وراقية جداً لقسم المحاضرات والخطب */
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .lectures-main-wrap {
+            padding-bottom: 80px;
+        }
+
+        .search-section {
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(58, 155, 153, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            margin-bottom: 24px;
+        }
+
+        .search-box-inner {
+            display: flex;
+            align-items: center;
+            background: #F7FAFC;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 4px 14px;
+            transition: all 0.25s ease;
+        }
+
+        .search-box-inner:focus-within {
+            border-color: #3A9B99;
+            box-shadow: 0 0 0 3px rgba(58, 155, 153, 0.15);
+            background: #FFFFFF;
+        }
+
+        .search-box-inner input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            padding: 10px 8px;
+            font-size: 14px;
+            font-family: 'Cairo', sans-serif;
+            color: var(--color-text);
+        }
+
+        .search-box-inner i.search-icon {
+            color: #A0AEC0;
+            font-size: 16px;
+        }
+
+        /* شبكة عرض المحاضرات */
+        .lectures-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .lecture-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid rgba(58, 155, 153, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .lecture-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(58, 155, 153, 0.1);
+            border-color: rgba(58, 155, 153, 0.3);
+        }
+
+        .lecture-cover {
+            height: 120px;
+            background: linear-gradient(135deg, #3A9B99 0%, #1E5150 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lecture-cover-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .lecture-cover-fallback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 14px;
+            text-align: center;
+            z-index: 1;
+            box-sizing: border-box;
+        }
+
+        .lecture-cover-fallback::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .lecture-cover-fallback-title {
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            direction: rtl;
+        }
+
+        .lecture-cover-pattern {
+            font-size: 44px;
+            color: rgba(255, 255, 255, 0.25);
+            z-index: 2;
+        }
+
+        .lecture-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 10;
+        }
+
+        .lecture-parts-badge {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: #EDFDFB;
+            color: #2F7E7C;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #C6F6F1;
+            z-index: 10;
+        }
+
+        .lecture-info {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .lecture-title {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 8px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 44px;
+        }
+
+        .lecture-scholar {
+            font-size: 12.5px;
+            color: #2F7E7C;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lecture-desc {
+            font-size: 13px;
+            color: #718096;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 62px;
+            margin-bottom: 14px;
+        }
+
+        /* المودال الشامل للمحاضرات وعناصر الأجزاء والمشغل */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 12000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .lecture-modal {
+            background: #FFFFFF;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lecture-modal-header {
+            padding: 18px 24px;
+            background: #EDFDFB;
+            border-bottom: 1px solid #C6F6F1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lecture-modal-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            color: #2F7E7C;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lecture-modal-close {
+            background: #E2F8F6;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: #2F7E7C;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .lecture-modal-close:hover {
+            background: #C6F6F1;
+            transform: rotate(90deg);
+        }
+
+        .lecture-modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* حاوية مشغل الصوت الاحترافي المضمن في المودال */
+        .modal-audio-player {
+            background: linear-gradient(135deg, #1A202C 0%, #2D3748 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: #FFFFFF;
+            display: none; /* تظهر فقط عند النقر على تشغيل */
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            border: 1px solid rgba(58, 155, 153, 0.2);
+        }
+
+        .player-track-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .player-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #E2E8F0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 70%;
+        }
+
+        .player-status-badge {
+            font-size: 11px;
+            background: #3A9B99;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .player-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .player-main-btn {
+            background: #3A9B99;
+            border: none;
+            color: #FFFFFF;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(58, 155, 153, 0.4);
+        }
+
+        .player-main-btn:hover {
+            background: #2D7A78;
+            transform: scale(1.05);
+        }
+
+        .player-progress-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .player-progress-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-slider {
+            flex: 1;
+            height: 5px;
+            background: #4A5568;
+            outline: none;
+            border-radius: 3px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .player-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #3A9B99;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .player-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .player-time {
+            font-size: 11px;
+            font-family: monospace;
+            color: #A0AEC0;
+        }
+
+        /* قائمة الأجزاء والمرفقات الصوتية المتاحة */
+        .parts-section-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #2D3748;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .parts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .part-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #F7FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .part-item:hover {
+            border-color: #3A9B99;
+            background: #EDFDFB;
+        }
+
+        .part-item.playing {
+            border-color: #3A9B99;
+            background: #EDFDFB;
+            box-shadow: 0 4px 10px rgba(58, 155, 153, 0.08);
+        }
+
+        .part-title-col {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 60%;
+        }
+
+        .part-icon {
+            color: #3A9B99;
+            font-size: 16px;
+        }
+
+        .part-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--color-text);
+            line-height: 1.4;
+        }
+
+        .part-meta {
+            font-size: 11px;
+            color: #718096;
+            margin-top: 2px;
+        }
+
+        .part-actions-col {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-part {
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-part-play {
+            background-color: #E2F8F6;
+            color: #3A9B99;
+        }
+
+        .btn-part-play:hover {
+            background-color: #3A9B99;
+            color: #FFFFFF;
+        }
+
+        .btn-part-play.active-play {
+            background-color: #3A9B99;
+            color: #FFFFFF;
+        }
+
+        .btn-part-download {
+            background-color: #EDF2F7;
+            color: #4A5568;
+        }
+
+        .btn-part-download:hover {
+            background-color: #3A9B99;
+            color: #FFFFFF;
+        }
+
+        /* صفحة الترقيم */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-page {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            color: var(--color-text);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-page:hover {
+            border-color: #3A9B99;
+            color: #3A9B99;
+            background: #EDFDFB;
+        }
+
+        .btn-page.active {
+            background: #3A9B99;
+            color: #FFFFFF;
+            border-color: #3A9B99;
+            box-shadow: 0 4px 10px rgba(58, 155, 153, 0.2);
+        }
+
+        .btn-page-nav {
+            padding: 0 12px;
+            width: auto;
+            font-size: 12.5px;
+        }
+
+        /* لوادر Skeletons */
+        .skeleton-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 20px;
+        }
+
+        .skeleton-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            height: 320px;
+            border: 1px solid #E2E8F0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150px;
+            height: 100%;
+            width: 150px;
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { left: 100%; }
+        }
+
+        .skeleton-cover {
+            height: 100px;
+            background: #E2E8F0;
+            border-radius: 10px;
+        }
+
+        .skeleton-line {
+            height: 16px;
+            background: #E2E8F0;
+            border-radius: 4px;
+        }
+
+        .skeleton-text {
+            height: 60px;
+            background: #E2E8F0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== الشريط العلوي الموحد ===== -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" id="headerBackBtn" aria-label="الرجوع للرئيسية" title="الرجوع للرئيسية">
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <div class="header-title">
+                <h1><i class="fa-solid fa-microphone-lines"></i> الصوتيات</h1>
+            </div>
+            <div class="header-actions">
+                <a href="/index.html" class="back-btn" title="الرئيسية" aria-label="الرئيسية">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <main class="main-content lectures-main-wrap">
+        <div class="fatwas-container">
+            
+            <!-- قسم البحث والتوجيه المعرفي -->
+            <div class="search-section">
+                <div class="search-box-inner">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="lectureSearchInput" placeholder="ابحث في الصوتيات والسلاسل الدينية..." autocomplete="off" />
+                </div>
+            </div>
+
+            <div class="fatwas-status-bar" style="margin-bottom: 16px;">
+                <span class="active-category-title">الملفات الصوتية والسلاسل المتاحة</span>
+                <span class="fatwas-total-badge" id="lecturesTotalBadge">جاري التحميل...</span>
+            </div>
+
+            <!-- شبكة المحاضرات واللوادر -->
+            <div id="lecturesContainer">
+                <div class="skeleton-wrapper">
+                    <div class="skeleton-card"><div class="skeleton-cover"></div><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 40%;"></div><div class="skeleton-text"></div></div>
+                    <div class="skeleton-card"><div class="skeleton-cover"></div><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 40%;"></div><div class="skeleton-text"></div></div>
+                    <div class="skeleton-card"><div class="skeleton-cover"></div><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 40%;"></div><div class="skeleton-text"></div></div>
+                </div>
+            </div>
+
+            <!-- أزرار الترقيم -->
+            <div class="pagination-container" id="paginationWrap" style="display:none;"></div>
+
+        </div>
+    </main>
+
+    <!-- ===== مودال تفاصيل السلسلة وقائمة الأجزاء والمشغل ===== -->
+    <div class="modal-overlay" id="lectureDetailModal">
+        <div class="lecture-modal">
+            <div class="lecture-modal-header">
+                <h3><i class="fa-solid fa-microphone-lines"></i> شروح ومحاضرات السلسلة</h3>
+                <button class="lecture-modal-close" id="lectureModalCloseBtn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="lecture-modal-body">
+                
+                <!-- تفاصيل عامة عن السلسلة -->
+                <div style="background: #F7FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+                        <h4 id="modalLectureTitle" style="font-size: 15px; font-weight: 800; color: var(--color-text); line-height: 1.5; flex: 1; margin: 0;">--</h4>
+                        <a id="modalFullPageBtn" href="#" class="btn-full-view" style="background: #EBF8F8; color: #3A9B99; border: 1px solid #C4ECEB; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.2s ease;">
+                            <i class="fa-solid fa-up-right-from-square"></i> تشغيل بصفحة كاملة
+                        </a>
+                    </div>
+                    <div id="modalLectureScholar" style="font-size: 13px; color: #3A9B99; font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 10px;"><i class="fa-solid fa-chalkboard-user"></i> --</div>
+                    <p id="modalLectureDesc" style="font-size: 13px; color: #4A5568; line-height: 1.6; border-top: 1px dashed #E2E8F0; padding-top: 10px; margin: 0;">--</p>
+                </div>
+
+                <!-- المشغل الصوتي الاحترافي المدمج -->
+                <div class="modal-audio-player" id="modalAudioPlayerBox">
+                    <audio id="modalAudioElement"></audio>
+                    <div class="player-track-info">
+                        <span class="player-title" id="playerTrackTitle">جاري تحميل المسار...</span>
+                        <span class="player-status-badge" id="playerStatusBadge">جاهز للاستماع</span>
+                    </div>
+                    <div class="player-controls-row">
+                        <button class="player-main-btn" id="playerPlayBtn" title="تشغيل / إيقاف مؤقت">
+                            <i class="fa-solid fa-play" id="playerPlayIcon"></i>
+                        </button>
+                        <div class="player-progress-wrap">
+                            <div class="player-progress-bar-row">
+                                <span class="player-time" id="playerCurrentTime">00:00</span>
+                                <input type="range" class="player-slider" id="playerSeekSlider" value="0" min="0" max="100" />
+                                <span class="player-time" id="playerDuration">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- قائمة الأجزاء والمرفقات الصوتية -->
+                <div>
+                    <div class="parts-section-title">
+                        <i class="fa-solid fa-circle-play"></i>
+                        <span>ملفات الأجزاء والمرفقات المتاحة</span>
+                    </div>
+                    <div class="parts-list" id="modalPartsList">
+                        <!-- سيتم حقن الأجزاء هنا ديناميكياً -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- جسر الأندرويد ومكتبة التنبيهات الموحدة -->
+    <script src="/android-bridge.js?v=5"></script>
+    <script src="/toast.js?v=5"></script>
+    <script src="./app.js?v=5" type="module"></script>
+</body>
+</html>

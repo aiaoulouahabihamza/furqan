@@ -1,58 +1,40 @@
-// sw.js - Service Worker for Al-Furqan PWA
-const CACHE_NAME = 'furqan-pwa-cache-v1';
-
-// Core assets to cache on install
-const PRE_CACHE_ASSETS = [
+const CACHE_NAME = 'furqan-cache-v2';
+const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
+  '/manifest.json',
   '/style.css',
   '/variables.css',
+  '/icons.css',
   '/main.js',
-  '/settings.js',
+  '/toast.js',
   '/praytime.js',
   '/global-audio.js',
   '/android-bridge.js',
-  '/manifest.json',
-  '/quran/index.html',
-  '/quran/style.css',
-  '/quran/main.js',
-  '/quran/page.html',
-  '/quran/page.css',
-  '/quran/page.js',
-  '/sunah/index.html',
-  '/sunah/style.css',
-  '/sunah/main.js',
-  '/recitations/index.html',
-  '/recitations/style.css',
-  '/recitations/main.js',
-  '/prayer/index.html',
-  '/prayer/style.css',
-  '/prayer/main.js',
-  '/adhkar/index.html',
-  '/adhkar/style.css',
-  '/adhkar/main.js',
-  '/settings/index.html'
+  '/data/images/logo.png'
 ];
 
-// Install Event
+// Install Event - Pre-cache critical assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Pre-caching core assets...');
-      return cache.addAll(PRE_CACHE_ASSETS);
+      console.log('📥 Pre-caching critical assets in Service Worker...');
+      return cache.addAll(ASSETS_TO_CACHE).catch(err => {
+        console.warn('⚠️ Some assets failed to pre-cache:', err);
+      });
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate Event
+// Activate Event - Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache...', cache);
-            return caches.delete(cache);
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log('🧹 Deleting old cache:', key);
+            return caches.delete(key);
           }
         })
       );
@@ -60,30 +42,45 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event - Stale-While-Revalidate caching strategy
+// Fetch Event - Network First with Cache Fallback
 self.addEventListener('fetch', (event) => {
-  // Ignore non-GET requests or browser extension requests
+  // Handle only GET requests for local origin assets
   if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
     return;
   }
 
+  // Bypass service worker caching for specific dynamic/third-party API endpoints if needed
+  if (event.request.url.includes('/api/') || event.request.url.includes('islamcontent.to')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Cache successful responses
+    fetch(event.request)
+      .then((networkResponse) => {
+        // If response is valid, update the cache with the new version
         if (networkResponse && networkResponse.status === 200) {
-          const cacheCopy = networkResponse.clone();
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, cacheCopy);
+            cache.put(event.request, responseToCache);
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // Fallback or offline behavior if network fails
-        console.log('[Service Worker] Network request failed, returning cache if available.');
-      });
-
-      return cachedResponse || fetchPromise;
-    })
+      })
+      .catch(() => {
+        // Offline fallback
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+        });
+      })
   );
+});
+
+// Listen for messages to trigger immediate update activation
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

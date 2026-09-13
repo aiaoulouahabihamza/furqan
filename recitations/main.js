@@ -459,6 +459,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ============================================
     // 5. عناصر الواجهة الرئيسية
     // ============================================
+    const globalBackBtn = document.getElementById('globalBackBtn');
+    const headerTitleText = document.getElementById('headerTitleText');
     const recitersView = document.getElementById('recitersView');
     const surahsView = document.getElementById('surahsView');
     const reciterSearchInput = document.getElementById('reciterSearchInput');
@@ -496,6 +498,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // المشغل المتوسع
     const fullPlayerModal = document.getElementById('fullPlayerModal');
     const closeFullPlayerBtn = document.getElementById('closeFullPlayerBtn');
+    const artCircle = document.getElementById('artCircle');
+    const fullEqualizer = document.getElementById('fullEqualizer');
     const fullSurahTitle = document.getElementById('fullSurahTitle');
     const fullReciterName = document.getElementById('fullReciterName');
     const offlinePlayingBadge = document.getElementById('offlinePlayingBadge');
@@ -533,19 +537,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPlayingSurahNumber = null;
     let hasTriedAudioFallback = false;
 
+    function normalizeArabic(text) {
+        if (!text) return '';
+        return text
+            .toString()
+            .toLowerCase()
+            .replace(/[\u064B-\u0652\u0670\u0640]/g, '')
+            .replace(/[أإآٱ]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/ى/g, 'ي')
+            .replace(/[ؤئ]/g, 'ء');
+    }
+
     // ============================================
     // 6. عرض بطاقات القراء (أوفلاين ومع الفلترة)
     // ============================================
     function renderRecitersCards() {
-        const query = (reciterSearchInput?.value || '').trim().toLowerCase();
-        if (reciterSearchClear) reciterSearchClear.style.display = query.length > 0 ? 'block' : 'none';
+        const rawQuery = (reciterSearchInput?.value || '').trim();
+        if (reciterSearchClear) reciterSearchClear.style.display = rawQuery.length > 0 ? 'block' : 'none';
 
         recitersCardsGrid.innerHTML = '';
 
+        const normQuery = normalizeArabic(rawQuery);
         const filtered = RECITERS_LIST.filter(reciter => {
+            const nameNorm = normalizeArabic(reciter.name || '');
+            const styleNorm = normalizeArabic(reciter.style || '');
+            const rawLower = rawQuery.toLowerCase();
             const matchesQuery = 
-                reciter.name.toLowerCase().includes(query) || 
-                reciter.style.toLowerCase().includes(query);
+                nameNorm.includes(normQuery) || 
+                styleNorm.includes(normQuery) ||
+                (reciter.name || '').toLowerCase().includes(rawLower) ||
+                (reciter.style || '').toLowerCase().includes(rawLower);
 
             if (!matchesQuery) return false;
 
@@ -613,6 +635,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectedReciterStyle.textContent = selectedReciter.style;
         playerReciterSub.textContent = selectedReciter.name;
         fullReciterName.textContent = selectedReciter.name;
+        if (headerTitleText) {
+            headerTitleText.textContent = selectedReciter.name;
+        }
 
         // الانتقال بقائمة السور مع إضافة حالة لزر الرجوع في الأندرويد
         history.pushState({ view: 'surahs', reciterId: reciter.identifier }, '');
@@ -623,25 +648,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderSurahs();
     }
 
+    function returnToRecitersList() {
+        surahsView.style.display = 'none';
+        recitersView.style.display = 'block';
+        if (headerTitleText) {
+            headerTitleText.textContent = 'التلاوات القرآنية';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // زر العودة لقائمة القراء
     if (backToRecitersBtn) {
         backToRecitersBtn.addEventListener('click', () => {
             if (history.state && history.state.view === 'surahs') {
                 history.back();
             } else {
-                surahsView.style.display = 'none';
-                recitersView.style.display = 'block';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                returnToRecitersList();
+            }
+        });
+    }
+
+    // زر الرجوع في الشريط العلوي الرئيسي
+    if (globalBackBtn) {
+        globalBackBtn.addEventListener('click', (e) => {
+            if (fullPlayerModal && fullPlayerModal.classList.contains('active')) {
+                e.preventDefault();
+                closeFullPlayer();
+                return;
+            }
+            if (surahsView && surahsView.style.display === 'block') {
+                e.preventDefault();
+                if (history.state && history.state.view === 'surahs') {
+                    history.back();
+                } else {
+                    returnToRecitersList();
+                }
+                return;
+            }
+            if (window.history.length > 1) {
+                e.preventDefault();
+                window.history.back();
             }
         });
     }
 
     // دعم زر الرجوع في الأندرويد/المتصفح
     window.addEventListener('popstate', (e) => {
+        if (fullPlayerModal && fullPlayerModal.classList.contains('active')) {
+            closeFullPlayer();
+            return;
+        }
         if (surahsView.style.display === 'block' && (!e.state || e.state.view !== 'surahs')) {
-            surahsView.style.display = 'none';
-            recitersView.style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            returnToRecitersList();
         }
     });
 
@@ -670,15 +728,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderSurahs() {
         if (loadingState) loadingState.style.display = 'none';
 
-        const query = (surahSearchInput?.value || '').trim().toLowerCase();
-        if (surahSearchClear) surahSearchClear.style.display = query.length > 0 ? 'block' : 'none';
+        const rawQuery = (surahSearchInput?.value || '').trim();
+        if (surahSearchClear) surahSearchClear.style.display = rawQuery.length > 0 ? 'block' : 'none';
 
+        const normQuery = normalizeArabic(rawQuery);
         let filtered = allSurahs.filter(surah => {
-            const name = (surah.name || '').toLowerCase();
+            const nameNorm = normalizeArabic(surah.name || '');
             const englishName = (surah.englishName || '').toLowerCase();
             const number = String(surah.number);
 
-            const matchesQuery = name.includes(query) || englishName.includes(query) || number === query;
+            const matchesQuery = 
+                nameNorm.includes(normQuery) || 
+                (surah.name || '').toLowerCase().includes(rawQuery.toLowerCase()) || 
+                englishName.includes(rawQuery.toLowerCase()) || 
+                number === rawQuery;
+
             if (!matchesQuery) return false;
 
             const isDownloaded = downloadedKeysSet.has(`${selectedReciter.identifier}_${surah.number}`);
@@ -1042,12 +1106,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isAudioBuffering) {
             iconClass = 'fa-spinner spin';
             if (playerDiscIcon) playerDiscIcon.classList.add('playing');
+            if (artCircle) artCircle.classList.add('playing');
+            if (fullEqualizer) fullEqualizer.classList.add('playing');
         } else if (isPlaying) {
             iconClass = 'fa-pause';
             if (playerDiscIcon) playerDiscIcon.classList.add('playing');
+            if (artCircle) artCircle.classList.add('playing');
+            if (fullEqualizer) fullEqualizer.classList.add('playing');
         } else {
             iconClass = 'fa-play';
             if (playerDiscIcon) playerDiscIcon.classList.remove('playing');
+            if (artCircle) artCircle.classList.remove('playing');
+            if (fullEqualizer) fullEqualizer.classList.remove('playing');
         }
 
         if (playPauseIcon) playPauseIcon.className = `fa-solid ${iconClass}`;

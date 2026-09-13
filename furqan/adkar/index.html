@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - حصن المسلم والأذكار</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/icons.css" />
+    
+    <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/adkar/style.css" />
+</head>
+<body>
+
+    <!-- ===== الشريط العلوي ===== -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" id="headerBackBtn">
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <div class="header-title">
+                <h1><i class="fa-solid fa-hands-praying"></i> الأذكار</h1>
+                <span>اللهم ذكرنا ما نسينا</span>
+            </div>
+            <button class="header-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" title="الإعدادات">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ===== المحتوى ===== -->
+    <main class="main-content">
+        
+        <!-- حالة التحميل -->
+        <div class="loading-state" id="loadingState">
+            <i class="fa-solid fa-spinner spin"></i>
+            <span>جاري تحميل الأذكار...</span>
+        </div>
+
+        <!-- 1) واجهة المجموعات -->
+        <div id="categoriesView" style="display: none;">
+            <div class="section-label">مجموعات الأذكار اليومية</div>
+            <div class="categories-grid" id="categoriesGrid"></div>
+        </div>
+
+        <!-- 2) واجهة تفاصيل الأذكار للمجموعة المحددة -->
+        <div id="detailView" style="display: none;">
+            <div class="detail-header-card">
+                <button class="back-to-categories-btn" id="backToCategoriesBtn">
+                    <i class="fa-solid fa-arrow-right"></i> العودة للمجموعات
+                </button>
+                <h2 id="activeCategoryTitle" class="active-category-title">--</h2>
+            </div>
+            <div class="azkar-list" id="azkarList"></div>
+        </div>
+
+    </main>
+
+    <!-- توست الإشعارات -->
+    <div class="toast-msg" id="toastMsg">تم النسخ بنجاح</div>
+
+    <script src="/praytime.js"></script>
+    <script src="/settings.js"></script>
+    <script src="/android-bridge.js"></script>
+    <script src="/global-audio.js"></script>
+    <script src="/adkar/main.js"></script>
+</body>
+</html>

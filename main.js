@@ -141,13 +141,21 @@ function closeModal(modal) {
 }
 
 // ============================================
-// 5. مودال البروفايل
+// 5. مودال البروفايل ونظام المصادقة
 // ============================================
 const profileBtn = document.getElementById('profileBtn');
 const profileModal = document.getElementById('profileModal');
 const profileClose = document.getElementById('profileClose');
 
-if (profileBtn) profileBtn.addEventListener('click', () => openModal(profileModal));
+if (profileBtn) {
+    profileBtn.addEventListener('click', () => {
+        if (window.FurqanAuth && typeof window.FurqanAuth.open === 'function') {
+            window.FurqanAuth.open();
+        } else if (profileModal) {
+            openModal(profileModal);
+        }
+    });
+}
 if (profileClose) profileClose.addEventListener('click', () => closeModal(profileModal));
 
 if (profileModal) {
@@ -221,7 +229,7 @@ function buildQuranPageUrl(data) {
         surah: data.surahNumber,
         name: data.surahName,
     });
-    return `./quran/page.html?${params.toString()}`;
+    return `/quran/page.html?${params.toString()}`;
 }
 
 function loadRecentReading() {
@@ -263,7 +271,7 @@ document.getElementById('viewAllRecent')?.addEventListener('click', () => {
             return;
         } catch (e) {}
     }
-    window.location.href = './quran/index.html';
+    window.location.href = '/quran/index.html';
 });
 
 // ============================================
@@ -285,16 +293,39 @@ let duaInterval = null;
 
 async function loadDua() {
     try {
-        const response = await fetch('./data/json/100dua.json');
+        let response = await fetch('/data/json/100dua.json');
+        if (!response.ok) {
+            response = await fetch('./data/json/100dua.json');
+        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+            throw new Error('تلقى المتصفح صفحة HTML بدلاً من ملف JSON');
+        }
         const data = await response.json();
+        if (!Array.isArray(data) || data.length === 0) throw new Error('بيانات الأدعية غير صالحة');
         allDua = data;
         initDots('duaDots', allDua.length);
         displayDua(0);
         startDuaRotation();
     } catch (error) {
-        console.error('خطأ في تحميل الأدعية:', error);
-        document.getElementById('randomDua').textContent = 'اللهم إني أسألك العفو والعافية';
-        document.getElementById('duaSource').textContent = 'دعاء مبارك';
+        console.warn('تنبيه في تحميل الأدعية:', error.message || error);
+        allDua = [
+            {
+                duaa: [{
+                    text: 'اللهم إني أسألك العفو والعافية في الدنيا والآخرة، اللهم إني أسألك العفو والعافية في ديني ودنياي وأهلي ومالي',
+                    source: { type: 'hadith', references: [{ book: 'سنن أبي داود', numberOrPage: '5074' }] }
+                }]
+            },
+            {
+                duaa: [{
+                    text: 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ',
+                    source: { type: 'quran', references: [{ surah: { name: 'البقرة' }, ayah: { from: '201' } }] }
+                }]
+            }
+        ];
+        initDots('duaDots', allDua.length);
+        displayDua(0);
     }
 }
 
@@ -306,7 +337,7 @@ function displayDua(index) {
     const duaSource = document.getElementById('duaSource');
     
     if (duaItem && duaItem.duaa && duaItem.duaa.length > 0) {
-        duaText.textContent = duaItem.duaa[0].text;
+        if (duaText) duaText.textContent = duaItem.duaa[0].text;
         
         // عرض المصدر
         const source = duaItem.duaa[0].source;
@@ -324,7 +355,7 @@ function displayDua(index) {
                 }
             }
         }
-        duaSource.textContent = sourceText || 'دعاء مبارك';
+        if (duaSource) duaSource.textContent = sourceText || 'دعاء مبارك';
     }
     
     // تحديث النقاط
@@ -349,17 +380,47 @@ let verseInterval = null;
 
 async function loadVerse() {
     try {
-        const response = await fetch('./data/json/ayat&ebra.json');
+        let response = null;
+        const candidatePaths = [
+            '/data/json/ayat&ebra.json',
+            '/data/json/ayat_ebra.json',
+            '/data/json/ayat%26ebra.json',
+            './data/json/ayat&ebra.json',
+            './data/json/ayat_ebra.json'
+        ];
+        for (const p of candidatePaths) {
+            try {
+                const res = await fetch(p);
+                const ct = res.headers.get('content-type') || '';
+                if (res.ok && !ct.includes('text/html')) {
+                    response = res;
+                    break;
+                }
+            } catch (_) {}
+        }
+        if (!response) throw new Error('تعذر العثور على ملف الآيات والعبر');
         const data = await response.json();
+        if (!Array.isArray(data) || data.length === 0) throw new Error('بيانات الآيات غير صالحة');
         allVerses = data;
         initDots('verseDots', allVerses.length);
         displayVerse(0);
         startVerseRotation();
     } catch (error) {
-        console.error('خطأ في تحميل الآيات:', error);
-        document.getElementById('verseText').textContent = '"وَمَنْ يَتَّقِ اللَّهَ يَجْعَلْ لَهُ مَخْرَجًا"';
-        document.getElementById('verseRef').textContent = 'الطلاق - 2';
-        document.getElementById('verseLesson').textContent = 'التقوى باب الفرج، من تمسك بها فتح الله له من حيث لا يحتسب';
+        console.warn('تنبيه في تحميل الآيات:', error.message || error);
+        allVerses = [
+            {
+                title1: 'وَمَنْ يَتَّقِ اللَّهَ يَجْعَلْ لَهُ مَخْرَجًا وَيَرْزُقْهُ مِنْ حَيْثُ لا يَحْتَسِبُ',
+                title2: 'سورة الطلاق - 2-3',
+                title3: 'التقوى باب الفرج الأعظم، من تمسك بها وأخلص قلبه لله كفاه كل هم'
+            },
+            {
+                title1: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
+                title2: 'سورة الشرح - 6',
+                title3: 'لن يغلب عسر يسرين، فمع كل ضائقة تتنزل ألطاف الله وتتيسر الأمور'
+            }
+        ];
+        initDots('verseDots', allVerses.length);
+        displayVerse(0);
     }
 }
 
@@ -372,9 +433,9 @@ function displayVerse(index) {
     const verseLesson = document.getElementById('verseLesson');
     
     if (verse) {
-        verseText.textContent = verse.title1 || '';
-        verseRef.textContent = verse.title2 || 'آية قرآنية';
-        verseLesson.textContent = verse.title3 || 'تأمل في آيات الله وتدبر معانيها';
+        if (verseText) verseText.textContent = verse.title1 || '';
+        if (verseRef) verseRef.textContent = verse.title2 || 'آية قرآنية';
+        if (verseLesson) verseLesson.textContent = verse.title3 || 'تأمل في آيات الله وتدبر معانيها';
     }
     
     updateDots('verseDots', index, allVerses.length);
@@ -532,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.getElementById('closeFurqanPopup') || document.getElementById('closeMishkatPopup');
     
     if (popup && closeBtn) {
-        const hasSeenWelcome = localStorage.getItem('furqan_update_v3_5');
+        const hasSeenWelcome = localStorage.getItem('furqan_update_v4_0');
         if (!hasSeenWelcome) {
             setTimeout(() => {
                 popup.classList.add('active');
@@ -541,7 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         closeBtn.addEventListener('click', () => {
             popup.classList.remove('active');
-            localStorage.setItem('furqan_update_v3_5', 'true');
+            localStorage.setItem('furqan_update_v4_0', 'true');
         });
     }
 });

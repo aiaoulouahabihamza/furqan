@@ -43,6 +43,18 @@ async function loadSurahs() {
     }
 }
 
+function normalizeArabic(text) {
+    if (!text) return '';
+    return text
+        .toString()
+        .toLowerCase()
+        .replace(/[\u064B-\u0652\u0670\u0640]/g, '')
+        .replace(/[أإآٱ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .replace(/[ؤئ]/g, 'ء');
+}
+
 // ===== عرض السور =====
 function renderSurahs(surahs) {
     if (!surahs || surahs.length === 0) {
@@ -53,14 +65,14 @@ function renderSurahs(surahs) {
     
     noResults.style.display = 'none';
     
-    surahList.innerHTML = surahs.map((surah, index) => {
+    surahList.innerHTML = surahs.map((surah) => {
         const typeClass = surah.type === 'مكية' ? 'makki' : 'madani';
         const typeLabel = surah.type === 'مكية' ? 'مكية' : 'مدنية';
         const versesCount = surah.surah_verses_count || '--';
         const latinName = surah.title_latin || '';
         
         return `
-            <div class="surah-item" data-index="${index}" data-surah-number="${surah.surah_number}">
+            <div class="surah-item" data-surah-number="${surah.surah_number}">
                 <div class="surah-number-wrap">
                     <span class="surah-number">${toArabicNum(surah.surah_number)}</span>
                 </div>
@@ -81,8 +93,8 @@ function renderSurahs(surahs) {
 
     document.querySelectorAll('.surah-item').forEach(item => {
         item.addEventListener('click', function() {
-            const index = parseInt(this.dataset.index);
-            const surah = allSurahs[index];
+            const surahNum = parseInt(this.dataset.surahNumber, 10);
+            const surah = allSurahs.find(s => parseInt(s.surah_number, 10) === surahNum);
             if (surah) {
                 navigateToSurah(surah);
             }
@@ -116,28 +128,28 @@ function navigateToSurah(surah) {
 
 // ===== البحث =====
 searchInput.addEventListener('input', function() {
-    const query = this.value.trim();
+    const rawQuery = this.value.trim();
     
-    if (query.length > 0) {
+    if (rawQuery.length > 0) {
         searchClear.classList.add('visible');
     } else {
         searchClear.classList.remove('visible');
     }
     
-    if (query === '') {
+    if (rawQuery === '') {
         renderSurahs(allSurahs);
         return;
     }
     
-    const lowerQuery = query.toLowerCase();
+    const normQuery = normalizeArabic(rawQuery);
     const filtered = allSurahs.filter(s => {
-        const titleAr = (s.title_ar || '').toLowerCase();
+        const titleArNorm = normalizeArabic(s.title_ar || s.surah_title || '');
         const titleLatin = (s.title_latin || '').toLowerCase();
         const surahNum = (s.surah_number || '').toString();
         
-        return titleAr.includes(lowerQuery) ||
-               titleLatin.includes(lowerQuery) ||
-               surahNum.includes(query);
+        return titleArNorm.includes(normQuery) ||
+               titleLatin.includes(rawQuery.toLowerCase()) ||
+               surahNum.includes(rawQuery);
     });
     
     renderSurahs(filtered);
@@ -193,6 +205,7 @@ document.getElementById('lastReadBtn').addEventListener('click', (e) => {
 
 // ===== إدارة العلامات المرجعية =====
 const bookmarksBtn = document.getElementById('bookmarksBtn');
+const headerBookmarksBtn = document.getElementById('headerBookmarksBtn');
 const bookmarksModal = document.getElementById('bookmarksModal');
 const closeBookmarksBtn = document.getElementById('closeBookmarksBtn');
 const bookmarksList = document.getElementById('bookmarksList');
@@ -206,10 +219,18 @@ function closeBookmarks() {
     bookmarksModal.classList.remove('active');
 }
 
-bookmarksBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    openBookmarks();
-});
+if (bookmarksBtn) {
+    bookmarksBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openBookmarks();
+    });
+}
+if (headerBookmarksBtn) {
+    headerBookmarksBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openBookmarks();
+    });
+}
 
 closeBookmarksBtn.addEventListener('click', closeBookmarks);
 bookmarksModal.addEventListener('click', (e) => {

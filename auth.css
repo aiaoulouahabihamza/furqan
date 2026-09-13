@@ -1,0 +1,951 @@
+/* ========================================= */
+/* نظام المصادقة والملف الشخصي - الفرقان   */
+/* ========================================= */
+
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(18, 24, 26, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.auth-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.auth-modal-container {
+    background: var(--glass-card, #F8F4ED);
+    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.15));
+    border-radius: 20px;
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    padding: 24px;
+    color: var(--color-text, #2C2C2C);
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+}
+
+.auth-modal-overlay.active .auth-modal-container {
+    transform: translateY(0) scale(1);
+}
+
+/* زر إغلاق النافذة */
+.auth-close-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(81, 73, 53, 0.08);
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-text, #2C2C2C);
+    font-size: 16px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.auth-close-btn:hover {
+    background: rgba(81, 73, 53, 0.15);
+    transform: rotate(90deg);
+}
+
+/* ترويسة النافذة */
+.auth-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-logo-badge {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 12px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--color-primary, #6A8EAE), var(--color-primary-dark, #416788));
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 6px 16px rgba(106, 142, 174, 0.3);
+}
+
+.auth-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: var(--color-text, #2C2C2C);
+}
+
+.auth-subtitle {
+    font-size: 13px;
+    color: var(--color-text-light, #706859);
+    margin: 0;
+}
+
+/* زر تسجيل الدخول بجوجل الموحد */
+.google-auth-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #FFFFFF;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    border-radius: 12px;
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+}
+
+.google-auth-btn:hover {
+    background: #F8FAFC;
+    border-color: #c2c7cf;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.google-icon-svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* فاصل "أو عبر" */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 16px 0;
+    color: var(--color-text-lighter, #9E9584);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--color-border, rgba(81, 73, 53, 0.15));
+}
+
+.auth-divider span {
+    padding: 0 10px;
+}
+
+/* أزرار التبديل بين الطرق (البريد / الهاتف) */
+.auth-methods-nav {
+    display: flex;
+    background: rgba(81, 73, 53, 0.06);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+    margin-bottom: 18px;
+}
+
+.auth-method-tab {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-light, #706859);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.auth-method-tab.active {
+    background: var(--glass-card, #FFFFFF);
+    color: var(--color-primary, #6A8EAE);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* مجموعات الحقول */
+.auth-form-group {
+    margin-bottom: 14px;
+}
+
+.auth-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text, #2C2C2C);
+    margin-bottom: 6px;
+}
+
+.auth-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-input-icon {
+    position: absolute;
+    right: 12px;
+    color: var(--color-text-lighter, #9E9584);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 10px 38px 10px 14px;
+    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.2));
+    border-radius: 10px;
+    background: var(--color-bg, #FAF6EE);
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 14px;
+    color: var(--color-text, #2C2C2C);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-input:focus {
+    border-color: var(--color-primary, #6A8EAE);
+    box-shadow: 0 0 0 3px rgba(106, 142, 174, 0.15);
+}
+
+/* إدخال رقم الهاتف مع مفتاح الدولة */
+.phone-input-row {
+    display: flex;
+    gap: 8px;
+    direction: ltr; /* لسهولة إدخال الرموز الدولية */
+}
+
+.country-code-select {
+    width: 110px;
+    padding: 10px 8px;
+    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.2));
+    border-radius: 10px;
+    background: var(--color-bg, #FAF6EE);
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text, #2C2C2C);
+    outline: none;
+    cursor: pointer;
+}
+
+.phone-number-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.2));
+    border-radius: 10px;
+    background: var(--color-bg, #FAF6EE);
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: var(--color-text, #2C2C2C);
+    outline: none;
+    direction: ltr;
+}
+
+.phone-number-input:focus,
+.country-code-select:focus {
+    border-color: var(--color-primary, #6A8EAE);
+    box-shadow: 0 0 0 3px rgba(106, 142, 174, 0.15);
+}
+
+/* رمز التحقق OTP */
+.otp-input-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    direction: ltr;
+    margin: 16px 0;
+}
+
+.otp-digit-input {
+    width: 44px;
+    height: 52px;
+    border: 2px solid var(--color-border, rgba(81, 73, 53, 0.2));
+    border-radius: 12px;
+    background: var(--color-bg, #FAF6EE);
+    font-size: 22px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--color-primary, #6A8EAE);
+    outline: none;
+    transition: all 0.2s;
+}
+
+.otp-digit-input:focus {
+    border-color: var(--color-primary, #6A8EAE);
+    box-shadow: 0 0 0 3px rgba(106, 142, 174, 0.2);
+    transform: translateY(-2px);
+}
+
+/* أزرار الإرسال والإجراءات */
+.auth-primary-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--color-primary, #6A8EAE), var(--color-primary-dark, #416788));
+    color: #FFFFFF;
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(106, 142, 174, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.auth-primary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(106, 142, 174, 0.4);
+}
+
+.auth-primary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auth-secondary-btn {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.2));
+    border-radius: 10px;
+    background: transparent;
+    color: var(--color-text-light, #706859);
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.auth-secondary-btn:hover {
+    background: rgba(81, 73, 53, 0.05);
+}
+
+/* روابط التبديل ونسيان كلمة المرور */
+.auth-switch-prompt {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--color-text-light, #706859);
+}
+
+.auth-switch-link {
+    color: var(--color-primary, #6A8EAE);
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.auth-forgot-link {
+    display: block;
+    text-align: left;
+    font-size: 12px;
+    color: var(--color-primary, #6A8EAE);
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+/* تنبيهات الحالة والأخطاء */
+.auth-alert {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-alert-error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #dc2626;
+}
+
+.auth-alert-success {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #059669;
+}
+
+/* ========================================= */
+/* واجهة الملف الشخصي للمستخدم المسجل        */
+/* ========================================= */
+.profile-card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--color-border, rgba(81, 73, 53, 0.12));
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+    padding: 3px;
+    background: linear-gradient(135deg, var(--color-primary, #6A8EAE), var(--color-gold, #C9A227));
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #FFF;
+}
+
+.profile-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--color-primary, #6A8EAE);
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.profile-online-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #10b981;
+    border: 2px solid var(--glass-card, #F8F4ED);
+}
+
+.profile-user-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-text, #2C2C2C);
+    margin: 0 0 4px;
+}
+
+.profile-user-contact {
+    font-size: 13px;
+    color: var(--color-text-light, #706859);
+    margin: 0;
+    direction: ltr;
+    display: inline-block;
+}
+
+.profile-provider-pill {
+    margin-top: 8px;
+    padding: 3px 12px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(106, 142, 174, 0.12);
+    color: var(--color-primary, #6A8EAE);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* إحصائيات سريعة في البروفايل */
+.profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.profile-stat-box {
+    background: rgba(81, 73, 53, 0.04);
+    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.1));
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+}
+
+.profile-stat-num {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--color-primary, #6A8EAE);
+    margin-bottom: 2px;
+}
+
+.profile-stat-label {
+    font-size: 11px;
+    color: var(--color-text-lighter, #9E9584);
+}
+
+/* أزرار إدارة الحساب */
+.profile-actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-action-btn {
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.15));
+    background: var(--glass-card, #FFFFFF);
+    color: var(--color-text, #2C2C2C);
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.profile-action-btn:hover {
+    border-color: var(--color-primary, #6A8EAE);
+    background: rgba(106, 142, 174, 0.05);
+    transform: translateY(-1px);
+}
+
+.profile-action-btn.logout {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.04);
+}
+
+.profile-action-btn.logout:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+/* زر تعديل الصورة وتغيير البروفايل */
+.profile-avatar-edit-badge {
+    position: absolute;
+    bottom: -2px;
+    left: -2px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-primary, #6A8EAE);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border: 2px solid var(--glass-card, #F8F4ED);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, background-color 0.2s;
+}
+.profile-avatar-edit-badge:hover {
+    transform: scale(1.1);
+    background: var(--color-primary-dark, #466C8C);
+}
+
+/* شارة البروفايل في الهيدر */
+.header-profile-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-primary, #6A8EAE);
+}
+
+.header-profile-letter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-primary, #6A8EAE);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+/* بطاقة الختمة وتفاصيل الملف الشخصي المحدثة */
+.profile-name-edit-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 4px 0 2px;
+}
+
+.profile-mini-edit-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-light, #64748B);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.profile-mini-edit-btn:hover {
+    color: var(--color-primary, #2D4B68);
+    background: rgba(45, 75, 104, 0.08);
+}
+
+.profile-bio-box {
+    margin: 10px auto 12px;
+    padding: 8px 14px;
+    background: rgba(45, 75, 104, 0.05);
+    border: 1px dashed rgba(45, 75, 104, 0.2);
+    border-radius: 12px;
+    font-size: 12.5px;
+    color: var(--color-text, #1E293B);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    max-width: 90%;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.profile-bio-box:hover {
+    background: rgba(45, 75, 104, 0.09);
+    border-color: var(--color-primary, #2D4B68);
+}
+
+.bio-quote-icon {
+    color: var(--color-primary, #2D4B68);
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.bio-edit-icon {
+    color: var(--color-text-light, #64748B);
+    font-size: 11px;
+    margin-right: auto;
+}
+
+.profile-badges-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.profile-sync-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.profile-khatma-card {
+    background: linear-gradient(135deg, rgba(45, 75, 104, 0.06), rgba(15, 118, 110, 0.06));
+    border: 1px solid rgba(45, 75, 104, 0.15);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin: 12px 0 16px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.profile-khatma-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-primary, #2D4B68);
+}
+
+.khatma-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.khatma-icon-box {
+    width: 34px;
+    height: 34px;
+    background: var(--color-primary, #2D4B68);
+    color: #FFFFFF;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.khatma-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    text-align: right;
+}
+
+.khatma-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-text, #1E293B);
+}
+
+.khatma-status {
+    font-size: 11px;
+    color: var(--color-text-light, #64748B);
+    font-weight: 600;
+}
+
+.khatma-percent-badge {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-primary, #2D4B68);
+    background: rgba(45, 75, 104, 0.1);
+    padding: 3px 8px;
+    border-radius: 9999px;
+}
+
+.khatma-progress-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.khatma-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10B981, #2D4B68);
+    border-radius: 9999px;
+    transition: width 0.4s ease;
+}
+
+.profile-action-btn.highlight {
+    background: rgba(91, 192, 190, 0.1);
+    border-color: rgba(91, 192, 190, 0.4);
+    color: var(--color-primary, #2D4B68);
+    font-weight: 700;
+}
+
+/* ========================================= */
+/* نموذج تعديل الملف الشخصي والنبذة الإيمانية */
+/* ========================================= */
+.edit-profile-form-wrap {
+    animation: fadeInModal 0.25s ease;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.edit-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border, rgba(81, 73, 53, 0.15));
+}
+
+.edit-profile-back-btn {
+    background: rgba(81, 73, 53, 0.08);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--color-text, #1E293B);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.edit-profile-back-btn:hover {
+    background: rgba(81, 73, 53, 0.15);
+}
+
+.edit-profile-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--color-text, #1E293B);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-avatar-edit-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.edit-avatar-preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #5BC0BE;
+    box-shadow: 0 4px 14px rgba(91, 192, 190, 0.25);
+}
+
+.edit-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.edit-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #5BC0BE;
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.edit-avatar-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-avatar-choice {
+    background: #FAF4EC;
+    border: 1px solid #D8B887;
+    color: #1E293B;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-avatar-choice:hover {
+    background: #5BC0BE;
+    color: #FFF;
+    border-color: #5BC0BE;
+}
+
+.btn-avatar-choice.danger {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.btn-avatar-choice.danger:hover {
+    background: #ef4444;
+    color: #FFF;
+}
+
+/* اقتراحات النبذة */
+.bio-presets-section {
+    margin: 12px 0 16px;
+}
+
+.bio-presets-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--color-text-light, #64748B);
+    margin-bottom: 6px;
+}
+
+.bio-presets-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.bio-chip-btn {
+    background: #FAF4EC;
+    border: 1px solid rgba(216, 184, 135, 0.6);
+    color: #1E293B;
+    border-radius: 14px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bio-chip-btn:hover {
+    background: #5BC0BE;
+    color: #FFF;
+    border-color: #5BC0BE;
+}
+
+.edit-profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+

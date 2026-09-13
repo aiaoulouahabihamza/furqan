@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('✅ Service Worker registered successfully:', reg.scope);
+                    
+                    // Check for updates
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('🔄 New Service Worker update found. Activating immediately...');
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                        });
+                    });
+                }).catch(err => {
+                    console.error('❌ Service Worker registration failed:', err);
+                });
+            });
+
+            // Reload page once when the new controller takes over to reflect updates instantly
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('🔄 Service Worker updated. Reloading page...');
+                    window.location.reload();
+                }
+            });
+        }
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>الفرقان - الفتاوى الشرعية</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css?v=5" />
+    <link rel="stylesheet" href="/icons.css?v=5" />
+    <link rel="stylesheet" href="/variables.css?v=5" /><link rel="stylesheet" href="/style.css?v=5" /><link rel="stylesheet" href="/auth.css?v=5" />
+    <link rel="stylesheet" href="/fatwas/style.css?v=5" />
+</head>
+<body>
+
+    <!-- ===== الشريط العلوي الموحد ===== -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-content">
+            <a href="/index.html" class="back-btn" id="headerBackBtn" aria-label="الرجوع للرئيسية">
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <div class="header-title">
+                <h1><i class="fa-solid fa-scale-balanced"></i> الفتاوى الشرعية</h1>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn-drawer-toggle" id="openDrawerBtn" title="مصدر الفتوى">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
+                <a href="/index.html" class="back-btn" title="الرئيسية" aria-label="الرئيسية">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== القائمة الجانبية (Drawer) لمصادر الإفتاء ===== -->
+    <div class="drawer-overlay" id="fatwaDrawerOverlay">
+        <div class="drawer-content" id="fatwaDrawer">
+            <div class="drawer-header">
+                <h3><i class="fa-solid fa-landmark"></i> جهات ومصادر الإفتاء</h3>
+                <button type="button" class="drawer-close-btn" id="closeDrawerBtn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="drawer-body" id="drawerSourcesList">
+                <!-- سيتم حقن جهات الإفتاء والمشايخ هنا ديناميكياً -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <main class="main-content fatwas-main-wrap">
+        <div class="fatwas-container">
+            <!-- شريط البحث -->
+            <div class="fatwa-search-bar-wrap" style="margin-top:20px;">
+                <div class="fatwa-search-inner">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="fatwaSearchInput" placeholder="ابحث في الأحكام والفتاوى الشرعية..." autocomplete="off" />
+                    <button type="button" class="search-clear-btn" id="fatwaSearchClearBtn" style="display:none;" title="مسح">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- شبكة وعرض الفتاوى الشرعية -->
+            <section class="fatwas-content-area" style="padding-top:10px;">
+                <div class="fatwas-status-bar">
+                    <span class="active-category-title" id="activeCategoryTitle">عرض جميع الفتاوى</span>
+                    <span class="fatwas-total-badge" id="fatwasTotalBadge">0 فتوى</span>
+                </div>
+
+                <div class="fatwas-grid" id="fatwasGrid">
+                    <div class="fatwa-loading-state">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <p>جاري جلب الفتاوى الشرعية الموثوقة...</p>
+                    </div>
+                </div>
+
+                <!-- ضوابط التصفح والصفحات -->
+                <div class="pagination-container" id="paginationControls" style="display:none;">
+                    <button type="button" class="page-btn" id="prevPageBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                    <div class="page-numbers" id="pageNumbers"></div>
+                    <button type="button" class="page-btn" id="nextPageBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- جسر الأندرويد ومكتبة التنبيهات -->
+    <script src="/android-bridge.js?v=5"></script>
+    <script src="/toast.js?v=5"></script>
+    <script type="module" src="/auth.js?v=5"></script>
+    <script type="module" src="/fatwas/app.js?v=5"></script>
+</body>
+</html>

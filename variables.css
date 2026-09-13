@@ -44,364 +44,92 @@
     --font-family: var(--font-cairo);
     --font-family-arabic: var(--font-amiri);
 
-    /* لوحة الألوان المحددة بدقة من المستخدم: #10828D | #F2F3EE | #12557B | #A3E062 */
-    --color-bg: #F2F3EE;                      /* خلفية أساسية فاتحة ونظيفة */
-    --color-surface: #FFFFFF;                 /* بطاقات وقوائم صلبة بيضاء عالية التباين */
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #E8EAE2;
-    --color-bg-hover: rgba(16, 130, 141, 0.08); 
+    /* ================================================================
+       نظام الألوان الحصري: نهار (School Day Essentials) / ليل (Charcoal & Ivory)
+       ================================================================ */
     
-    --color-primary: #10828D;                 /* اللون البترولي/التركوازي الرئيسي */
-    --color-primary-rgb: 16, 130, 141;
-    --color-primary-light: #259AA6;           /* بترولي مريح */
-    --color-primary-dark: #12557B;            /* كحلي بترولي عميق */
+    /* ================================================================
+       لوحة الألوان الرسمية المعتمدة لمنصة الفرقان (متناسقة ومتوازنة):
+       - الأبيض (#FFFFFF): الخلفية الأساسية لقراءة ونقاوة النصوص
+       - الذهبي البيج (#D8B887): لمسات وخطوط ناعمة دافئة متناسقة
+       - النعناعي الفاتح (#A6E7D1): تفاعل ناعم وشارات التنبيه
+       - الفيروزي (#5BC0BE): اللون الرئيسي للعلامة التجارية والأزرار التفاعلية CTA
+       ================================================================ */
     
-    --color-herbal: #A3E062;                  /* الأخضر العشبي/الليموني النضر */
-    --color-herbal-rgb: 163, 224, 98;
-    --color-herbal-light: #C4F082;            /* عشبي فاتح */
-    --color-herbal-dark: #7DB83C;             /* عشبي دافئ */
+    --color-bg: #FFFFFF;                      /* الأبيض الناصع لقراءة النصوص */
+    --color-surface: #FAF6F0;                 /* أسطح بيج دافئة ناعمة مريحة للعين بدلاً من اللون الصامت المجهد */
+    --color-bg-card: #FFFFFF;                 /* بطاقات ناصعة مع حواف ذهبية ناعمة */
+    --color-bg-secondary: #F7F3EC;            /* خلفية ثانوية متناسقة للأقسام والهوامش */
+    --color-bg-hover: #EBF8F5;                /* نعناعي فيروزي فاتح لتأثيرات مرور الماوس (Hover) */
+    
+    --color-primary: #5BC0BE;                 /* الفيروزي: اللون الرئيسي للعلامة التجارية والأزرار التفاعلية CTA */
+    --color-primary-rgb: 91, 192, 190;
+    --color-primary-light: #A6E7D1;           /* النعناعي الفاتح */
+    --color-primary-dark: #3A9B99;            /* فيروزي غامق للتفاعل */
+    
+    --color-teal: #5BC0BE;                    /* فيروزي */
+    --color-teal-rgb: 91, 192, 190;
+    --color-aqua: #FAF6F0;                    
+    
+    --color-gold: #D8B887;                    /* الذهبي البيج الدافئ المتناسق */
+    --color-gold-rgb: 216, 184, 135;
+    --color-gold-light: rgba(216, 184, 135, 0.2);
+    --color-gold-dark: #B89665;
 
-    --color-gold: #10828D;
-    --color-gold-light: rgba(163, 224, 98, 0.25);
-    --color-gold-dark: #12557B;
+    --color-mint: #A6E7D1;                    /* النعناعي الفاتح لشارات التفاعل والتأثيرات */
+    --color-herbal: #5BC0BE;                  
+    --color-herbal-rgb: 91, 192, 190;
+    --color-herbal-light: #A6E7D1;            
+    --color-herbal-dark: #3A9B99;
 
-    --color-text: #0E2A36;                    /* كحلي داكن واضح ومريح قراءته */
-    --color-text-light: #3D5A6C;             
-    --color-text-lighter: #6B8896;
+    --color-text: #1E293B;                    /* نص داكن كحلي عالي الوضوح والتباين */
+    --color-text-light: #475569;             
+    --color-text-lighter: #64748B;
 
-    --color-border: rgba(18, 85, 123, 0.16);   /* حدود ناعمة واضحة */
-    --color-border-light: rgba(163, 224, 98, 0.25);
+    --color-border: rgba(216, 184, 135, 0.45);  /* إطار ناعم متناسق بالذهبي البيج */
+    --color-border-light: rgba(91, 192, 190, 0.25); /* إطار فيروزي شفاف */
 
-    /* نظام الزجاج المطفأ الهلامي (Frosted Glassmorphism) */
-    --glass-bg: rgba(242, 243, 238, 0.85);
-    --glass-card: rgba(255, 255, 255, 0.78);
-    --glass-border: 1px solid rgba(255, 255, 255, 0.75);
-    --glass-blur: blur(12px);
-    --glass-shadow: 0 6px 20px -2px rgba(18, 85, 123, 0.08);
+    /* نظام الأسطح والزجاج المصقول */
+    --glass-bg: rgba(255, 255, 255, 0.96);
+    --glass-card: rgba(250, 244, 236, 0.96);
+    --glass-border: 1px solid rgba(216, 184, 135, 0.3);
+    --glass-shadow: 0 2px 10px rgba(216, 184, 135, 0.1);
 
-    --gradient-primary: linear-gradient(135deg, #10828D 0%, #12557B 100%);
-    --gradient-sky: linear-gradient(135deg, #10828D 0%, #259AA6 100%);
-    --gradient-herbal: linear-gradient(135deg, #10828D 0%, #A3E062 100%);
+    --gradient-primary: linear-gradient(135deg, #5BC0BE 0%, #3A9B99 100%);
+    --gradient-sky: linear-gradient(135deg, #5BC0BE 0%, #D8B887 100%);
+    --gradient-herbal: linear-gradient(135deg, #5BC0BE 0%, #A6E7D1 100%);
+    --gradient-gold: linear-gradient(135deg, #D8B887 0%, #FAF4EC 100%);
 
-    --shadow-sm: 0 1px 4px rgba(18, 85, 123, 0.05);
+    --shadow-sm: 0 1px 3px rgba(216, 184, 135, 0.1);
     --shadow: var(--glass-shadow);
-    --shadow-card: 0 4px 16px -2px rgba(18, 85, 123, 0.07);
-    --shadow-hover: 0 8px 22px -4px rgba(16, 130, 141, 0.14);
-    --shadow-glow: 0 0 16px rgba(163, 224, 98, 0.35);
+    --shadow-card: 0 2px 12px rgba(216, 184, 135, 0.12);
+    --shadow-hover: 0 6px 18px rgba(91, 192, 190, 0.18);
+    --shadow-glow: 0 0 14px rgba(91, 192, 190, 0.25);
 
-    /* تصغير وتخفيف البروز لتفادي التصميم المنفوخ */
-    --radius-sm: 8px;
-    --radius: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 22px;
+    /* الشريط السفلي العائم */
+    --nav-bg: rgba(255, 255, 255, 0.96);
+    --nav-border: rgba(216, 184, 135, 0.3);
+    --nav-item-color: #1E293B;
+    --nav-item-active-bg: #5BC0BE;
+    --nav-item-active-text: #FFFFFF;
+    --nav-item-active-shadow: rgba(91, 192, 190, 0.3);
+
+    /* أبعاد وهندسة الحواف المتقنة (أحجام ملمومة ومنسقة إنسانيين) */
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
     --radius-full: 9999px;
 
-    /* أبعاد مدمجة ورشيقة */
-    --header-height: 52px;
-    --bottom-nav-height: 56px;
-    --max-width: 540px;
-    --content-padding: 14px;
+    --header-height: 48px;
+    --bottom-nav-height: 52px;
+    --max-width: 520px;
+    --content-padding: 12px;
 
-    /* سرعة عالية في الحركة والتنقل */
-    --transition: all 0.15s ease-out;
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 0. ثيم الزمرد الأصيل المفضل للقرآن (Emerald / Petrol) */
-[data-theme="emerald"] {
-    --color-bg: #F9F3ED;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #EFE6DC;
-    --color-bg-hover: rgba(16, 69, 91, 0.08); 
-    --color-primary: #10455B;
-    --color-primary-rgb: 16, 69, 91;
-    --color-primary-light: #1D627E;
-    --color-primary-dark: #0A2D3C;
-    --color-herbal: #FFAF20;
-    --color-herbal-rgb: 255, 175, 32;
-    --color-herbal-light: #FFC45E;
-    --color-herbal-dark: #D48C0F;
-    --color-gold: #FFAF20;
-    --color-gold-light: rgba(255, 175, 32, 0.25);
-    --color-gold-dark: #10455B;
-    --color-text: #0E2A36;
-    --color-text-light: #3D5A6C;
-    --color-text-lighter: #6B8896;
-    --color-border: rgba(16, 69, 91, 0.15);
-    --color-border-light: rgba(255, 175, 32, 0.25);
-    --glass-bg: rgba(249, 243, 237, 0.88);
-    --glass-card: rgba(255, 255, 255, 0.85);
-    --glass-shadow: 0 6px 20px -2px rgba(16, 69, 91, 0.08);
-    --gradient-primary: linear-gradient(135deg, #10455B 0%, #1D627E 100%);
-    --gradient-sky: linear-gradient(135deg, #10455B 0%, #FFAF20 100%);
-    --gradient-herbal: linear-gradient(135deg, #10455B 0%, #FFAF20 100%);
-    --shadow-sm: 0 1px 4px rgba(16, 69, 91, 0.05);
-    --shadow-card: 0 4px 16px -2px rgba(16, 69, 91, 0.07);
-    --shadow-hover: 0 8px 22px -4px rgba(16, 69, 91, 0.14);
-    --shadow-glow: 0 0 16px rgba(255, 175, 32, 0.35);
-}
 
-/* 1. ثيم البترولي والذهب العسلي (#10455B / #FFAF20 / #F9F3ED / #FFFFFF) */
-[data-theme="theme-ocean-amber"] {
-    --color-bg: #F9F3ED;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #EFE7DE;
-    --color-bg-hover: rgba(16, 69, 91, 0.08); 
-    --color-primary: #10455B;
-    --color-primary-rgb: 16, 69, 91;
-    --color-primary-light: #20627E;
-    --color-primary-dark: #0A2E3D;
-    --color-herbal: #FFAF20;
-    --color-herbal-rgb: 255, 175, 32;
-    --color-herbal-light: #FFC55B;
-    --color-herbal-dark: #D48C0F;
-    --color-text: #0E2936;
-    --color-text-light: #3D5A6C;
-    --color-border: rgba(16, 69, 91, 0.16);
-    --gradient-primary: linear-gradient(135deg, #10455B 0%, #FFAF20 100%);
-}
-
-/* 2. ثيم شاطئ المرجان والفيروز (#30BCC9 / #FAF3E3 / #FADA80 / #F6404F) */
-[data-theme="theme-coral-turquoise"] {
-    --color-bg: #FAF3E3;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #F0E6CE;
-    --color-bg-hover: rgba(48, 188, 201, 0.09);
-    --color-primary: #30BCC9;
-    --color-primary-rgb: 48, 188, 201;
-    --color-primary-light: #52CFDC;
-    --color-primary-dark: #1F8D98;
-    --color-herbal: #F6404F;
-    --color-herbal-rgb: 246, 64, 79;
-    --color-herbal-light: #F86E7A;
-    --color-herbal-dark: #D62332;
-    --color-gold: #FADA80;
-    --color-text: #1E3033;
-    --color-text-light: #4A6367;
-    --color-border: rgba(48, 188, 201, 0.2);
-    --gradient-primary: linear-gradient(135deg, #30BCC9 0%, #1F8D98 100%);
-}
-
-/* 3. ثيم عشب الغابات والمحيط (#4B8564 / #0E5072 / #E9694B / #E7E2D8) */
-[data-theme="theme-forest-ocean"], [data-theme="theme-356"] {
-    --color-bg: #E7E2D8;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #DDD6C9;
-    --color-bg-hover: rgba(75, 133, 100, 0.08);
-    --color-primary: #4B8564;
-    --color-primary-rgb: 75, 133, 100;
-    --color-primary-light: #64A37E;
-    --color-primary-dark: #0E5072;
-    --color-herbal: #E9694B;
-    --color-herbal-rgb: 233, 105, 75;
-    --color-herbal-light: #F2907A;
-    --color-herbal-dark: #C94C30;
-    --color-text: #0E2A36;
-    --color-text-light: #3D5A6C;
-    --color-border: rgba(75, 133, 100, 0.16);
-    --gradient-primary: linear-gradient(135deg, #4B8564 0%, #0E5072 100%);
-}
-
-/* 4. ثيم العقيق الغروبي والبرتقالي (#8D4051 / #FF943F / #FBF0E8 / #FFFFFF) */
-[data-theme="theme-plum-sunset"] {
-    --color-bg: #FBF0E8;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #F3DECE;
-    --color-bg-hover: rgba(141, 64, 81, 0.08);
-    --color-primary: #8D4051;
-    --color-primary-rgb: 141, 64, 81;
-    --color-primary-light: #AB576B;
-    --color-primary-dark: #652734;
-    --color-herbal: #FF943F;
-    --color-herbal-rgb: 255, 148, 63;
-    --color-herbal-light: #FFAD6A;
-    --color-herbal-dark: #DE721D;
-    --color-text: #32161D;
-    --color-text-light: #6B434C;
-    --color-border: rgba(141, 64, 81, 0.16);
-    --gradient-primary: linear-gradient(135deg, #8D4051 0%, #FF943F 100%);
-}
-
-/* 5. ثيم الفيروز واليوسفي النضر (#25CED1 / #F4F4F4 / #FFFFFF / #FF8A5B) */
-[data-theme="theme-mint-peach"] {
-    --color-bg: #F4F4F4;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #E5E7E8;
-    --color-bg-hover: rgba(37, 206, 209, 0.08);
-    --color-primary: #1CAFB2;
-    --color-primary-rgb: 28, 175, 178;
-    --color-primary-light: #25CED1;
-    --color-primary-dark: #12797B;
-    --color-herbal: #FF8A5B;
-    --color-herbal-rgb: 255, 138, 91;
-    --color-herbal-light: #FFA680;
-    --color-herbal-dark: #D9693B;
-    --color-text: #192D2E;
-    --color-text-light: #4A6364;
-    --color-border: rgba(28, 175, 178, 0.18);
-    --gradient-primary: linear-gradient(135deg, #1CAFB2 0%, #12797B 100%);
-}
-
-/* 6. ثيم الزيتون والربيع النضر (#33363D / #CCCAB0 / #EDEFDF / #96C65E) */
-[data-theme="theme-olive-spring"] {
-    --color-bg: #EDEFDF;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #DDDDC8;
-    --color-bg-hover: rgba(150, 198, 94, 0.12);
-    --color-primary: #33363D;
-    --color-primary-rgb: 51, 54, 61;
-    --color-primary-light: #4C515C;
-    --color-primary-dark: #1F2126;
-    --color-herbal: #96C65E;
-    --color-herbal-rgb: 150, 198, 94;
-    --color-herbal-light: #B0DD7E;
-    --color-herbal-dark: #78A542;
-    --color-gold: #CCCAB0;
-    --color-text: #212328;
-    --color-text-light: #4D535E;
-    --color-border: rgba(51, 54, 61, 0.16);
-    --gradient-primary: linear-gradient(135deg, #33363D 0%, #96C65E 100%);
-}
-
-/* 7. ثيم ندى السماء والصحراء (#557F9F / #F7F2D7 / #E7D6AC / #9D8888) */
-[data-theme="theme-slate-sand"] {
-    --color-bg: #F7F2D7;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #EBE4C0;
-    --color-bg-hover: rgba(85, 127, 159, 0.09);
-    --color-primary: #557F9F;
-    --color-primary-rgb: 85, 127, 159;
-    --color-primary-light: #729AB8;
-    --color-primary-dark: #3B5D77;
-    --color-herbal: #E7D6AC;
-    --color-herbal-rgb: 231, 214, 172;
-    --color-herbal-light: #F2E5C5;
-    --color-herbal-dark: #BFAB7E;
-    --color-gold: #9D8888;
-    --color-text: #223746;
-    --color-text-light: #4E687A;
-    --color-border: rgba(85, 127, 159, 0.18);
-    --gradient-primary: linear-gradient(135deg, #557F9F 0%, #3B5D77 100%);
-}
-
-/* 8. ثيم الشروق الذهبي والحجر (#F97350 / #FAD06C / #F7F2E5 / #B7AC9A) */
-[data-theme="theme-golden-sunrise"] {
-    --color-bg: #F7F2E5;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #EAE2CF;
-    --color-bg-hover: rgba(249, 115, 80, 0.08);
-    --color-primary: #E8603C;
-    --color-primary-rgb: 232, 96, 60;
-    --color-primary-light: #F97350;
-    --color-primary-dark: #BF4120;
-    --color-herbal: #FAD06C;
-    --color-herbal-rgb: 250, 208, 108;
-    --color-herbal-light: #FFE08F;
-    --color-herbal-dark: #D4A73F;
-    --color-gold: #B7AC9A;
-    --color-text: #3B241A;
-    --color-text-light: #6E5143;
-    --color-border: rgba(232, 96, 60, 0.18);
-    --gradient-primary: linear-gradient(135deg, #E8603C 0%, #FAD06C 100%);
-}
-
-/* 9. ثيم نسيم البحر والزلال (#0096D1 / #FFF4EA / #A8EAD5 / #3EBDC6) */
-[data-theme="theme-lagoon-breeze"] {
-    --color-bg: #FFF4EA;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #F5E4D4;
-    --color-bg-hover: rgba(0, 150, 209, 0.08);
-    --color-primary: #0096D1;
-    --color-primary-rgb: 0, 150, 209;
-    --color-primary-light: #2DB4EC;
-    --color-primary-dark: #006E9C;
-    --color-herbal: #3EBDC6;
-    --color-herbal-rgb: 62, 189, 198;
-    --color-herbal-light: #6FD3DA;
-    --color-herbal-dark: #239AA2;
-    --color-gold: #A8EAD5;
-    --color-text: #0E3040;
-    --color-text-light: #3A5F71;
-    --color-border: rgba(0, 150, 209, 0.16);
-    --gradient-primary: linear-gradient(135deg, #0096D1 0%, #3EBDC6 100%);
-}
-
-/* 10. ثيم الليل الفلكي والفيروز (#353755 / #FFFFFF / #E0E4EE / #5BD3C7) */
-[data-theme="theme-astral-teal"] {
-    --color-bg: #E0E4EE;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #CED3E0;
-    --color-bg-hover: rgba(53, 55, 85, 0.08);
-    --color-primary: #353755;
-    --color-primary-rgb: 53, 55, 85;
-    --color-primary-light: #4E5178;
-    --color-primary-dark: #222339;
-    --color-herbal: #5BD3C7;
-    --color-herbal-rgb: 91, 211, 199;
-    --color-herbal-light: #83E3DA;
-    --color-herbal-dark: #37B3A6;
-    --color-text: #1E2033;
-    --color-text-light: #4C506F;
-    --color-border: rgba(53, 55, 85, 0.16);
-    --gradient-primary: linear-gradient(135deg, #353755 0%, #5BD3C7 100%);
-}
-
-/* 11. ثيم المحيط العميق والمرجان (#002C3E / #78BCC4 / #F7F8F3 / #F7444E) */
-[data-theme="theme-deep-abyss"] {
-    --color-bg: #F7F8F3;
-    --color-surface: #FFFFFF;
-    --color-bg-card: #FFFFFF;
-    --color-bg-secondary: #E6EAE0;
-    --color-bg-hover: rgba(0, 44, 62, 0.08);
-    --color-primary: #002C3E;
-    --color-primary-rgb: 0, 44, 62;
-    --color-primary-light: #0D4760;
-    --color-primary-dark: #001A25;
-    --color-herbal: #F7444E;
-    --color-herbal-rgb: 247, 68, 78;
-    --color-herbal-light: #FA7078;
-    --color-herbal-dark: #D4252F;
-    --color-gold: #78BCC4;
-    --color-text: #00202D;
-    --color-text-light: #2D4E5D;
-    --color-border: rgba(0, 44, 62, 0.16);
-    --gradient-primary: linear-gradient(135deg, #002C3E 0%, #78BCC4 100%);
-}
-
-/* 12. الوضع الليلي الكحلي والذهبي الفاخر */
-[data-theme="dark"] {
-    --color-bg: #151821;             /* كحلي ليلي فاخر جداً */
-    --color-surface: #1E2230;        /* بطاقات داكنة مصقولة */
-    --color-bg-card: #1E2230; 
-    --color-bg-secondary: #10121A;
-    --color-bg-hover: rgba(91, 114, 179, 0.18);
-    --color-primary: #435892;
-    --color-primary-rgb: 67, 88, 146;        
-    --color-primary-light: #5B72B3;
-    --color-primary-dark: #393F50;
-    --color-herbal: #BCAA8A;        
-    --color-herbal-light: #D4C5AC;
-    --color-herbal-dark: #A18E6E;
-    --color-text: #F2EEE7;           
-    --color-text-light: #A4ADC4;     
-    --color-text-lighter: #6E7991;
-    --color-border: rgba(91, 114, 179, 0.28);
-    --color-border-light: rgba(188, 170, 138, 0.18);
-    --glass-bg: rgba(21, 24, 33, 0.95);
-    --glass-card: rgba(30, 34, 48, 0.95);
-    --shadow-card: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
-    --shadow-glow: 0 0 20px rgba(188, 170, 138, 0.25);
-}
 
 /* ==================================================================
    تأثيرات حركية أنيقة
@@ -558,11 +286,11 @@ input:checked + .slider:before { transform: translateX(20px); }
     flex-direction: column;
     gap: 2px;
 }
-[data-theme="dark"] .custom-options {
-    background-color: #0E2A36;
-    background: #0E2A36;
-    border-color: rgba(16, 130, 141, 0.4);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+.custom-options {
+    background-color: var(--color-surface, #E8F9F8);
+    background: var(--color-surface, #E8F9F8);
+    border: 1px solid var(--color-border, rgba(91, 192, 190, 0.25));
+    box-shadow: 0 10px 30px rgba(91, 192, 190, 0.12);
 }
 .custom-select.open .custom-options {
     opacity: 1;
@@ -591,38 +319,10 @@ input:checked + .slider:before { transform: translateX(20px); }
     color: #FFFFFF !important;
     font-weight: 700;
 }
-[data-theme="dark"] .custom-option.selected {
-    background: var(--color-primary);
-    color: #FFFFFF !important;
-}
-
-.custom-field-row {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px dashed rgba(0,0,0,0.05);
-}
-.custom-field-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-.custom-field-row label {
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--color-text);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
 /* Scrollbar للـ options */
 .custom-options::-webkit-scrollbar { width: 6px; }
 .custom-options::-webkit-scrollbar-track { background: transparent; }
-.custom-options::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
-[data-theme="dark"] .custom-options::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+.custom-options::-webkit-scrollbar-thumb { background: rgba(91, 192, 190, 0.25); border-radius: 10px; }
 
 /* أيقونة المسبحة الموحدة (Fa-beads / Tasbeeh icon) */
 .fa-beads, .fa-solid.fa-beads {
@@ -673,25 +373,6 @@ input:checked + .slider:before { transform: translateX(20px); }
     transition: transform 0.2s ease, color 0.2s ease !important;
 }
 
-[data-theme="dark"] .header-btn,
-[data-theme="dark"] .main-header .back-btn,
-[data-theme="dark"] .main-header .icon-btn,
-[data-theme="dark"] .main-header .header-btn,
-[data-theme="dark"] .settings-btn {
-    background: #0E2A36 !important;
-    border-color: rgba(16, 130, 141, 0.35) !important;
-    color: var(--color-primary-light, #259AA6) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-}
-
-[data-theme="dark"] .header-btn i,
-[data-theme="dark"] .main-header .back-btn i,
-[data-theme="dark"] .main-header .icon-btn i,
-[data-theme="dark"] .main-header .header-btn i,
-[data-theme="dark"] .settings-btn i {
-    color: var(--color-primary-light, #259AA6) !important;
-}
-
 .header-btn:hover,
 .main-header .back-btn:hover,
 .main-header .icon-btn:hover,
@@ -731,26 +412,24 @@ input:checked + .slider:before { transform: translateX(20px); }
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    box-shadow: 0 8px 24px rgba(18, 85, 123, 0.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     padding: 0;
     z-index: 1000;
-    height: var(--bottom-nav-height, 58px);
+    height: var(--bottom-nav-height, 56px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg, 16px);
-    max-width: var(--max-width, 480px);
+    max-width: var(--max-width, 540px);
     margin: 0 auto;
-}
-
-[data-theme="dark"] .bottom-nav {
-    background: rgba(9, 29, 38, 0.85);
-    border-color: rgba(16, 130, 141, 0.35);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
 }
 
 .nav-items {
     display: flex;
     justify-content: space-around;
     align-items: center;
+    width: 100%;
     height: 100%;
 }
 
@@ -759,32 +438,52 @@ input:checked + .slider:before { transform: translateX(20px); }
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 3px;
     text-decoration: none;
-    color: var(--color-text-lighter, #9299a8);
+    color: var(--color-text-lighter, #64748B);
     font-size: 10px;
     font-weight: 600;
     width: 100%;
     height: 100%;
-    transition: var(--transition, all 0.2s ease);
+    transition: var(--transition);
     position: relative;
     border-radius: var(--radius, 12px);
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
 }
 
+/* الأيقونات في الشريط السفلي بسيطة ونظيفة بغير محاكاة زجاجية مفرطة */
 .nav-item i {
-    font-size: 17px;
-    transition: var(--transition, all 0.2s ease);
-    color: inherit;
+    font-size: 18px;
+    color: var(--color-text-light, #475569);
+    transition: var(--transition);
+    background: transparent;
+    box-shadow: none;
+    border: none;
 }
 
-.nav-item.active {
-    color: var(--color-primary);
-    font-weight: 700;
+.nav-item span {
+    font-size: 10.5px;
+    font-weight: 600;
+    font-family: var(--font-cairo), sans-serif;
+    color: var(--color-text-light, #475569);
+    transition: var(--transition);
+}
+
+.nav-item:hover i {
+    color: var(--color-primary, #5BC0BE);
+    transform: translateY(-1px);
 }
 
 .nav-item.active i {
+    color: var(--color-primary, #5BC0BE) !important;
     transform: translateY(-1px);
-    color: var(--color-primary);
+}
+
+.nav-item.active span {
+    color: var(--color-primary, #5BC0BE);
+    font-weight: 800;
 }
 
 .nav-item::before {
@@ -793,10 +492,10 @@ input:checked + .slider:before { transform: translateX(20px); }
     top: 0;
     width: 28px;
     height: 3px;
-    background: var(--gradient-primary, var(--color-primary));
+    background: var(--gradient-primary);
     border-radius: 0 0 3px 3px;
     opacity: 0;
-    transition: var(--transition, all 0.2s ease);
+    transition: var(--transition);
 }
 
 .nav-item.active::before {
@@ -809,7 +508,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .header-hijri-date-sub {
     font-size: 11px;
     font-weight: 700;
-    color: var(--color-primary-light, #259AA6);
+    color: var(--color-gold, #A58D66);
     opacity: 0.95;
     margin-top: 3px;
     display: flex;
@@ -820,9 +519,208 @@ input:checked + .slider:before { transform: translateX(20px); }
     white-space: nowrap;
 }
 [data-theme="dark"] .header-hijri-date-sub {
-    color: #5BD3C7;
+    color: var(--color-gold, #F7E7CE);
 }
 .header-hijri-date-sub i {
     font-size: 9px;
 }
+
+/* ==================================================================
+   تنسيق مربع البحث الموحد والدقيق عبر جميع صفحات الموقع (Search Bar)
+   ================================================================== */
+.search-section {
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    background: var(--color-surface, #FAF4EC); /* الذهبي البيج الفاتح الخان للبطاقات ومربعات البحث */
+    border: 1px solid var(--color-border, rgba(216, 184, 135, 0.35));
+    border-radius: var(--radius, 10px);
+    padding: 0 10px;
+    height: 38px;
+    box-shadow: 0 1px 3px rgba(216, 184, 135, 0.08);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-bar:focus-within {
+    border-color: var(--color-primary, #5BC0BE);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(91, 192, 190, 0.18);
+}
+
+.search-bar .search-icon {
+    color: var(--color-text-lighter, #64748B);
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-left: 8px; /* RTL spacing */
+    pointer-events: none;
+}
+
+.search-bar input {
+    flex: 1;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--color-text, #1E293B);
+    font-family: var(--font-cairo, sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0;
+    box-shadow: none !important;
+}
+
+.search-bar input::placeholder {
+    color: var(--color-text-lighter, #64748B);
+    font-size: 12.5px;
+}
+
+.search-clear,
+.search-clear-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-lighter, #64748B);
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    margin-right: 4px;
+}
+
+.search-clear:hover,
+.search-clear-btn:hover {
+    color: var(--color-primary, #5BC0BE);
+    background: #A6E7D1;
+}
+
+/* ==================================================================
+   توحيد وتنسيق الشريط العلوي (Header) في جميع صفحات المشروع بدقة تامة
+   ================================================================== */
+.main-header {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    z-index: 1000 !important;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.85)) !important;
+    backdrop-filter: var(--glass-blur, blur(10px)) !important;
+    -webkit-backdrop-filter: var(--glass-blur, blur(10px)) !important;
+    box-shadow: 0 2px 10px rgba(18, 85, 123, 0.05) !important;
+    height: 64px !important;
+    display: flex !important;
+    align-items: center !important;
+    border-bottom: 1px solid var(--color-border, #E2E8F0) !important;
+    transition: all 0.25s ease !important;
+}
+
+.header-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: var(--max-width, 1200px) !important;
+    margin: 0 auto !important;
+    padding: 0 var(--content-padding, 16px) !important;
+    height: 100% !important;
+}
+
+/* توحيد العنوان وأحجامه وألوانه لجميع الصفحات */
+.header-title, .header-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.header-title h1, 
+.header-title .title-text, 
+.logo-title {
+    font-family: 'Cairo', sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #1A202C !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    line-height: 1.4 !important;
+}
+
+.header-title h1 i, 
+.logo-title i {
+    color: #3A9B99 !important;
+    font-size: 18px !important;
+}
+
+/* توحيد وتنسيق أزرار الرجوع والتفاعلات في الهيدر */
+.back-btn, 
+.header-btn, 
+.btn-drawer-toggle {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid #E2E8F0 !important;
+    color: #3A9B99 !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+    padding: 0 !important;
+}
+
+.back-btn:hover, 
+.header-btn:hover, 
+.btn-drawer-toggle:hover {
+    background: #3A9B99 !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+    transform: translateY(-1px) !important;
+}
+
+.back-btn:active, 
+.header-btn:active, 
+.btn-drawer-toggle:active {
+    transform: scale(0.95) !important;
+}
+
+/* دعم الثيم المظلم */
+[data-theme="dark"] .header-title h1, 
+[data-theme="dark"] .header-title .title-text, 
+[data-theme="dark"] .logo-title {
+    color: #F7FAFC !important;
+}
+
+[data-theme="dark"] .back-btn, 
+[data-theme="dark"] .header-btn, 
+[data-theme="dark"] .btn-drawer-toggle {
+    background: #2D3748 !important;
+    border-color: #4A5568 !important;
+    color: #A0AEC0 !important;
+}
+
+[data-theme="dark"] .back-btn:hover, 
+[data-theme="dark"] .header-btn:hover, 
+[data-theme="dark"] .btn-drawer-toggle:hover {
+    background: #3A9B99 !important;
+    color: #ffffff !important;
+}
+
+
+
 

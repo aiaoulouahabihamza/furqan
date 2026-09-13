@@ -5,34 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>الفرقان - حصن المسلم والأذكار</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="/icons.css" />
     
     <link rel="stylesheet" href="/variables.css" />
+    <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/adkar/style.css" />
 </head>
 <body>
 
-    <!-- ===== الشريط العلوي ===== -->
+    <!-- ===== الشريط العلوي الموحد ===== -->
     <header class="main-header" id="mainHeader">
         <div class="header-content">
-            <a href="/index.html" class="back-btn" id="headerBackBtn">
+            <a href="/index.html" class="back-btn" id="headerBackBtn" aria-label="الرجوع للرئيسية" title="الرجوع للرئيسية">
                 <i class="fa-solid fa-arrow-right"></i>
             </a>
             <div class="header-title">
-                <h1><i class="fa-solid fa-hands-praying"></i> الأذكار</h1>
-                <span>اللهم ذكرنا ما نسينا</span>
+                <h1><i class="fa-solid fa-hands-praying"></i> الأذكار والأدعية</h1>
             </div>
-            <button class="header-btn settings-btn" id="openSettingsBtn" onclick="window.location.href='/settings/index.html'" title="الإعدادات">
-                <i class="fa-solid fa-gear"></i>
-            </button>
+            <div class="header-actions">
+                <a href="/index.html" class="back-btn" title="الرئيسية" aria-label="الرئيسية">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
         </div>
     </header>
 
     <!-- ===== المحتوى ===== -->
     <main class="main-content">
         
+        <!-- شريط البحث عن الأذكار -->
+        <div class="search-section" id="adkarSearchSection" style="display: none;">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="adkarSearchInput" placeholder="ابحث في الأذكار والتصنيفات (مثال: الصباح، المساء، النوم، الاستغفار)..." autocomplete="off" />
+                <button class="search-clear" id="adkarSearchClear" aria-label="مسح البحث" style="display:none;">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+        </div>
+
         <!-- حالة التحميل -->
         <div class="loading-state" id="loadingState">
             <i class="fa-solid fa-spinner spin"></i>
@@ -41,8 +54,13 @@
 
         <!-- 1) واجهة المجموعات -->
         <div id="categoriesView" style="display: none;">
-            <div class="section-label">مجموعات الأذكار اليومية</div>
+            <div class="section-label" id="categoriesSectionLabel">مجموعات الأذكار اليومية</div>
             <div class="categories-grid" id="categoriesGrid"></div>
+            <div class="no-results" id="adkarNoResults" style="display:none;">
+                <i class="fa-solid fa-magnifying-glass no-results-icon"></i>
+                <p class="no-results-text">لا توجد نتائج مطابقة للبحث</p>
+                <button class="no-results-btn" id="clearAdkarSearchBtn">عرض جميع الأذكار</button>
+            </div>
         </div>
 
         <!-- 2) واجهة تفاصيل الأذكار للمجموعة المحددة -->

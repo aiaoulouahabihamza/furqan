@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AlFurqan App Blueprint",
+  "description": "Firestore database blueprint for Al-Furqan Islamic platform including users, profiles, bookmarks, khatmas, and settings",
+  "entities": {
+    "users": {
+      "title": "User",
+      "description": "User profile collection",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "providerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastLoginAt": { "type": "string", "format": "date-time" },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "theme": { "type": "string" },
+            "fontSize": { "type": "string" },
+            "readerReciter": { "type": "string" }
+          }
+        }
+      },
+      "required": ["uid"]
+    },
+    "bookmarks": {
+      "title": "Bookmark",
+      "description": "User saved bookmarks for Quran ayahs, hadiths, or azkar",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["ayah", "surah", "hadith", "zekr", "story"] },
+        "itemId": { "type": "string" },
+        "title": { "type": "string" },
+        "text": { "type": "string" },
+        "page": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type", "itemId"]
+    },
+    "khatma": {
+      "title": "Khatma",
+      "description": "User Quran Khatma tracking progress",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "currentPage": { "type": "number" },
+        "totalPages": { "type": "number", "default": 604 },
+        "targetDays": { "type": "number" },
+        "completed": { "type": "boolean", "default": false },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId"]
+    }
+  }
+}
