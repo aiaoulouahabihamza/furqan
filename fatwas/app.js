@@ -17,15 +17,45 @@ document.addEventListener('DOMContentLoaded', () => {
     initFatwas();
 });
 
+const STORAGE_FATWAS_KEY = 'al_furqan_fatwas_cache_v2';
+
 async function initFatwas() {
     bindEvents();
     
-    // Set loading to true and render modern skeleton loaders
-    fatwasState.list = [];
-    fatwasState.filteredList = [];
-    fatwasState.loading = true;
-    renderFatwas();
+    // استرجاع الفتاوى من الكاش المحلي أولاً للعمل بدون نت
+    loadCachedFatwas();
 
+    if (navigator.onLine) {
+        if (fatwasState.list.length === 0) {
+            fatwasState.loading = true;
+            renderFatwas();
+        }
+        await fetchFreshFatwas();
+    } else {
+        fatwasState.loading = false;
+        renderFatwas();
+    }
+}
+
+function loadCachedFatwas() {
+    try {
+        const cached = localStorage.getItem(STORAGE_FATWAS_KEY);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                fatwasState.list = parsed;
+                fatwasState.filteredList = [...parsed];
+                fatwasState.loading = false;
+                extractAndRenderSources();
+                renderFatwas();
+            }
+        }
+    } catch (e) {
+        console.warn('Error loading cached fatwas:', e);
+    }
+}
+
+async function fetchFreshFatwas() {
     try {
         const res1 = await fetch(`${ISLAMCONTENT_BASE_URL}/fatwa/ar/ar/1/100/json`).then(r => r.json()).catch(() => null);
 
@@ -38,6 +68,9 @@ async function initFatwas() {
         if (apiFatwas.length > 0) {
             fatwasState.list = [...apiFatwas];
             fatwasState.filteredList = [...fatwasState.list];
+            try {
+                localStorage.setItem(STORAGE_FATWAS_KEY, JSON.stringify(fatwasState.list));
+            } catch (e) {}
             extractAndRenderSources();
             renderFatwas();
         } else {

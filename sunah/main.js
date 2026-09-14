@@ -805,6 +805,10 @@ async function renderHadithsStage() {
     const book = BOOKS.find(b => b.id === activeBookId);
     if (!book) return;
 
+    if (!navigator.onLine) {
+        if (window.showToast) window.showToast('عذراً، تحتاج إلى اتصال بالإنترنت لعرض الأحاديث الشريفة.');
+    }
+
     // إظهار اللودر المشترك عند التحميل لأول مرة
     if (currentOffset === 0) {
         hadithsList.innerHTML = `

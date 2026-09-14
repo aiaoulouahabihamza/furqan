@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initLibrary();
 });
 
+const STORAGE_LIBRARY_KEY = 'al_furqan_library_books_cache_v2';
+const STORAGE_LIBRARY_TOTAL_KEY = 'al_furqan_library_total_v2';
+
 function initLibrary() {
     bindEvents();
     const urlParams = new URLSearchParams(window.location.search);
@@ -24,18 +27,64 @@ function initLibrary() {
         const searchInput = document.getElementById('bookSearchInput');
         if (searchInput) searchInput.value = searchParam;
     }
-    fetchBooks(1);
+
+    // استرجاع الكاش المحلي فوراً حتى تظهر الكتب مباشرة وبدون نت
+    loadCachedBooks();
+
+    // جلب أحدث الكتب إذا كان هناك اتصال بالإنترنت
+    if (navigator.onLine) {
+        fetchBooks(1);
+    } else {
+        libraryState.loading = false;
+        renderBooks();
+        if (libraryState.books.length > 0) {
+            const badge = document.getElementById('booksTotalBadge');
+            if (badge) badge.textContent = `${libraryState.books.length} كتاب (محفوظ أوفلاين)`;
+        }
+    }
+}
+
+function loadCachedBooks() {
+    try {
+        const cached = localStorage.getItem(STORAGE_LIBRARY_KEY);
+        const cachedTotal = localStorage.getItem(STORAGE_LIBRARY_TOTAL_KEY);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                libraryState.books = parsed;
+                libraryState.filteredBooks = [...parsed];
+                libraryState.totalCount = Number(cachedTotal) || parsed.length;
+                libraryState.loading = false;
+                const badge = document.getElementById('booksTotalBadge');
+                if (badge) badge.textContent = `${libraryState.totalCount} كتاب`;
+                renderBooks();
+            }
+        }
+    } catch (e) {
+        console.warn('Error loading cached library books:', e);
+    }
 }
 
 function getDownloadProxyUrl(url, title, extension) {
     if (!url) return '#';
-    const cleanTitle = (title || 'file').replace(/[\s\/\\?%*:|"<>]/g, '_');
-    return `/api/download-file?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(cleanTitle)}.${extension}`;
+    return url.replace(/^http:\/\//i, 'https://');
 }
 
 async function fetchBooks(page) {
-    libraryState.loading = true;
-    renderBooks();
+    if (!navigator.onLine) {
+        if (libraryState.books.length === 0) {
+            loadCachedBooks();
+        }
+        libraryState.loading = false;
+        renderBooks();
+        return;
+    }
+
+    // إذا لم يكن هناك كاش سابق، نعرض مؤشر التحميل
+    if (libraryState.books.length === 0) {
+        libraryState.loading = true;
+        renderBooks();
+    }
     
     try {
         const res = await fetch(`${ISLAMCONTENT_BASE_URL}/books/ar/ar/${page}/${libraryState.itemsPerPage}/json`)
@@ -53,17 +102,26 @@ async function fetchBooks(page) {
                 libraryState.totalCount = libraryState.books.length;
             }
             
-            document.getElementById('booksTotalBadge').textContent = `${libraryState.totalCount} كتاب`;
+            // حفظ في التخزين المؤقت المحلي للعمل أوفلاين
+            try {
+                localStorage.setItem(STORAGE_LIBRARY_KEY, JSON.stringify(libraryState.books));
+                localStorage.setItem(STORAGE_LIBRARY_TOTAL_KEY, String(libraryState.totalCount));
+            } catch (e) {}
+
+            const badge = document.getElementById('booksTotalBadge');
+            if (badge) badge.textContent = `${libraryState.totalCount} كتاب`;
             libraryState.loading = false;
             
             renderBooks();
             renderPagination(res.links);
-        } else {
+        } else if (libraryState.books.length === 0) {
             showErrorState('فشل استدعاء الكتب من المصدر.');
         }
     } catch (err) {
         console.error('Error fetching books:', err);
-        showErrorState('حدث خطأ أثناء الاتصال بمزود الخدمة.');
+        if (libraryState.books.length === 0) {
+            showErrorState('حدث خطأ أثناء الاتصال بمزود الخدمة.');
+        }
     }
 }
 
@@ -333,27 +391,73 @@ function openBookDetails(id) {
     if (modal) modal.style.display = 'flex';
 }
 
-function triggerBookDownload(book) {
-    if (!book.pdfUrl) {
-        if (window.FurqanToast) window.FurqanToast.error('تعذر العثور على رابط التحميل لهذا الكتاب.');
+async function triggerBookDownload(book) {
+    if (!book) return;
+
+    const cleanFilename = (book.title || 'كتاب_إسلامي').replace(/[\/\\?%*:|"<>\s]+/g, '_') + '.pdf';
+
+    // إذا كان الرابط متوفراً مسبقاً
+    if (book.pdfUrl) {
+        if (window.Fur9anBridge && typeof window.Fur9anBridge.downloadFile === 'function') {
+            window.Fur9anBridge.downloadFile(book.pdfUrl, cleanFilename, 'الفرقان');
+        } else if (typeof window.downloadFur9anFile === 'function') {
+            window.downloadFur9anFile(book.pdfUrl, cleanFilename);
+        } else {
+            const proxyUrl = `/api/download-file?url=${encodeURIComponent(book.pdfUrl)}&filename=${encodeURIComponent('الفرقان - ' + cleanFilename)}`;
+            const link = document.createElement('a');
+            link.href = proxyUrl;
+            link.setAttribute('download', 'الفرقان - ' + cleanFilename);
+            link.setAttribute('target', '_blank');
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => { if (document.body.contains(link)) document.body.removeChild(link); }, 3000);
+        }
         return;
     }
 
-    if (window.downloadFur9anFile) {
-        window.downloadFur9anFile(book.pdfUrl, `${book.title}.pdf`);
-    } else {
-        if (window.FurqanToast) window.FurqanToast.success(`جاري بدء تنزيل كتاب: ${book.title}...`);
-        const cleanFilename = (book.title || 'book').replace(/[\/\\?%*:|"<>\s]+/g, '_') + '.pdf';
-        const downloadUrl = `/api/download-file?url=${encodeURIComponent(book.pdfUrl)}&filename=${encodeURIComponent('الفرقان - ' + cleanFilename)}`;
-        
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.setAttribute('download', `الفرقان - ${cleanFilename}`);
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => {
-            if (link.parentNode) link.parentNode.removeChild(link);
-        }, 1500);
+    // إذا لم يكن الرابط في بيانات القائمة المختصرة، نجلبه فوراً من تفاصيل الكتاب
+    if (window.FurqanToast) window.FurqanToast.info(`جاري استدعاء ملف الكتاب: ${book.title}... 📥`);
+
+    try {
+        let rawDetail = null;
+        try {
+            const r = await fetch(`https://api3.islamhouse.com/v3/paV29H2gm56kvLPy/main/get-item/${book.id}/ar/json`);
+            if (r.ok) rawDetail = await r.json();
+        } catch(e) {}
+
+        if (!rawDetail) {
+            const proxyR = await fetch(`/api/islamhouse-item?id=${book.id}`);
+            if (proxyR.ok) rawDetail = await proxyR.json();
+        }
+
+        if (rawDetail && rawDetail.attachments && rawDetail.attachments.length > 0) {
+            const pdfAtt = rawDetail.attachments.find(a => 
+                (a.extension_type && a.extension_type.toLowerCase() === 'pdf') ||
+                (a.url && a.url.toLowerCase().includes('.pdf'))
+            );
+            const foundUrl = pdfAtt ? pdfAtt.url : rawDetail.attachments[0].url;
+            if (foundUrl) {
+                book.pdfUrl = foundUrl;
+                if (window.Fur9anBridge && typeof window.Fur9anBridge.downloadFile === 'function') {
+                    window.Fur9anBridge.downloadFile(foundUrl, cleanFilename, 'الفرقان');
+                } else {
+                    const proxyUrl = `/api/download-file?url=${encodeURIComponent(foundUrl)}&filename=${encodeURIComponent('الفرقان - ' + cleanFilename)}`;
+                    const link = document.createElement('a');
+                    link.href = proxyUrl;
+                    link.setAttribute('download', 'الفرقان - ' + cleanFilename);
+                    link.setAttribute('target', '_blank');
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => { if (document.body.contains(link)) document.body.removeChild(link); }, 3000);
+                }
+                return;
+            }
+        }
+
+        if (window.FurqanToast) window.FurqanToast.error('عذراً، لم يتوفر ملف PDF مباشر لهذا الكتاب في المصدر.');
+    } catch (err) {
+        console.error('Error fetching book attachment:', err);
+        if (window.FurqanToast) window.FurqanToast.error('تعذر استدعاء ملف الكتاب، يرجى المحاولة لاحقاً');
     }
 }
 

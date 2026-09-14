@@ -504,6 +504,11 @@
             if (sourceIdx >= sources.length) {
                 this.isPlaying = false;
                 this.updateUI();
+                if (!navigator.onLine) {
+                    if (window.showToast) window.showToast('أنت أوفلاين وهذه السورة غير محملة مسبقاً. يرجى الاتصال بالإنترنت.');
+                } else {
+                    if (window.showToast) window.showToast('تعذر تحميل المصدر الصوتي حالياً. يرجى المحاولة لاحقاً.');
+                }
                 return;
             }
 

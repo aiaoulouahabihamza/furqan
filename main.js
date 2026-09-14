@@ -141,51 +141,17 @@ function closeModal(modal) {
 }
 
 // ============================================
-// 5. مودال البروفايل ونظام المصادقة
+// 5. مودال البروفايل ونظام المصادقة الموحد
 // ============================================
 const profileBtn = document.getElementById('profileBtn');
-const profileModal = document.getElementById('profileModal');
-const profileClose = document.getElementById('profileClose');
-
 if (profileBtn) {
     profileBtn.addEventListener('click', () => {
         if (window.FurqanAuth && typeof window.FurqanAuth.open === 'function') {
             window.FurqanAuth.open();
-        } else if (profileModal) {
-            openModal(profileModal);
+        } else if (typeof window.openAuthModal === 'function') {
+            window.openAuthModal();
         }
     });
-}
-if (profileClose) profileClose.addEventListener('click', () => closeModal(profileModal));
-
-if (profileModal) {
-    profileModal.addEventListener('click', (e) => {
-        if (e.target === profileModal) closeModal(profileModal);
-    });
-}
-
-document.getElementById('profileSave')?.addEventListener('click', () => {
-    const data = {
-        name: document.getElementById('profileName')?.value || '',
-        city: document.getElementById('profileCity')?.value || '',
-        country: document.getElementById('profileCountry')?.value || '',
-    };
-    localStorage.setItem('profile', JSON.stringify(data));
-    showAppToast('تم حفظ الملف الشخصي بنجاح', 'success');
-    closeModal(profileModal);
-});
-
-const savedProfile = localStorage.getItem('profile');
-if (savedProfile) {
-    try {
-        const data = JSON.parse(savedProfile);
-        const nameInput = document.getElementById('profileName');
-        const cityInput = document.getElementById('profileCity');
-        const countryInput = document.getElementById('profileCountry');
-        if (nameInput) nameInput.value = data.name || '';
-        if (cityInput) cityInput.value = data.city || '';
-        if (countryInput) countryInput.value = data.country || '';
-    } catch(e) {}
 }
 
 // ============================================
@@ -593,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.getElementById('closeFurqanPopup') || document.getElementById('closeMishkatPopup');
     
     if (popup && closeBtn) {
-        const hasSeenWelcome = localStorage.getItem('furqan_update_v4_0');
+        const hasSeenWelcome = localStorage.getItem('furqan_update_v1_1_1');
         if (!hasSeenWelcome) {
             setTimeout(() => {
                 popup.classList.add('active');
@@ -602,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         closeBtn.addEventListener('click', () => {
             popup.classList.remove('active');
-            localStorage.setItem('furqan_update_v4_0', 'true');
+            localStorage.setItem('furqan_update_v1_1_1', 'true');
         });
     }
 });

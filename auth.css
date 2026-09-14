@@ -1,24 +1,26 @@
-/* ========================================= */
-/* نظام المصادقة والملف الشخصي - الفرقان   */
-/* ========================================= */
+/* ==========================================================================
+   نظام المصادقة والملف الشخصي الموحد - منصة الفرقان
+   تصميم إسلامي عصري فائق الجمال والدقة وسهل الاستخدام ومتجاوب بالكامل
+   ========================================================================== */
 
+/* الخلفية المظلمة الشفافة (Overlay) */
 .auth-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(18, 24, 26, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 99999;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 100000;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 16px;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
+    transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .auth-modal-overlay.active {
@@ -26,21 +28,26 @@
     visibility: visible;
 }
 
+/* بطاقة النافذة المنبثقة */
 .auth-modal-container {
-    background: var(--glass-card, #F8F4ED);
-    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.15));
-    border-radius: 20px;
+    background: var(--color-card, #FFFFFF);
+    border: 1px solid var(--color-border, rgba(226, 232, 240, 0.8));
+    border-radius: 24px;
     width: 100%;
     max-width: 440px;
-    max-height: 90vh;
+    max-height: calc(100vh - 32px);
     overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-    transform: translateY(20px) scale(0.97);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transform: translateY(16px) scale(0.96);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
     position: relative;
-    padding: 24px;
-    color: var(--color-text, #2C2C2C);
+    padding: 24px 22px;
+    color: var(--color-text, #1E293B);
     font-family: var(--font-cairo, 'Cairo', sans-serif);
+    direction: rtl;
+    text-align: right;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
 }
 
 .auth-modal-overlay.active .auth-modal-container {
@@ -50,61 +57,106 @@
 /* زر إغلاق النافذة */
 .auth-close-btn {
     position: absolute;
-    top: 16px;
-    left: 16px;
-    background: rgba(81, 73, 53, 0.08);
-    border: none;
-    width: 34px;
-    height: 34px;
+    top: 18px;
+    left: 18px;
+    background: var(--color-bg, rgba(241, 245, 249, 0.8));
+    border: 1px solid var(--color-border, rgba(226, 232, 240, 0.8));
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: var(--color-text, #2C2C2C);
+    color: var(--color-text-light, #64748B);
     font-size: 16px;
-    transition: background 0.2s, transform 0.2s;
+    transition: all 0.2s ease;
+    z-index: 10;
 }
 
 .auth-close-btn:hover {
-    background: rgba(81, 73, 53, 0.15);
-    transform: rotate(90deg);
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    border-color: rgba(239, 68, 68, 0.3);
+    transform: rotate(90deg) scale(1.05);
 }
 
-/* ترويسة النافذة */
+/* ترويسة النافذة والشعار */
 .auth-header {
     text-align: center;
     margin-bottom: 20px;
+    padding-top: 4px;
 }
 
 .auth-logo-badge {
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     margin: 0 auto 12px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--color-primary, #6A8EAE), var(--color-primary-dark, #416788));
-    color: #FFFFFF;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--color-primary, #0F766E), #0D9488);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    box-shadow: 0 6px 16px rgba(106, 142, 174, 0.3);
+    box-shadow: 0 8px 20px -4px rgba(15, 118, 110, 0.35);
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .auth-title {
-    font-size: 20px;
+    font-size: 21px;
     font-weight: 800;
-    margin: 0 0 4px;
-    color: var(--color-text, #2C2C2C);
+    margin: 0 0 6px;
+    color: var(--color-text, #0F172A);
+    letter-spacing: -0.3px;
 }
 
 .auth-subtitle {
     font-size: 13px;
-    color: var(--color-text-light, #706859);
+    color: var(--color-text-light, #64748B);
     margin: 0;
+    line-height: 1.55;
 }
 
-/* زر تسجيل الدخول بجوجل الموحد */
+/* شريط تبويب نمط الدخول / التسجيل */
+.auth-segmented-tabs {
+    display: flex;
+    background: var(--color-bg, #F1F5F9);
+    border-radius: 14px;
+    padding: 4px;
+    gap: 4px;
+    margin-bottom: 20px;
+    border: 1px solid var(--color-border, rgba(226, 232, 240, 0.8));
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--color-text-light, #64748B);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.auth-tab-btn.active {
+    background: var(--color-card, #FFFFFF);
+    color: var(--color-primary, #0F766E);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--color-text, #1E293B);
+}
+
+/* زر جوجل الموحد الفاخر */
 .google-auth-btn {
     width: 100%;
     display: flex;
@@ -113,37 +165,43 @@
     gap: 12px;
     padding: 12px 16px;
     background: #FFFFFF;
-    color: #3c4043;
-    border: 1px solid #dadce0;
-    border-radius: 12px;
+    color: #1F2937;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 14px;
     font-family: var(--font-cairo, 'Cairo', sans-serif);
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    margin-bottom: 18px;
 }
 
 .google-auth-btn:hover {
-    background: #F8FAFC;
-    border-color: #c2c7cf;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.google-auth-btn:active {
+    transform: translateY(0);
 }
 
 .google-icon-svg {
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
 }
 
-/* فاصل "أو عبر" */
+/* فاصل التدرج الأنيق */
 .auth-divider {
     display: flex;
     align-items: center;
     text-align: center;
     margin: 16px 0;
-    color: var(--color-text-lighter, #9E9584);
-    font-size: 12px;
+    color: var(--color-text-light, #94A3B8);
+    font-size: 12.5px;
     font-weight: 600;
 }
 
@@ -151,58 +209,25 @@
 .auth-divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid var(--color-border, rgba(81, 73, 53, 0.15));
+    border-bottom: 1px solid var(--color-border, rgba(226, 232, 240, 0.8));
 }
 
 .auth-divider span {
-    padding: 0 10px;
+    padding: 0 12px;
 }
 
-/* أزرار التبديل بين الطرق (البريد / الهاتف) */
-.auth-methods-nav {
-    display: flex;
-    background: rgba(81, 73, 53, 0.06);
-    border-radius: 12px;
-    padding: 4px;
-    gap: 4px;
-    margin-bottom: 18px;
-}
-
-.auth-method-tab {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    background: transparent;
-    border-radius: 8px;
-    font-family: var(--font-cairo, 'Cairo', sans-serif);
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--color-text-light, #706859);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.auth-method-tab.active {
-    background: var(--glass-card, #FFFFFF);
-    color: var(--color-primary, #6A8EAE);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-/* مجموعات الحقول */
+/* مجموعات الحقول والإدخالات */
 .auth-form-group {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
+    text-align: right;
 }
 
 .auth-label {
     display: block;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 700;
-    color: var(--color-text, #2C2C2C);
-    margin-bottom: 6px;
+    color: var(--color-text, #334155);
+    margin-bottom: 7px;
 }
 
 .auth-input-wrapper {
@@ -213,219 +238,190 @@
 
 .auth-input-icon {
     position: absolute;
-    right: 12px;
-    color: var(--color-text-lighter, #9E9584);
+    right: 14px;
+    color: var(--color-text-light, #94A3B8);
     font-size: 14px;
     pointer-events: none;
+    transition: color 0.2s;
 }
 
 .auth-input {
     width: 100%;
-    padding: 10px 38px 10px 14px;
-    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.2));
-    border-radius: 10px;
-    background: var(--color-bg, #FAF6EE);
+    padding: 11px 40px 11px 40px;
+    border: 1.5px solid var(--color-border, rgba(203, 213, 225, 0.8));
+    border-radius: 12px;
+    background: var(--color-bg, #F8FAFC);
     font-family: var(--font-cairo, 'Cairo', sans-serif);
     font-size: 14px;
-    color: var(--color-text, #2C2C2C);
+    color: var(--color-text, #0F172A);
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: all 0.2s ease;
 }
 
 .auth-input:focus {
-    border-color: var(--color-primary, #6A8EAE);
-    box-shadow: 0 0 0 3px rgba(106, 142, 174, 0.15);
+    background: var(--color-card, #FFFFFF);
+    border-color: var(--color-primary, #0F766E);
+    box-shadow: 0 0 0 3.5px rgba(15, 118, 110, 0.15);
 }
 
-/* إدخال رقم الهاتف مع مفتاح الدولة */
-.phone-input-row {
-    display: flex;
-    gap: 8px;
-    direction: ltr; /* لسهولة إدخال الرموز الدولية */
+.auth-input:focus + .auth-input-icon {
+    color: var(--color-primary, #0F766E);
 }
 
-.country-code-select {
-    width: 110px;
-    padding: 10px 8px;
-    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.2));
-    border-radius: 10px;
-    background: var(--color-bg, #FAF6EE);
-    font-family: var(--font-cairo, 'Cairo', sans-serif);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text, #2C2C2C);
-    outline: none;
-    cursor: pointer;
-}
-
-.phone-number-input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.2));
-    border-radius: 10px;
-    background: var(--color-bg, #FAF6EE);
-    font-family: var(--font-cairo, 'Cairo', sans-serif);
-    font-size: 15px;
-    letter-spacing: 1px;
-    color: var(--color-text, #2C2C2C);
-    outline: none;
-    direction: ltr;
-}
-
-.phone-number-input:focus,
-.country-code-select:focus {
-    border-color: var(--color-primary, #6A8EAE);
-    box-shadow: 0 0 0 3px rgba(106, 142, 174, 0.15);
-}
-
-/* رمز التحقق OTP */
-.otp-input-wrapper {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    direction: ltr;
-    margin: 16px 0;
-}
-
-.otp-digit-input {
-    width: 44px;
-    height: 52px;
-    border: 2px solid var(--color-border, rgba(81, 73, 53, 0.2));
-    border-radius: 12px;
-    background: var(--color-bg, #FAF6EE);
-    font-size: 22px;
-    font-weight: 800;
-    text-align: center;
-    color: var(--color-primary, #6A8EAE);
-    outline: none;
-    transition: all 0.2s;
-}
-
-.otp-digit-input:focus {
-    border-color: var(--color-primary, #6A8EAE);
-    box-shadow: 0 0 0 3px rgba(106, 142, 174, 0.2);
-    transform: translateY(-2px);
-}
-
-/* أزرار الإرسال والإجراءات */
-.auth-primary-btn {
-    width: 100%;
-    padding: 12px;
+/* زر إظهار/إخفاء كلمة المرور */
+.auth-eye-btn {
+    position: absolute;
+    left: 10px;
+    background: transparent;
     border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--color-primary, #6A8EAE), var(--color-primary-dark, #416788));
-    color: #FFFFFF;
-    font-family: var(--font-cairo, 'Cairo', sans-serif);
-    font-size: 15px;
-    font-weight: 700;
+    color: var(--color-text-light, #94A3B8);
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(106, 142, 174, 0.3);
+    padding: 6px;
+    font-size: 14px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    transition: color 0.2s;
+}
+
+.auth-eye-btn:hover {
+    color: var(--color-primary, #0F766E);
+}
+
+.auth-forgot-link {
+    display: inline-block;
+    background: none;
+    border: none;
+    color: var(--color-primary, #0F766E);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+    padding: 2px 0;
+    transition: opacity 0.2s;
+}
+
+.auth-forgot-link:hover {
+    text-decoration: underline;
+}
+
+/* الزر الأساسي */
+.auth-primary-btn {
+    width: 100%;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--color-primary, #0F766E), #0D9488);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 14px;
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 14.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.3);
     margin-top: 8px;
 }
 
 .auth-primary-btn:hover {
+    opacity: 0.95;
+    box-shadow: 0 6px 18px rgba(15, 118, 110, 0.4);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(106, 142, 174, 0.4);
+}
+
+.auth-primary-btn:active {
+    transform: translateY(0);
 }
 
 .auth-primary-btn:disabled {
-    opacity: 0.6;
+    opacity: 0.65;
     cursor: not-allowed;
     transform: none;
 }
 
-.auth-secondary-btn {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.2));
-    border-radius: 10px;
-    background: transparent;
-    color: var(--color-text-light, #706859);
-    font-family: var(--font-cairo, 'Cairo', sans-serif);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 8px;
-}
-
-.auth-secondary-btn:hover {
-    background: rgba(81, 73, 53, 0.05);
-}
-
-/* روابط التبديل ونسيان كلمة المرور */
-.auth-switch-prompt {
-    text-align: center;
-    margin-top: 14px;
-    font-size: 13px;
-    color: var(--color-text-light, #706859);
-}
-
-.auth-switch-link {
-    color: var(--color-primary, #6A8EAE);
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: underline;
-    background: none;
-    border: none;
-    padding: 0;
-    font-family: inherit;
-    font-size: inherit;
-}
-
-.auth-forgot-link {
-    display: block;
-    text-align: left;
-    font-size: 12px;
-    color: var(--color-primary, #6A8EAE);
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 4px;
-    background: none;
-    border: none;
-    padding: 0;
-}
-
-/* تنبيهات الحالة والأخطاء */
+/* صندوق التنبيهات */
 .auth-alert {
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 14px;
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    text-align: right;
+    animation: authAlertFade 0.25s ease-out;
+}
+
+@keyframes authAlertFade {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .auth-alert-error {
-    background: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #dc2626;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #991B1B;
+}
+
+.auth-alert-error i {
+    color: #DC2626;
+    font-size: 15px;
+    margin-top: 2px;
 }
 
 .auth-alert-success {
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #059669;
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    color: #166534;
 }
 
-/* ========================================= */
-/* واجهة الملف الشخصي للمستخدم المسجل        */
-/* ========================================= */
-.profile-card-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.auth-alert-success i {
+    color: #16A34A;
+    font-size: 15px;
+    margin-top: 2px;
+}
+
+/* تذييل تبديل الحساب */
+.auth-switch-prompt {
     text-align: center;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--color-border, rgba(81, 73, 53, 0.12));
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--color-text-light, #64748B);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.auth-switch-link {
+    background: none;
+    border: none;
+    color: var(--color-primary, #0F766E);
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0;
+    transition: all 0.2s;
+}
+
+.auth-switch-link:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   واجهة الملف الشخصي للمستخدم المسجل (Profile View)
+   ========================================================================== */
+
+.profile-card-header {
+    text-align: center;
+    padding-bottom: 16px;
     margin-bottom: 16px;
+    border-bottom: 1px solid var(--color-border, rgba(226, 232, 240, 0.8));
     position: relative;
 }
 
@@ -433,11 +429,7 @@
     position: relative;
     width: 80px;
     height: 80px;
-    border-radius: 50%;
-    margin-bottom: 12px;
-    padding: 3px;
-    background: linear-gradient(135deg, var(--color-primary, #6A8EAE), var(--color-gold, #C9A227));
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    margin: 0 auto 12px;
 }
 
 .profile-avatar-img {
@@ -445,90 +437,251 @@
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    background: #FFF;
+    border: 3px solid var(--color-primary, #0F766E);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
 }
 
 .profile-avatar-placeholder {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: var(--color-primary, #6A8EAE);
-    color: #FFF;
+    background: linear-gradient(135deg, var(--color-primary, #0F766E), #0D9488);
+    color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
+    font-size: 32px;
     font-weight: 800;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+    border: 3px solid var(--color-card, #FFFFFF);
 }
 
 .profile-online-badge {
     position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 16px;
-    height: 16px;
+    bottom: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    background: #10B981;
     border-radius: 50%;
-    background: #10b981;
-    border: 2px solid var(--glass-card, #F8F4ED);
+    border: 2.5px solid var(--color-card, #FFFFFF);
+}
+
+.profile-avatar-edit-badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--color-primary, #0F766E);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border: 2px solid var(--color-card, #FFFFFF);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.profile-avatar-edit-badge:hover {
+    transform: scale(1.1);
+    background: #0D9488;
+}
+
+.profile-name-edit-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 4px;
 }
 
 .profile-user-name {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 800;
-    color: var(--color-text, #2C2C2C);
-    margin: 0 0 4px;
-}
-
-.profile-user-contact {
-    font-size: 13px;
-    color: var(--color-text-light, #706859);
+    color: var(--color-text, #0F172A);
     margin: 0;
+}
+
+.profile-mini-edit-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-light, #64748B);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.2s;
+}
+
+.profile-mini-edit-btn:hover {
+    color: var(--color-primary, #0F766E);
+}
+
+.profile-user-email {
+    font-size: 12.5px;
+    color: var(--color-text-light, #64748B);
+    margin: 0 0 8px;
     direction: ltr;
-    display: inline-block;
 }
 
-.profile-provider-pill {
-    margin-top: 8px;
-    padding: 3px 12px;
-    border-radius: 9999px;
-    font-size: 11px;
-    font-weight: 700;
-    background: rgba(106, 142, 174, 0.12);
-    color: var(--color-primary, #6A8EAE);
-    display: inline-flex;
+.profile-bio-box {
+    margin: 8px auto 10px;
+    padding: 8px 14px;
+    background: rgba(15, 118, 110, 0.06);
+    border: 1px dashed rgba(15, 118, 110, 0.25);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--color-text, #0F172A);
+    display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* إحصائيات سريعة في البروفايل */
+.profile-bio-box:hover {
+    background: rgba(15, 118, 110, 0.1);
+    border-color: var(--color-primary, #0F766E);
+}
+
+/* شبكة الإحصائيات */
 .profile-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .profile-stat-box {
-    background: rgba(81, 73, 53, 0.04);
-    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.1));
-    border-radius: 12px;
+    background: var(--color-bg, #F8FAFC);
+    border: 1px solid var(--color-border, rgba(226, 232, 240, 0.8));
+    border-radius: 14px;
     padding: 10px 6px;
     text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.profile-stat-box:hover {
+    transform: translateY(-2px);
+    border-color: rgba(15, 118, 110, 0.3);
 }
 
 .profile-stat-num {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 800;
-    color: var(--color-primary, #6A8EAE);
+    color: var(--color-primary, #0F766E);
     margin-bottom: 2px;
 }
 
 .profile-stat-label {
     font-size: 11px;
-    color: var(--color-text-lighter, #9E9584);
+    font-weight: 700;
+    color: var(--color-text-light, #64748B);
 }
 
-/* أزرار إدارة الحساب */
+/* بطاقة برنامج الختمة */
+.profile-khatma-card {
+    background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(13, 148, 136, 0.04));
+    border: 1.5px solid rgba(15, 118, 110, 0.2);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.khatma-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.khatma-card-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--color-primary, #0F766E);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.khatma-badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(15, 118, 110, 0.15);
+    color: var(--color-primary, #0F766E);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.khatma-progress-track {
+    height: 7px;
+    background: rgba(226, 232, 240, 0.8);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.khatma-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #0F766E, #14B8A6);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.khatma-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: var(--color-text-light, #64748B);
+    margin-bottom: 10px;
+}
+
+.khatma-btns-row {
+    display: flex;
+    gap: 8px;
+}
+
+.khatma-btn {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.khatma-btn.primary {
+    background: var(--color-primary, #0F766E);
+    color: #FFFFFF;
+}
+
+.khatma-btn.primary:hover {
+    background: #0D9488;
+}
+
+.khatma-btn.secondary {
+    background: var(--color-card, #FFFFFF);
+    color: var(--color-text, #1E293B);
+    border: 1px solid var(--color-border, rgba(203, 213, 225, 0.8));
+}
+
+.khatma-btn.secondary:hover {
+    background: var(--color-bg, #F8FAFC);
+}
+
+/* قائمة إجراءات الحساب */
 .profile-actions-list {
     display: flex;
     flex-direction: column;
@@ -537,13 +690,13 @@
 
 .profile-action-btn {
     width: 100%;
-    padding: 11px 16px;
-    border-radius: 12px;
-    border: 1px solid var(--color-border, rgba(81, 73, 53, 0.15));
-    background: var(--glass-card, #FFFFFF);
-    color: var(--color-text, #2C2C2C);
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1.5px solid var(--color-border, rgba(226, 232, 240, 0.8));
+    background: var(--color-card, #FFFFFF);
+    color: var(--color-text, #1E293B);
     font-family: var(--font-cairo, 'Cairo', sans-serif);
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -553,60 +706,37 @@
 }
 
 .profile-action-btn:hover {
-    border-color: var(--color-primary, #6A8EAE);
-    background: rgba(106, 142, 174, 0.05);
+    border-color: var(--color-primary, #0F766E);
+    background: rgba(15, 118, 110, 0.04);
     transform: translateY(-1px);
 }
 
 .profile-action-btn.logout {
-    color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.2);
-    background: rgba(239, 68, 68, 0.04);
+    color: #DC2626;
+    border-color: #FEE2E2;
+    background: #FEF2F2;
+    margin-top: 4px;
 }
 
 .profile-action-btn.logout:hover {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: #ef4444;
+    background: #FEE2E2;
+    border-color: #FCA5A5;
 }
 
-/* زر تعديل الصورة وتغيير البروفايل */
-.profile-avatar-edit-badge {
-    position: absolute;
-    bottom: -2px;
-    left: -2px;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--color-primary, #6A8EAE);
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    border: 2px solid var(--glass-card, #F8F4ED);
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s, background-color 0.2s;
-}
-.profile-avatar-edit-badge:hover {
-    transform: scale(1.1);
-    background: var(--color-primary-dark, #466C8C);
-}
-
-/* شارة البروفايل في الهيدر */
+/* شارات الهيدر الموحدة */
 .header-profile-avatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--color-primary, #6A8EAE);
+    border: 2px solid var(--color-primary, #0F766E);
 }
 
 .header-profile-letter {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--color-primary, #6A8EAE);
+    background: linear-gradient(135deg, var(--color-primary, #0F766E), #0D9488);
     color: #FFFFFF;
     display: flex;
     align-items: center;
@@ -615,337 +745,89 @@
     font-weight: 800;
 }
 
-/* بطاقة الختمة وتفاصيل الملف الشخصي المحدثة */
-.profile-name-edit-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin: 4px 0 2px;
-}
-
-.profile-mini-edit-btn {
-    background: none;
-    border: none;
-    color: var(--color-text-light, #64748B);
-    font-size: 13px;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 6px;
-    transition: color 0.2s, background-color 0.2s;
-}
-
-.profile-mini-edit-btn:hover {
-    color: var(--color-primary, #2D4B68);
-    background: rgba(45, 75, 104, 0.08);
-}
-
-.profile-bio-box {
-    margin: 10px auto 12px;
-    padding: 8px 14px;
-    background: rgba(45, 75, 104, 0.05);
-    border: 1px dashed rgba(45, 75, 104, 0.2);
-    border-radius: 12px;
-    font-size: 12.5px;
-    color: var(--color-text, #1E293B);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    max-width: 90%;
-    transition: background 0.2s, border-color 0.2s;
-}
-
-.profile-bio-box:hover {
-    background: rgba(45, 75, 104, 0.09);
-    border-color: var(--color-primary, #2D4B68);
-}
-
-.bio-quote-icon {
-    color: var(--color-primary, #2D4B68);
-    font-size: 11px;
-    opacity: 0.7;
-}
-
-.bio-edit-icon {
-    color: var(--color-text-light, #64748B);
-    font-size: 11px;
-    margin-right: auto;
-}
-
-.profile-badges-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
-}
-
-.profile-sync-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-    border-radius: 9999px;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.profile-khatma-card {
-    background: linear-gradient(135deg, rgba(45, 75, 104, 0.06), rgba(15, 118, 110, 0.06));
-    border: 1px solid rgba(45, 75, 104, 0.15);
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin: 12px 0 16px;
-    transition: transform 0.2s, border-color 0.2s;
-}
-
-.profile-khatma-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--color-primary, #2D4B68);
-}
-
-.khatma-card-top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.khatma-icon-box {
-    width: 34px;
-    height: 34px;
-    background: var(--color-primary, #2D4B68);
-    color: #FFFFFF;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-}
-
-.khatma-details {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    text-align: right;
-}
-
-.khatma-title {
-    font-size: 12px;
-    font-weight: 800;
-    color: var(--color-text, #1E293B);
-}
-
-.khatma-status {
-    font-size: 11px;
-    color: var(--color-text-light, #64748B);
-    font-weight: 600;
-}
-
-.khatma-percent-badge {
-    font-size: 12px;
-    font-weight: 800;
-    color: var(--color-primary, #2D4B68);
-    background: rgba(45, 75, 104, 0.1);
-    padding: 3px 8px;
-    border-radius: 9999px;
-}
-
-.khatma-progress-track {
+/* ==========================================================================
+   نافذة تأكيد تسجيل الخروج
+   ========================================================================== */
+.confirm-dialog-card {
+    background: var(--color-card, #FFFFFF);
+    border: 1px solid var(--color-border, rgba(226, 232, 240, 0.8));
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    max-width: 380px;
     width: 100%;
-    height: 6px;
-    background: rgba(0, 0, 0, 0.08);
-    border-radius: 9999px;
-    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: authAlertFade 0.25s ease-out;
 }
 
-.khatma-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #10B981, #2D4B68);
-    border-radius: 9999px;
-    transition: width 0.4s ease;
-}
-
-.profile-action-btn.highlight {
-    background: rgba(91, 192, 190, 0.1);
-    border-color: rgba(91, 192, 190, 0.4);
-    color: var(--color-primary, #2D4B68);
-    font-weight: 700;
-}
-
-/* ========================================= */
-/* نموذج تعديل الملف الشخصي والنبذة الإيمانية */
-/* ========================================= */
-.edit-profile-form-wrap {
-    animation: fadeInModal 0.25s ease;
-}
-
-@keyframes fadeInModal {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.edit-profile-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--color-border, rgba(81, 73, 53, 0.15));
-}
-
-.edit-profile-back-btn {
-    background: rgba(81, 73, 53, 0.08);
-    border: none;
-    width: 32px;
-    height: 32px;
+.confirm-icon-danger {
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    color: var(--color-text, #1E293B);
+    background: #FEE2E2;
+    color: #DC2626;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 22px;
+    margin: 0 auto 12px;
+}
+
+.confirm-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-text, #0F172A);
+    margin: 0 0 6px;
+}
+
+.confirm-desc {
+    font-size: 13px;
+    color: var(--color-text-light, #64748B);
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-confirm-danger {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 12px;
+    background: #DC2626;
+    color: #FFFFFF;
+    border: none;
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 13.5px;
+    font-weight: 700;
     cursor: pointer;
-    font-size: 14px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-confirm-danger:hover {
+    background: #B91C1C;
+}
+
+.btn-confirm-cancel {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 12px;
+    background: var(--color-bg, #F1F5F9);
+    color: var(--color-text, #1E293B);
+    border: 1px solid var(--color-border, rgba(203, 213, 225, 0.8));
+    font-family: var(--font-cairo, 'Cairo', sans-serif);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
     transition: background 0.2s;
 }
 
-.edit-profile-back-btn:hover {
-    background: rgba(81, 73, 53, 0.15);
+.btn-confirm-cancel:hover {
+    background: #E2E8F0;
 }
-
-.edit-profile-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--color-text, #1E293B);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.profile-avatar-edit-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    margin: 14px 0;
-}
-
-.edit-avatar-preview {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #5BC0BE;
-    box-shadow: 0 4px 14px rgba(91, 192, 190, 0.25);
-}
-
-.edit-avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.edit-avatar-placeholder {
-    width: 100%;
-    height: 100%;
-    background: #5BC0BE;
-    color: #FFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: 800;
-}
-
-.edit-avatar-btns {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.btn-avatar-choice {
-    background: #FAF4EC;
-    border: 1px solid #D8B887;
-    color: #1E293B;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 11.5px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-avatar-choice:hover {
-    background: #5BC0BE;
-    color: #FFF;
-    border-color: #5BC0BE;
-}
-
-.btn-avatar-choice.danger {
-    color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.3);
-    background: rgba(239, 68, 68, 0.05);
-}
-
-.btn-avatar-choice.danger:hover {
-    background: #ef4444;
-    color: #FFF;
-}
-
-/* اقتراحات النبذة */
-.bio-presets-section {
-    margin: 12px 0 16px;
-}
-
-.bio-presets-label {
-    display: block;
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--color-text-light, #64748B);
-    margin-bottom: 6px;
-}
-
-.bio-presets-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.bio-chip-btn {
-    background: #FAF4EC;
-    border: 1px solid rgba(216, 184, 135, 0.6);
-    color: #1E293B;
-    border-radius: 14px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.bio-chip-btn:hover {
-    background: #5BC0BE;
-    color: #FFF;
-    border-color: #5BC0BE;
-}
-
-.edit-profile-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 16px;
-}
-
-

@@ -57,6 +57,27 @@ function sanitizeFilename(name) {
 }
 
 // Endpoint for direct downloads (audio and pdf) with forced headers
+app.get('/furqan-project.zip', (req, res) => {
+  const zipPath = path.join(__dirname, 'furqan-project.zip');
+  if (fs.existsSync(zipPath)) {
+    res.setHeader('Content-Disposition', 'attachment; filename="furqan-project.zip"');
+    res.setHeader('Content-Type', 'application/zip');
+    return res.sendFile(zipPath);
+  }
+  res.status(404).send('Archive not found');
+});
+
+app.get('/api/download-project', (req, res) => {
+  const zipPath = path.join(__dirname, 'furqan-project.zip');
+  if (fs.existsSync(zipPath)) {
+    res.setHeader('Content-Disposition', 'attachment; filename="furqan-project.zip"');
+    res.setHeader('Content-Type', 'application/zip');
+    return res.sendFile(zipPath);
+  }
+  res.status(404).send('Archive not found');
+});
+
+// Endpoint for direct downloads (audio and pdf) with forced headers
 app.get('/api/download-file', async (req, res) => {
   const fileUrl = req.query.url;
   const rawFilename = req.query.filename || 'download';
@@ -65,27 +86,49 @@ app.get('/api/download-file', async (req, res) => {
     return res.status(400).send('Missing file URL');
   }
 
-  if (!isSafeUrl(fileUrl)) {
+  // Handle case if client passed a relative proxy url
+  let actualUrl = fileUrl;
+  if (fileUrl.startsWith('/api/download-file?') || fileUrl.includes('/api/download-file?url=')) {
+    try {
+      const match = fileUrl.match(/[?&]url=([^&]+)/);
+      if (match) actualUrl = decodeURIComponent(match[1]);
+    } catch (e) {}
+  }
+
+  if (!isSafeUrl(actualUrl)) {
     return res.status(403).send('Invalid or restricted file URL');
   }
   
   const filename = sanitizeFilename(rawFilename);
-  const cleanUrl = fileUrl.replace(/^http:\/\//i, 'https://');
+  const cleanUrl = actualUrl.replace(/^http:\/\//i, 'https://');
   
   try {
+    let referer = 'https://islamhouse.com/';
+    try {
+      const parsed = new URL(cleanUrl);
+      referer = `${parsed.protocol}//${parsed.hostname}/`;
+    } catch(e) {}
+
     const response = await fetch(cleanUrl, {
+      redirect: 'follow',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://islamhouse.com/'
+        'Referer': referer,
+        'Accept': '*/*'
       }
     });
+
     if (!response.ok) {
       return res.status(response.status).send(`Failed to fetch file: ${response.statusText}`);
     }
     
     // Set response headers to force download and set correct content type
-    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+    const asciiFallback = filename.replace(/[^\x20-\x7E]/g, '_');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
     res.setHeader('Content-Type', response.headers.get('content-type') || 'application/octet-stream');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length');
+    
     const contentLength = response.headers.get('content-length');
     if (contentLength) {
       res.setHeader('Content-Length', contentLength);
@@ -103,21 +146,39 @@ app.get('/api/proxy-audio', async (req, res) => {
   const fileUrl = req.query.url;
   if (!fileUrl) return res.status(400).send('Missing audio URL');
   
-  if (!isSafeUrl(fileUrl)) {
+  let actualUrl = fileUrl;
+  if (fileUrl.startsWith('/api/proxy-audio?') || fileUrl.includes('/api/proxy-audio?url=')) {
+    try {
+      const match = fileUrl.match(/[?&]url=([^&]+)/);
+      if (match) actualUrl = decodeURIComponent(match[1]);
+    } catch (e) {}
+  }
+
+  if (!isSafeUrl(actualUrl)) {
     return res.status(403).send('Invalid or restricted audio URL');
   }
 
-  const cleanUrl = fileUrl.replace(/^http:\/\//i, 'https://');
+  const cleanUrl = actualUrl.replace(/^http:\/\//i, 'https://');
   try {
+    let referer = 'https://islamhouse.com/';
+    try {
+      const parsed = new URL(cleanUrl);
+      referer = `${parsed.protocol}//${parsed.hostname}/`;
+    } catch(e) {}
+
     const range = req.headers.range;
     const fetchHeaders = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Referer': 'https://islamhouse.com/'
+      'Referer': referer,
+      'Accept': '*/*'
     };
     if (range) {
       fetchHeaders['Range'] = range;
     }
-    const response = await fetch(cleanUrl, { headers: fetchHeaders });
+    const response = await fetch(cleanUrl, { 
+      redirect: 'follow',
+      headers: fetchHeaders 
+    });
     res.status(response.status);
     ['content-type', 'content-length', 'content-range', 'accept-ranges'].forEach(h => {
       const val = response.headers.get(h);

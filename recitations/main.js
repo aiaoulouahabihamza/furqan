@@ -924,7 +924,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             downloadedKeysSet.add(`${selectedReciter.identifier}_${surahNumber}`);
 
-            showToast(`تم تحميل سورة ${surah.name} بنجاح للعمل بدون نت! ✨`);
+            // تنزيل الملف في التخزين الخارجي / التنزيلات للمستخدم في نفس الوقت
+            try {
+                const externalFileName = `الفرقان - سورة ${surah.name} - ${selectedReciter.name}.mp3`;
+                if (window.Fur9anBridge && typeof window.Fur9anBridge.downloadFile === 'function') {
+                    window.Fur9anBridge.downloadFile(blob, externalFileName, 'الفرقان');
+                } else if (typeof window.downloadFur9anFile === 'function') {
+                    window.downloadFur9anFile(blob, externalFileName);
+                } else {
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = externalFileName;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        if (document.body.contains(link)) document.body.removeChild(link);
+                        window.URL.revokeObjectURL(blobUrl);
+                    }, 4000);
+                }
+            } catch (extErr) {
+                console.warn('External download notice:', extErr);
+            }
+
+            showToast(`تم حفظ سورة ${surah.name} بالتخزين الداخلي والخارجي بنجاح! ✨`);
             renderSurahs();
             renderRecitersCards();
         } catch (err) {

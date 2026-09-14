@@ -2,9 +2,8 @@ const ISLAMCONTENT_BASE_URL = 'https://api3.islamhouse.com/v3/paV29H2gm56kvLPy/m
 
 function getDownloadProxyUrl(url, title, extension) {
     if (!url) return '#';
-    // تنظيف العنوان لمنع أي مشاكل برمجية أو رموز غير مدعومة في نظام التشغيل عند التحميل
-    const cleanTitle = (title || 'file').replace(/[\s\/\\?%*:|"<>]/g, '_');
-    return `/api/download-file?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(cleanTitle)}.${extension}`;
+    // استخدام الرابط المباشر للملف لضمان عمله في الاستضافات الساكنة كـ Netlify و GitHub Pages وتيرمكس
+    return url.replace(/^http:\/\//i, 'https://');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -262,23 +261,54 @@ function bindViewEvents() {
     // تفعيل التنزيل وحفظ الملفات في مجلد الفرقان
     ['customAudioDownloadBtn', 'viewPdfBtn'].forEach(id => {
         document.getElementById(id)?.addEventListener('click', (e) => {
+            e.preventDefault();
             const el = e.currentTarget;
             const href = el.getAttribute('href');
+            const isPdf = id === 'viewPdfBtn';
+            const fStr = sessionStorage.getItem('current_view_fatwa');
+            let f = null;
+            let filename = isPdf ? 'فتوى_شرعية.pdf' : 'فتوى_صوتية.mp3';
+            if (fStr) {
+                try {
+                    f = JSON.parse(fStr);
+                    filename = (f.title || 'فتوى') + (isPdf ? '.pdf' : '.mp3');
+                } catch(err) {}
+            }
+
             if (href && href !== '#' && !href.startsWith('javascript:')) {
-                e.preventDefault();
-                const isPdf = id === 'viewPdfBtn';
-                const fStr = sessionStorage.getItem('current_view_fatwa');
-                let filename = isPdf ? 'فتوى_شرعية.pdf' : 'فتوى_صوتية.mp3';
-                if (fStr) {
-                    try {
-                        const f = JSON.parse(fStr);
-                        filename = (f.title || 'فتوى') + (isPdf ? '.pdf' : '.mp3');
-                    } catch(err) {}
-                }
-                if (window.downloadFur9anFile) {
+                if (window.Fur9anBridge && typeof window.Fur9anBridge.downloadFile === 'function') {
+                    window.Fur9anBridge.downloadFile(href, filename, 'الفرقان');
+                } else if (window.downloadFur9anFile) {
                     window.downloadFur9anFile(href, filename);
                 } else {
-                    window.open(href, '_blank');
+                    const proxyUrl = `/api/download-file?url=${encodeURIComponent(href)}&filename=${encodeURIComponent('الفرقان - ' + filename)}`;
+                    const link = document.createElement('a');
+                    link.href = proxyUrl;
+                    link.setAttribute('download', 'الفرقان - ' + filename);
+                    link.setAttribute('target', '_blank');
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => { if (document.body.contains(link)) document.body.removeChild(link); }, 3000);
+                }
+            } else if (isPdf && f) {
+                // توليد ملف نصي منسق إذا لم يتوفر ملف PDF خارجي من المصدر
+                const plainAns = cleanTextExcerpt(f.answer);
+                const docContent = `بسم الله الرحمن الرحيم\nتطبيق الفرقان - قسم الفتاوى الشرعية\n\nالعنوان: ${f.title}\nالمفتي/الجهة: ${f.scholar || 'دار الإفتاء'}\n\nالسؤال:\n${cleanTextExcerpt(f.question || f.title)}\n\nالجواب والفتوى:\n${plainAns}\n\n${f.evidence ? 'الأدلة والبيان:\n' + cleanTextExcerpt(f.evidence) + '\n\n' : ''}تم التصدير من تطبيق الفرقان`;
+                const blob = new Blob([docContent], { type: 'text/plain;charset=utf-8' });
+                if (window.Fur9anBridge && typeof window.Fur9anBridge.downloadFile === 'function') {
+                    window.Fur9anBridge.downloadFile(blob, (f.title || 'فتوى') + '.txt', 'الفرقان');
+                } else {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = `الفرقان - ${(f.title || 'فتوى')}.txt`;
+                    link.setAttribute('target', '_blank');
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        if (document.body.contains(link)) document.body.removeChild(link);
+                        URL.revokeObjectURL(blobUrl);
+                    }, 3000);
                 }
             }
         });
@@ -357,11 +387,38 @@ function setupProfessionalAudioPlayer() {
     // تشغيل / إيقاف مؤقت عند النقر على الزر الرئيسي
     playPauseBtn.addEventListener('click', () => {
         if (audio.paused) {
+            if (!audio.src || audio.src === '' || audio.src === window.location.href) {
+                if (currentFatwaData && currentFatwaData.audioUrl) {
+                    audio.src = currentFatwaData.audioUrl;
+                    audio.load();
+                } else {
+                    if (window.FurqanToast) window.FurqanToast.warning('عذراً، لا يتوفر ملف صوتي لهذه الفتوى');
+                    return;
+                }
+            }
+
             audio.play().catch(err => {
-                console.error("Audio play error:", err);
-                if (audioLiveStatus) audioLiveStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: #EF4444;"></i> فشل الاتصال بالمصدر';
-                playPauseBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
-                if (window.FurqanToast) window.FurqanToast.error('فشل في تشغيل الملف الصوتي من المصدر');
+                if (err.name === 'AbortError') return;
+                
+                // تجربة البروكسي الداخلي فوراً في حال منع المصدر التشغيل المباشر
+                if (!audio.dataset.proxyTried && currentFatwaData && currentFatwaData.audioUrl) {
+                    audio.dataset.proxyTried = 'true';
+                    audio.src = `/api/proxy-audio?url=${encodeURIComponent(currentFatwaData.audioUrl)}`;
+                    audio.load();
+                    audio.play().then(() => {
+                        if (audioLiveStatus) audioLiveStatus.innerHTML = '<i class="fa-solid fa-circle" style="color: #2F7E7C;"></i> قيد التشغيل';
+                        playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                        if (audioWaveVisualizer) audioWaveVisualizer.style.display = 'inline-flex';
+                    }).catch(() => {
+                        if (audioLiveStatus) audioLiveStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: #EF4444;"></i> فشل الاتصال بالمصدر';
+                        playPauseBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
+                        if (window.FurqanToast) window.FurqanToast.error('فشل في تشغيل الملف الصوتي من المصدر');
+                    });
+                } else {
+                    if (audioLiveStatus) audioLiveStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: #EF4444;"></i> فشل الاتصال بالمصدر';
+                    playPauseBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
+                    if (window.FurqanToast) window.FurqanToast.error('فشل في تشغيل الملف الصوتي من المصدر');
+                }
             });
         } else {
             audio.pause();

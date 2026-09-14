@@ -1225,6 +1225,18 @@
             }
 
             function playAudio() {
+                const currentTrack = activeParts[activeIndex];
+                if (!currentTrack || !currentTrack.url) {
+                    showToast('عذراً، لم يتوفر ملف صوتي صالح لهذا المقطع', 'warning');
+                    return;
+                }
+
+                if (!audioContext.src || audioContext.src === '' || audioContext.src === window.location.href) {
+                    let safeUrl = (currentTrack.url || '').replace(/^http:\/\//i, 'https://');
+                    audioContext.src = safeUrl;
+                    audioContext.load();
+                }
+
                 playPromise = audioContext.play();
                 if (playPromise !== undefined && playPromise !== null) {
                     playPromise.then(() => {
@@ -1236,8 +1248,8 @@
                     }).catch(err => {
                         playPromise = null;
                         if (err.name === 'AbortError') return;
-                        console.error('Audio play error:', err);
-                        const currentTrack = activeParts[activeIndex];
+                        
+                        // محاولة فورية عبر البروكسي عند فشل التشغيل المباشر
                         if (!audioContext.dataset.fallbackTried && currentTrack && currentTrack.url) {
                             audioContext.dataset.fallbackTried = 'true';
                             audioContext.src = `/api/proxy-audio?url=${encodeURIComponent(currentTrack.url)}`;
@@ -1482,18 +1494,22 @@
         }
 
         function triggerDirectDownload(url, filename) {
-            if (window.downloadFur9anFile) {
-                window.downloadFur9anFile(url, `${filename}.mp3`);
+            if (!url) return;
+            const cleanFilename = (filename || 'مقطع_صوتي').replace(/[\/\\?%*:|"<>\s]+/g, '_') + '.mp3';
+            if (window.Fur9anBridge && typeof window.Fur9anBridge.downloadFile === 'function') {
+                window.Fur9anBridge.downloadFile(url, cleanFilename, 'الفرقان');
+            } else if (window.downloadFur9anFile) {
+                window.downloadFur9anFile(url, cleanFilename);
             } else {
                 showToast('جاري بدء تحميل الملف في مجلد الفرقان...', 'success');
-                const cleanFilename = filename.replace(/[\/\\?%*:|"<>\s]+/g, '_') + '.mp3';
                 const proxyUrl = `/api/download-file?url=${encodeURIComponent(url)}&filename=${encodeURIComponent('الفرقان - ' + cleanFilename)}`;
                 const link = document.createElement('a');
                 link.href = proxyUrl;
                 link.setAttribute('download', `الفرقان - ${cleanFilename}`);
+                link.setAttribute('target', '_blank');
                 document.body.appendChild(link);
                 link.click();
-                setTimeout(() => { if (document.body.contains(link)) document.body.removeChild(link); }, 2000);
+                setTimeout(() => { if (document.body.contains(link)) document.body.removeChild(link); }, 3000);
             }
         }
     </script>

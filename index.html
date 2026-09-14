@@ -228,40 +228,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- ========================================= -->
-    <!-- مودال البروفايل                          -->
-    <!-- ========================================= -->
-    <div class="modal-overlay profile-modal" id="profileModal">
-        <div class="modal-content profile-content">
-            <div class="modal-header">
-                <h2><i class="fa-solid fa-circle-user"></i> الملف الشخصي</h2>
-                <button class="modal-close" id="profileClose">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="profile-body">
-                <div class="profile-avatar">
-                    <i class="fa-solid fa-user-gear"></i>
-                </div>
-                <div class="profile-info">
-                    <div class="profile-field">
-                        <label>الاسم الكريـم</label>
-                        <input type="text" id="profileName" placeholder="أدخل اسمك" />
-                    </div>
-                    <div class="profile-field">
-                        <label>المدينة</label>
-                        <input type="text" id="profileCity" placeholder="أدخل مدينتك" />
-                    </div>
-                    <div class="profile-field">
-                        <label>الدولة</label>
-                        <input type="text" id="profileCountry" placeholder="أدخل دولتك" />
-                    </div>
-                </div>
-                <button class="btn-primary profile-save" id="profileSave">حفظ التغييرات</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================= -->
     <!-- الشريط السفلي (الرئيسية في الوسط تماماً)   -->
     <!-- ========================================= -->
     <nav class="bottom-nav" id="bottomNav">
@@ -297,43 +263,36 @@
             <div class="furqan-popup-header">
                 <img src="./data/images/logo.png" alt="شعار الفرقان" class="furqan-popup-logo">
                 <h3 class="furqan-popup-title" style="color:var(--color-primary); font-size: 26px;">منصة الفرقان</h3>
-                <span class="furqan-popup-subtitle" style="background: rgba(58, 155, 153, 0.15); color: #3A9B99; padding: 4px 14px; border-radius: 20px; font-weight: 800; font-size: 12px; display: inline-block; margin-top: 4px;">تحديث الإصدار الجديد v4.0.0</span>
+                <span class="furqan-popup-subtitle" style="background: rgba(58, 155, 153, 0.15); color: #3A9B99; padding: 4px 14px; border-radius: 20px; font-weight: 800; font-size: 12px; display: inline-block; margin-top: 4px;">تحديث الإصدار الجديد v1.1.1</span>
             </div>
-            <div class="furqan-popup-body" style="margin-top: 16px;">
-                <p class="furqan-popup-welcome" style="margin-bottom: 16px; color: var(--color-text-light);">أهلاً بك في <strong>منصة الفرقان</strong> مع باقة الميزات والتحديثات الجديدة:</p>
+            <div class="furqan-popup-body" style="margin-top: 16px; max-height: 250px; overflow-y: auto;">
+                <p class="furqan-popup-welcome" style="margin-bottom: 12px; color: var(--color-text-light); font-size: 14px;">أهلاً بك! إليك أهم الميزات الجديدة:</p>
                 <ul class="furqan-popup-features" style="list-style: none; padding: 0;">
                     <li>
                         <i class="fa-solid fa-play-circle" style="color:#3A9B99;"></i>
                         <div>
-                            <strong>المشغل الصوتي الأنيق والحديث:</strong>
-                            <span>تصميم انسيابي دافئ مع زر تحكم مركزي، وأعمدة صوتية متفاعلة، وشريط زمني دقيق للتقدم.</span>
+                            <strong>تحديث المشغل الصوتي:</strong>
+                            <span>مشغل انسيابي مع إمكانية التشغيل في الخلفية دون إنترنت.</span>
                         </div>
                     </li>
                     <li>
                         <i class="fa-solid fa-folder-arrow-down" style="color:#3A9B99;"></i>
                         <div>
-                            <strong>تنزيل وحفظ الملفات في مجلد "الفرقان":</strong>
-                            <span>حفظ تلقائي لجميع الكتب والمحاضرات الصوتية في مجلد موحد باسم "الفرقان" لسهولة الوصول إليها.</span>
+                            <strong>تنزيل مباشر:</strong>
+                            <span>حفظ تلقائي للكتب والصوتيات في مجلد "الفرقان" بجهازك.</span>
                         </div>
                     </li>
                     <li>
                         <i class="fa-solid fa-mobile-screen-button" style="color:#3A9B99;"></i>
                         <div>
-                            <strong>محاكاة ودعم زر الرجوع في الأندرويد:</strong>
-                            <span>تنقل ذكي ومرن بين كافة الأقسام (المكتبة، الفتاوى، الصوتيات والمودالات) بدون إغلاق التطبيق.</span>
-                        </div>
-                    </li>
-                    <li>
-                        <i class="fa-solid fa-book-open-reader" style="color:#3A9B99;"></i>
-                        <div>
-                            <strong>المكتبة والفتاوى الشرعية الموسعة:</strong>
-                            <span>آلاف الكتب والرسائل العلمية والفتاوى الفقهية الموثقة مع إمكانية القراءة والتحميل المباشر.</span>
+                            <strong>دعم زر الرجوع:</strong>
+                            <span>تنقل مرن وسلس في الأندرويد دون إغلاق التطبيق.</span>
                         </div>
                     </li>
                 </ul>
             </div>
             <div class="furqan-popup-footer" style="margin-top: 16px;">
-                <button class="btn-primary" id="closeFurqanPopup">استكشف التحديث الجديد الآن</button>
+                <button class="btn-primary" id="closeFurqanPopup">استكشاف</button>
             </div>
         </div>
     </div>

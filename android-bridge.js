@@ -23,14 +23,44 @@
             return window.AndroidFur9anApp || window.FurqanAndroidInterface || null;
         },
 
-        // تنزيل أي ملف من الموقع وحفظه في مجلد مخصص باسم "الفرقان"
-        downloadFile: function(url, filename, folderName = FUR9AN_DOWNLOAD_DIR) {
-            if (!url) {
-                console.error('📱 [Bridge] Download failed: No URL provided');
+        // تنزيل أي ملف من الموقع وحفظه في مجلد مخصص باسم "الفرقان" بدون أي توجيه لصفحة أخرى
+        downloadFile: function(urlOrBlob, filename, folderName = FUR9AN_DOWNLOAD_DIR) {
+            if (!urlOrBlob) {
+                console.error('📱 [Bridge] Download failed: No URL or Blob provided');
                 return;
             }
 
             const cleanTitle = (filename || 'ملف_الفرقان').trim();
+            const sanitizedName = cleanTitle.replace(/[\/\\?%*:|"<>]/g, '_');
+            const downloadFilename = sanitizedName.startsWith(folderName) ? sanitizedName : `${folderName} - ${sanitizedName}`;
+
+            // إذا كان المدخل كائن Blob مباشر (مثل تلاوات التخزين الداخلي أو التسجيلات)
+            if (urlOrBlob instanceof Blob) {
+                try {
+                    const blobUrl = window.URL.createObjectURL(urlOrBlob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = downloadFilename;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        if (document.body.contains(link)) document.body.removeChild(link);
+                        window.URL.revokeObjectURL(blobUrl);
+                    }, 3000);
+
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(`تم تنزيل ${cleanTitle} في وحدة التخزين! 📥`, 'success');
+                    } else if (window.FurqanToast) {
+                        window.FurqanToast.success(`تم بدء تنزيل ${cleanTitle} بنجاح 📥`);
+                    }
+                    return;
+                } catch (blobErr) {
+                    console.error('Error downloading Blob:', blobErr);
+                }
+            }
+
+            const url = String(urlOrBlob);
             const nativeApp = this.getNativeApp();
 
             // 1. أندرويد الأصلي: توجيه التنزيل لمجلد "الفرقان" في وحدة التخزين
@@ -40,6 +70,8 @@
                     console.log(`📱 [Bridge] تم إرسال أمر التنزيل للأندرويد: ${cleanTitle} في مجلد [${folderName}]`);
                     if (typeof window.showToast === 'function') {
                         window.showToast(`جاري تنزيل الملف في مجلد "${folderName}"... 📥`, 'success');
+                    } else if (window.FurqanToast) {
+                        window.FurqanToast.info(`جاري تنزيل الملف في مجلد "${folderName}"... 📥`);
                     }
                     return;
                 } catch (e) {
@@ -47,41 +79,40 @@
                 }
             }
 
-            // 2. كاباسيتور Filesystem إذا كان متوفراً
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) {
-                console.log(`📱 [Bridge] محاولة التنزيل عبر Capacitor Filesystem في مجلد ${folderName}`);
-            }
-
-            // 3. متصفح الويب القياسي (Web Fallback) مع توجيه المجلد والاسم
+            // 2. متصفح الويب القياسي بدون مغادرة الصفحة نهائياً
             try {
                 if (typeof window.showToast === 'function') {
-                    window.showToast(`جاري تنزيل وحفظ الملف في مجلد "${folderName}"... 📥`, 'success');
+                    window.showToast(`جاري بدء تنزيل: ${cleanTitle}... 📥`, 'success');
+                } else if (window.FurqanToast) {
+                    window.FurqanToast.info(`جاري بدء تنزيل: ${cleanTitle}... 📥`);
                 }
 
-                // صياغة اسم التنزيل مع مجلد الفرقان
-                const sanitizedName = cleanTitle.replace(/[\/\\?%*:|"<>]/g, '_');
-                const downloadFilename = `${folderName} - ${sanitizedName}`;
-                
-                let safeUrl = url.replace(/^http:\/\//i, 'https://');
-                let targetUrl = safeUrl;
-
-                // استخدام خادم التنزيل الوسيط لضمان فرض هيدرات Attachment إذا كان رابط خارجي
-                if (safeUrl.startsWith('http')) {
-                    targetUrl = `/api/download-file?url=${encodeURIComponent(safeUrl)}&filename=${encodeURIComponent(downloadFilename)}`;
+                // استخراج الرابط الحقيقي إذا تم تمرير بروكسي مسبقاً
+                let targetUrl = url;
+                if (url.startsWith('/api/download-file?') || url.includes('/api/download-file?url=')) {
+                    try {
+                        const m = url.match(/[?&]url=([^&]+)/);
+                        if (m) targetUrl = decodeURIComponent(m[1]);
+                    } catch (e) {}
                 }
+                targetUrl = targetUrl.replace(/^http:\/\//i, 'https://');
 
+                const proxyDownloadUrl = `/api/download-file?url=${encodeURIComponent(targetUrl)}&filename=${encodeURIComponent(downloadFilename)}`;
+
+                // تشغيل التنزيل الفوري عبر فتح نافذة جديدة (لتجاوز قيود الـ iframe في المعاينة)
+                // المتصفح سيغلق النافذة تلقائياً بمجرد بدء التحميل بفضل ترويسة attachment
                 const link = document.createElement('a');
-                link.href = targetUrl;
+                link.href = proxyDownloadUrl;
                 link.setAttribute('download', downloadFilename);
                 link.setAttribute('target', '_blank');
-                link.style.display = 'none';
                 document.body.appendChild(link);
                 link.click();
+
+                // إزالة الرابط بعد التنفيذ
                 setTimeout(() => {
-                    if (document.body.contains(link)) {
-                        document.body.removeChild(link);
-                    }
-                }, 2000);
+                    if (document.body.contains(link)) document.body.removeChild(link);
+                }, 1000);
+
             } catch (err) {
                 console.error('📱 [Bridge] خطأ في تنزيل الملف عبر الويب:', err);
             }

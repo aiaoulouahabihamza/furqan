@@ -30,21 +30,68 @@ if (document.readyState === 'loading') {
     initLectures();
 }
 
+const STORAGE_LECTURES_KEY = 'al_furqan_lectures_cache_v2';
+const STORAGE_LECTURES_TOTAL_KEY = 'al_furqan_lectures_total_v2';
+
 function initLectures() {
     bindEvents();
     initAudioPlayer();
-    fetchLectures(1);
+
+    // استرجاع المحاضرات من الكاش المحلي أولاً للعمل بدون نت
+    loadCachedLectures();
+
+    if (navigator.onLine) {
+        fetchLectures(1);
+    } else {
+        lecturesState.loading = false;
+        renderLectures();
+        if (lecturesState.items.length > 0) {
+            const badge = document.getElementById('lecturesTotalBadge');
+            if (badge) badge.textContent = `${lecturesState.items.length} مادة صوتية (محفوظ أوفلاين)`;
+        }
+    }
+}
+
+function loadCachedLectures() {
+    try {
+        const cached = localStorage.getItem(STORAGE_LECTURES_KEY);
+        const cachedTotal = localStorage.getItem(STORAGE_LECTURES_TOTAL_KEY);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                lecturesState.items = parsed;
+                lecturesState.filteredItems = [...parsed];
+                lecturesState.totalCount = Number(cachedTotal) || parsed.length;
+                lecturesState.loading = false;
+                const badge = document.getElementById('lecturesTotalBadge');
+                if (badge) badge.textContent = `${lecturesState.totalCount} مادة صوتية`;
+                renderLectures();
+            }
+        }
+    } catch (e) {
+        console.warn('Error loading cached lectures:', e);
+    }
 }
 
 function getDownloadProxyUrl(url, title, extension) {
     if (!url) return '#';
-    const cleanTitle = (title || 'file').replace(/[\s\/\\?%*:|"<>]/g, '_');
-    return `/api/download-file?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(cleanTitle)}.${extension}`;
+    return url.replace(/^http:\/\//i, 'https://');
 }
 
 async function fetchLectures(page) {
-    lecturesState.loading = true;
-    renderLectures();
+    if (!navigator.onLine) {
+        if (lecturesState.items.length === 0) {
+            loadCachedLectures();
+        }
+        lecturesState.loading = false;
+        renderLectures();
+        return;
+    }
+
+    if (lecturesState.items.length === 0) {
+        lecturesState.loading = true;
+        renderLectures();
+    }
     
     try {
         const res = await fetch(`${ISLAMCONTENT_BASE_URL}/audios/ar/ar/${page}/${lecturesState.itemsPerPage}/json`)
@@ -61,17 +108,25 @@ async function fetchLectures(page) {
                 lecturesState.totalCount = lecturesState.items.length;
             }
             
-            document.getElementById('lecturesTotalBadge').textContent = `${lecturesState.totalCount} مادة صوتية`;
+            try {
+                localStorage.setItem(STORAGE_LECTURES_KEY, JSON.stringify(lecturesState.items));
+                localStorage.setItem(STORAGE_LECTURES_TOTAL_KEY, String(lecturesState.totalCount));
+            } catch (e) {}
+
+            const badge = document.getElementById('lecturesTotalBadge');
+            if (badge) badge.textContent = `${lecturesState.totalCount} مادة صوتية`;
             lecturesState.loading = false;
             
             renderLectures();
             renderPagination(res.links);
-        } else {
+        } else if (lecturesState.items.length === 0) {
             showErrorState('فشل استدعاء المواد الصوتية من المصدر.');
         }
     } catch (err) {
         console.error('Error fetching lectures:', err);
-        showErrorState('حدث خطأ أثناء الاتصال بمزود الخدمة.');
+        if (lecturesState.items.length === 0) {
+            showErrorState('حدث خطأ أثناء الاتصال بمزود الخدمة.');
+        }
     }
 }
 
@@ -466,27 +521,27 @@ function bindPartActionListeners() {
         });
     });
 
-    // أزرار تنزيل المسارات
+    // أزرار تنزيل المسارات بدون أي توجيه أو فتح نوافذ
     const downloadBtns = partsListEl.querySelectorAll('.btn-part-download');
     downloadBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             const url = btn.dataset.url;
             const title = btn.dataset.title;
             if (url) {
-                if (window.downloadFur9anFile) {
-                    window.downloadFur9anFile(url, `${title}.mp3`);
+                const cleanFilename = (title || 'مقطع_صوتي').replace(/[\/\\?%*:|"<>\s]+/g, '_') + '.mp3';
+                if (window.Fur9anBridge && typeof window.Fur9anBridge.downloadFile === 'function') {
+                    window.Fur9anBridge.downloadFile(url, cleanFilename, 'الفرقان');
+                } else if (typeof window.downloadFur9anFile === 'function') {
+                    window.downloadFur9anFile(url, cleanFilename);
                 } else {
-                    if (window.FurqanToast) window.FurqanToast.success(`جاري بدء تنزيل المسار: ${title}...`);
-                    const cleanFilename = (title || 'audio').replace(/[\/\\?%*:|"<>\s]+/g, '_') + '.mp3';
                     const proxyUrl = `/api/download-file?url=${encodeURIComponent(url)}&filename=${encodeURIComponent('الفرقان - ' + cleanFilename)}`;
-                    const link = document.createElement('a');
-                    link.href = proxyUrl;
-                    link.setAttribute('download', `الفرقان - ${cleanFilename}`);
-                    document.body.appendChild(link);
-                    link.click();
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = proxyUrl;
+                    document.body.appendChild(iframe);
                     setTimeout(() => {
-                        if (link.parentNode) link.parentNode.removeChild(link);
-                    }, 1500);
+                        if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                    }, 15000);
                 }
             }
         });
@@ -505,15 +560,29 @@ function initAudioPlayer() {
 
     // تشغيل / إيقاف
     playBtn.addEventListener('click', () => {
-        if (!audioPlayer.src) return;
+        if (!audioPlayer.src || audioPlayer.src === '' || audioPlayer.src === window.location.href) {
+            if (lecturesState.selectedItem && lecturesState.selectedItem.parts && lecturesState.selectedItem.parts.length > 0) {
+                playTrack(lecturesState.selectedItem.parts[0], 0);
+            }
+            return;
+        }
         
         if (isPlaying) {
             audioPlayer.pause();
         } else {
             audioPlayer.play().catch(e => {
                 if (e.name === 'AbortError') return; // تجاهل الانقطاعات العادية
-                console.error('Playback failed:', e);
-                if (window.FurqanToast) window.FurqanToast.error('فشل تشغيل المسار الصوتي من المصدر.');
+                
+                if (!audioPlayer.dataset.fallbackTried && lecturesState.activeTrackUrl) {
+                    audioPlayer.dataset.fallbackTried = 'true';
+                    audioPlayer.src = `/api/proxy-audio?url=${encodeURIComponent(lecturesState.activeTrackUrl)}`;
+                    audioPlayer.load();
+                    audioPlayer.play().catch(() => {
+                        if (window.FurqanToast) window.FurqanToast.error('فشل تشغيل المسار الصوتي من المصدر.');
+                    });
+                } else {
+                    if (window.FurqanToast) window.FurqanToast.error('فشل تشغيل المسار الصوتي من المصدر.');
+                }
             });
         }
     });

@@ -1,10 +1,10 @@
 /**
  * نظام المصادقة والملف الشخصي الموحد - منصة الفرقان
  * يدعم:
- * 1. تسجيل الدخول السريع بحساب Google مع اسم "منصة الفرقان" الأنيق
- * 2. التسجيل وإنشاء الحساب بالبريد الإلكتروني وكلمة المرور مع الحفظ الآمن في Firestore و LocalStorage
- * 3. التسجيل برقم الهاتف المباشر دون الحاجة لكابتشا مع كود تحقق فوري حقيقي واختياري
- * 4. إدارة الملف الشخصي ومزامنة العلامات والتفاعل مع مجتمع الفرقان
+ * 1. تسجيل الدخول السريع والآمن بحساب Google
+ * 2. تسجيل الدخول الحقيقي بالبريد الإلكتروني وكلمة المرور عبر Firebase Authentication
+ * 3. إنشاء حساب جديد حقيقي وتحديث الاسم والنبذة ومزامنته في Firestore
+ * 4. إدارة الملف الشخصي، متابعة برنامج الختمة، الإحصائيات، وتسجيل الخروج الآمن
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -12,6 +12,10 @@ import {
     getAuth, 
     GoogleAuthProvider, 
     signInWithPopup, 
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    updateProfile,
     signOut, 
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -26,13 +30,13 @@ import {
 
 // إعدادات Firebase الرسمية من مشروع الفرقان
 const firebaseConfig = {
-    projectId: "citric-cursor-w0w9t",
-    appId: "1:612208334398:web:4b710979798bb4251b636f",
-    apiKey: "AIzaSyAdt_TH78jhPZlOv7wHPhH41uYQucZboT0",
-    authDomain: "citric-cursor-w0w9t.firebaseapp.com",
-    firestoreDatabaseId: "ai-studio-furqan-2506412c-6d92-4794-92c3-db3d5c527307",
-    storageBucket: "citric-cursor-w0w9t.firebasestorage.app",
-    messagingSenderId: "612208334398"
+    apiKey: "AIzaSyCqGYbrliNQU_yO-gN_Vcv0Ykn5ZbJ5jBE",
+    authDomain: "furqan-b752b.firebaseapp.com",
+    projectId: "furqan-b752b",
+    storageBucket: "furqan-b752b.firebasestorage.app",
+    messagingSenderId: "172183159664",
+    appId: "1:172183159664:web:10411663c0ad5a84dd45b5",
+    measurementId: "G-JM5WGZSBP9"
 };
 
 // تهيئة Firebase
@@ -40,36 +44,17 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// مزود Google المهيأ
+// مزود Google
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // مفاتيح التخزين المحلي
 const STORAGE_USER_KEY = 'al_furqan_current_user';
-const STORAGE_ACCOUNTS_KEY = 'al_furqan_registered_accounts';
 
 // الحالة الداخلية
 let currentUser = null;
-let emailMode = 'login'; // 'login' | 'signup'
-let isEditingProfile = false; // نمط تعديل البروفايل داخل المودال
-
-/**
- * الحصول على الحسابات المسجلة محلياً
- */
-function getStoredAccounts() {
-    try {
-        return JSON.parse(localStorage.getItem(STORAGE_ACCOUNTS_KEY) || '{}');
-    } catch {
-        return {};
-    }
-}
-
-/**
- * حفظ الحسابات محلياً
- */
-function saveStoredAccounts(accounts) {
-    localStorage.setItem(STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts));
-}
+let authMode = 'login'; // 'login' | 'signup'
+let isEditingProfile = false;
 
 /**
  * استعادة المستخدم الحالي من التخزين إذا وجد
@@ -88,31 +73,42 @@ function restoreStoredUser() {
 restoreStoredUser();
 
 /**
- * حقن نافذة المصادقة في الـ DOM
+ * حقن نافذة المصادقة في الـ DOM والتأكد من ربط الأزرار بدقة
  */
 function injectAuthModal() {
-    if (document.getElementById('furqanAuthModalOverlay')) return;
-
-    const modalHTML = `
-    <div class="auth-modal-overlay" id="furqanAuthModalOverlay">
-        <div class="auth-modal-container" id="furqanAuthModalContainer">
-            <button class="auth-close-btn" id="furqanAuthCloseBtn" title="إغلاق">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div id="furqanAuthModalBody"></div>
+    let overlay = document.getElementById('furqanAuthModalOverlay');
+    if (!overlay) {
+        const modalHTML = `
+        <div class="auth-modal-overlay" id="furqanAuthModalOverlay">
+            <div class="auth-modal-container" id="furqanAuthModalContainer">
+                <button type="button" class="auth-close-btn" id="furqanAuthCloseBtn" title="إغلاق النافذة" aria-label="إغلاق">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div id="furqanAuthModalBody"></div>
+            </div>
         </div>
-    </div>
-    `;
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        overlay = document.getElementById('furqanAuthModalOverlay');
+    }
 
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-    const overlay = document.getElementById('furqanAuthModalOverlay');
     const closeBtn = document.getElementById('furqanAuthCloseBtn');
     
-    closeBtn?.addEventListener('click', closeAuthModal);
-    overlay?.addEventListener('click', (e) => {
-        if (e.target === overlay) closeAuthModal();
-    });
+    if (closeBtn) {
+        closeBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeAuthModal();
+        };
+    }
+    
+    if (overlay) {
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                closeAuthModal();
+            }
+        };
+    }
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeAuthModal();
@@ -120,7 +116,7 @@ function injectAuthModal() {
 }
 
 /**
- * فتح نافذة المصادقة
+ * فتح نافذة المصادقة أو البروفايل
  */
 function openAuthModal() {
     injectAuthModal();
@@ -135,14 +131,18 @@ function openAuthModal() {
 window.openAuthModal = openAuthModal;
 
 /**
- * إغلاق نافذة المصادقة
+ * إغلاق نافذة المصادقة بالكامل
  */
 function closeAuthModal() {
     const overlay = document.getElementById('furqanAuthModalOverlay');
     if (overlay) {
         overlay.classList.remove('active');
-        document.body.style.overflow = '';
     }
+    const confirmOverlay = document.getElementById('logoutConfirmOverlay');
+    if (confirmOverlay) {
+        confirmOverlay.remove();
+    }
+    document.body.style.overflow = '';
 }
 window.closeAuthModal = closeAuthModal;
 
@@ -152,7 +152,7 @@ function getCurrentUser() {
 window.getCurrentUser = getCurrentUser;
 
 /**
- * توليد محتوى النافذة (تسجيل الدخول أو الملف الشخصي)
+ * توليد محتوى النافذة بناءً على حالة المستخدم
  */
 function renderAuthModalContent() {
     const body = document.getElementById('furqanAuthModalBody');
@@ -160,32 +160,42 @@ function renderAuthModalContent() {
 
     if (currentUser) {
         if (isEditingProfile) {
-            renderProfileEditFormView(body);
+            renderProfileEditView(body);
         } else {
             renderProfileView(body);
         }
     } else {
-        renderLoginView(body);
+        renderAuthFormView(body);
     }
 }
 
 /**
- * واجهة تسجيل الدخول وإنشاء الحساب (الواجهة الرئيسية النظيفة)
+ * واجهة تسجيل الدخول وإنشاء الحساب (تصميم عصري ونظيف)
  */
-function renderLoginView(container) {
+function renderAuthFormView(container) {
     container.innerHTML = `
         <div class="auth-header">
             <div class="auth-logo-badge">
-                <img src="/data/images/logo.png" alt="الفرقان" style="width:42px;height:42px;object-fit:contain;border-radius:50%;" onerror="this.src='/icons/icon-192.png'" />
+                <img src="/data/images/logo.png" alt="الفرقان" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='/icons/icon-192.png'" />
             </div>
             <h2 class="auth-title">منصة الفرقان</h2>
-            <p class="auth-subtitle">سجّل دخولك لحفظ ختماتك، والتفاعل مع مجتمع القراء ونشر المقالات</p>
+            <p class="auth-subtitle">سجّل دخولك لحفظ ختماتك القرآنية، متابعة أورادك، ومزامنة بياناتك</p>
+        </div>
+
+        <!-- شريط التبديل بين الدخول والتسجيل -->
+        <div class="auth-segmented-tabs">
+            <button type="button" class="auth-tab-btn ${authMode === 'login' ? 'active' : ''}" id="tabLoginBtn">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول
+            </button>
+            <button type="button" class="auth-tab-btn ${authMode === 'signup' ? 'active' : ''}" id="tabSignupBtn">
+                <i class="fa-solid fa-user-plus"></i> حساب جديد
+            </button>
         </div>
 
         <div id="authAlertArea"></div>
 
-        <!-- زر جوجل السريع والواضح -->
-        <button class="google-auth-btn" id="googleSignInBtn" title="تسجيل الدخول عبر Google إلى منصة الفرقان">
+        <!-- زر تسجيل الدخول بحساب Google المباشر -->
+        <button type="button" class="google-auth-btn" id="googleSignInBtn" title="تسجيل الدخول بحساب Google">
             <svg class="google-icon-svg" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -196,84 +206,104 @@ function renderLoginView(container) {
         </button>
 
         <div class="auth-divider">
-            <span>أو المتابعة بالبريد الإلكتروني</span>
+            <span>أو عبر البريد الإلكتروني</span>
         </div>
 
-        <!-- نموذج البريد الإلكتروني (دخول أو إنشاء حساب مباشر وفعال 100%) -->
-        <div id="emailAuthSection">
-            <form id="emailAuthForm">
-                ${emailMode === 'signup' ? `
-                <div class="auth-form-group">
-                    <label class="auth-label" for="authFullName">الاسم الكريم</label>
-                    <div class="auth-input-wrapper">
-                        <i class="fa-regular fa-user auth-input-icon"></i>
-                        <input type="text" id="authFullName" class="auth-input" placeholder="مثال: عبد الله أحمد" required />
-                    </div>
+        <!-- نموذج إدخال البريد وكلمة المرور الحقيقي -->
+        <form id="emailAuthForm">
+            ${authMode === 'signup' ? `
+            <div class="auth-form-group">
+                <label class="auth-label" for="authFullName">الاسم الكريم</label>
+                <div class="auth-input-wrapper">
+                    <i class="fa-regular fa-user auth-input-icon"></i>
+                    <input type="text" id="authFullName" class="auth-input" placeholder="مثال: عبد الله أحمد" required />
                 </div>
-                ` : ''}
-
-                <div class="auth-form-group">
-                    <label class="auth-label" for="authEmail">البريد الإلكتروني</label>
-                    <div class="auth-input-wrapper">
-                        <i class="fa-regular fa-envelope auth-input-icon"></i>
-                        <input type="email" id="authEmail" class="auth-input" placeholder="name@example.com" required dir="ltr" />
-                    </div>
-                </div>
-
-                <div class="auth-form-group">
-                    <label class="auth-label" for="authPassword">كلمة المرور</label>
-                    <div class="auth-input-wrapper">
-                        <i class="fa-solid fa-lock auth-input-icon"></i>
-                        <input type="password" id="authPassword" class="auth-input" placeholder="••••••••" required dir="ltr" />
-                    </div>
-                    ${emailMode === 'login' ? `
-                    <button type="button" class="auth-forgot-link" id="forgotPasswordBtn">نسيت كلمة المرور؟</button>
-                    ` : ''}
-                </div>
-
-                <button type="submit" class="auth-primary-btn" id="emailSubmitBtn">
-                    <span>${emailMode === 'login' ? 'تسجيل الدخول' : 'إنشاء الحساب الآن'}</span>
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-            </form>
-
-            <div class="auth-switch-prompt">
-                ${emailMode === 'login' ? `
-                <span>ليس لديك حساب بعد؟</span>
-                <button type="button" class="auth-switch-link" id="switchToSignupBtn">إنشاء حساب جديد</button>
-                ` : `
-                <span>لديك حساب مسجل بالفعل؟</span>
-                <button type="button" class="auth-switch-link" id="switchToLoginBtn">تسجيل الدخول</button>
-                `}
             </div>
+            ` : ''}
+
+            <div class="auth-form-group">
+                <label class="auth-label" for="authEmail">البريد الإلكتروني</label>
+                <div class="auth-input-wrapper">
+                    <i class="fa-regular fa-envelope auth-input-icon"></i>
+                    <input type="email" id="authEmail" class="auth-input" placeholder="name@example.com" required dir="ltr" />
+                </div>
+            </div>
+
+            <div class="auth-form-group">
+                <label class="auth-label" for="authPassword">كلمة المرور</label>
+                <div class="auth-input-wrapper">
+                    <i class="fa-solid fa-lock auth-input-icon"></i>
+                    <input type="password" id="authPassword" class="auth-input" placeholder="••••••••" required dir="ltr" minlength="6" />
+                    <button type="button" class="auth-eye-btn" id="togglePasswordVisibilityBtn" title="إظهار / إخفاء كلمة المرور">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                ${authMode === 'login' ? `
+                <button type="button" class="auth-forgot-link" id="forgotPasswordBtn">نسيت كلمة المرور؟</button>
+                ` : ''}
+            </div>
+
+            <button type="submit" class="auth-primary-btn" id="emailSubmitBtn">
+                <span>${authMode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}</span>
+                <i class="fa-solid ${authMode === 'login' ? 'fa-arrow-left' : 'fa-check'}"></i>
+            </button>
+        </form>
+
+        <div class="auth-switch-prompt">
+            ${authMode === 'login' ? `
+            <span>ليس لديك حساب بعد؟</span>
+            <button type="button" class="auth-switch-link" id="promptSwitchToSignup">إنشاء حساب جديد</button>
+            ` : `
+            <span>لديك حساب بالفعل؟</span>
+            <button type="button" class="auth-switch-link" id="promptSwitchToLogin">تسجيل الدخول</button>
+            `}
         </div>
     `;
 
-    bindLoginEvents();
+    bindAuthEvents();
 }
 
 /**
- * ربط أحداث واجهة تسجيل الدخول
+ * ربط أحداث نموذج الدخول
  */
-function bindLoginEvents() {
-    // 1. زر جوجل
+function bindAuthEvents() {
+    // زر Google
     document.getElementById('googleSignInBtn')?.addEventListener('click', handleGoogleSignIn);
 
-    // 2. التبديل بين الدخول وإنشاء حساب
-    document.getElementById('switchToSignupBtn')?.addEventListener('click', () => {
-        emailMode = 'signup';
-        renderLoginView(document.getElementById('furqanAuthModalBody'));
+    // التبديل بين التبويبات
+    document.getElementById('tabLoginBtn')?.addEventListener('click', () => {
+        authMode = 'login';
+        renderAuthModalContent();
+    });
+    document.getElementById('tabSignupBtn')?.addEventListener('click', () => {
+        authMode = 'signup';
+        renderAuthModalContent();
     });
 
-    document.getElementById('switchToLoginBtn')?.addEventListener('click', () => {
-        emailMode = 'login';
-        renderLoginView(document.getElementById('furqanAuthModalBody'));
+    document.getElementById('promptSwitchToSignup')?.addEventListener('click', () => {
+        authMode = 'signup';
+        renderAuthModalContent();
+    });
+    document.getElementById('promptSwitchToLogin')?.addEventListener('click', () => {
+        authMode = 'login';
+        renderAuthModalContent();
     });
 
-    // 3. نموذج البريد وكلمة المرور
+    // إظهار/إخفاء كلمة المرور
+    const togglePassBtn = document.getElementById('togglePasswordVisibilityBtn');
+    const passInput = document.getElementById('authPassword');
+    if (togglePassBtn && passInput) {
+        togglePassBtn.addEventListener('click', () => {
+            const isPassword = passInput.type === 'password';
+            passInput.type = isPassword ? 'text' : 'password';
+            togglePassBtn.innerHTML = `<i class="fa-regular fa-eye${isPassword ? '-slash' : ''}"></i>`;
+        });
+    }
+
+    // إرسال النموذج
     document.getElementById('emailAuthForm')?.addEventListener('submit', handleEmailAuth);
 
-    // 4. نسيت كلمة المرور
+    // نسيت كلمة المرور
     document.getElementById('forgotPasswordBtn')?.addEventListener('click', handleForgotPassword);
 }
 
@@ -291,9 +321,8 @@ async function handleGoogleSignIn() {
             uid: user.uid,
             displayName: user.displayName || 'قارئ الفرقان',
             email: user.email,
-            phoneNumber: user.phoneNumber || null,
             photoURL: user.photoURL || null,
-            bio: '﴿ رَبِّ زِدْنِي عِلْمًا ﴾',
+            bio: '﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾',
             providerId: 'google',
             createdAt: user.metadata?.creationTime || new Date().toISOString(),
             lastLoginAt: new Date().toISOString()
@@ -304,23 +333,21 @@ async function handleGoogleSignIn() {
         localStorage.setItem('al_furqan_uid', user.uid);
         localStorage.setItem('user_display_name', userData.displayName);
 
-        // مزامنة سحابية غير معطلة للواجهة (Background Sync with timeout)
+        // مزامنة مع Firestore
         syncUserToFirestore(userData, 'google').catch(err => console.warn('Firestore sync background notice:', err));
         
         updateHeaderProfileUI(userData);
-        showAuthAlert('أهلاً بك! تم تسجيل الدخول بنجاح بحساب Google في منصة الفرقان', 'success');
-
         if (window.FurqanToast) {
-            window.FurqanToast.success(`مرحباً بك يا ${userData.displayName}`);
+            window.FurqanToast.success(`أهلاً بك يا ${userData.displayName}`);
         }
 
-        setTimeout(() => {
-            renderAuthModalContent();
-        }, 300);
+        renderAuthModalContent();
     } catch (error) {
         console.warn('Google Auth note:', error);
         if (error.code === 'auth/popup-closed-by-user') {
-            showAuthAlert('تم إغلاق نافذة تسجيل الدخول', 'error');
+            showAuthAlert('تم إغلاق نافذة تسجيل الدخول قبل الإكمال', 'error');
+        } else if (error.code === 'auth/unauthorized-domain') {
+            showUnauthorizedDomainHelper();
         } else {
             showAuthAlert(getFirebaseErrorMessage(error), 'error');
         }
@@ -330,8 +357,7 @@ async function handleGoogleSignIn() {
 }
 
 /**
- * معالجة تسجيل الدخول وإنشاء الحساب بالبريد الإلكتروني
- * نظام فوري وسلس: استجابة فورية دون تجميد الصفحة ومزامنة سحابية مستمرة
+ * معالجة الدخول وإنشاء الحساب الحقيقي عبر البريد الإلكتروني
  */
 async function handleEmailAuth(e) {
     e.preventDefault();
@@ -339,7 +365,7 @@ async function handleEmailAuth(e) {
     const passwordInput = document.getElementById('authPassword');
     const fullNameInput = document.getElementById('authFullName');
 
-    const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
     const password = passwordInput ? passwordInput.value : '';
     const fullName = fullNameInput ? fullNameInput.value.trim() : '';
 
@@ -348,153 +374,121 @@ async function handleEmailAuth(e) {
         return;
     }
 
+    if (password.length < 6) {
+        showAuthAlert('يجب أن تتكون كلمة المرور من 6 خانات أو أكثر', 'error');
+        return;
+    }
+
     setAuthLoading(true);
     clearAuthAlert();
 
     try {
-        const accounts = getStoredAccounts();
+        if (authMode === 'signup') {
+            // إنشاء حساب جديد حقيقي عبر Firebase
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-        if (emailMode === 'signup') {
-            if (password.length < 6) {
-                showAuthAlert('يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل', 'error');
-                setAuthLoading(false);
-                return;
+            const displayName = fullName || email.split('@')[0];
+            
+            try {
+                await updateProfile(user, { displayName: displayName });
+            } catch (pErr) {
+                console.warn('Profile update notice:', pErr);
             }
 
-            if (accounts[email]) {
-                showAuthAlert('هذا البريد الإلكتروني مسجل مسبقاً، يمكنك تسجيل الدخول به مباشرة', 'error');
-                setAuthLoading(false);
-                return;
-            }
-
-            // إنشاء معرف حساب فريد وآمن
-            const uid = 'usr_' + btoa(unescape(encodeURIComponent(email))).replace(/=/g, '').slice(0, 20);
-            const userObj = {
-                uid: uid,
-                email: email,
-                displayName: fullName || email.split('@')[0],
-                phoneNumber: null,
+            const userData = {
+                uid: user.uid,
+                email: user.email,
+                displayName: displayName,
                 photoURL: null,
-                bio: 'عضو في مجتمع الفرقان المبارك',
-                password: password,
+                bio: '﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾',
                 providerId: 'email',
                 createdAt: new Date().toISOString(),
                 lastLoginAt: new Date().toISOString()
             };
 
-            accounts[email] = userObj;
-            saveStoredAccounts(accounts);
+            currentUser = userData;
+            localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userData));
+            localStorage.setItem('al_furqan_uid', user.uid);
+            localStorage.setItem('user_display_name', displayName);
 
-            currentUser = userObj;
-            localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userObj));
-            localStorage.setItem('al_furqan_uid', uid);
-            localStorage.setItem('user_display_name', userObj.displayName);
+            syncUserToFirestore(userData, 'email').catch(err => console.warn('Firestore sync notice:', err));
 
-            // مزامنة غير معطلة للواجهة في الخلفية
-            syncUserToFirestore(userObj, 'email', { displayName: userObj.displayName, bio: userObj.bio }).catch(err => console.warn('Sync background notice:', err));
-
-            updateHeaderProfileUI(userObj);
-            showAuthAlert('تم إنشاء حسابك بنجاح في منصة الفرقان! مرحباً بك معنا', 'success');
-
+            updateHeaderProfileUI(userData);
             if (window.FurqanToast) {
-                window.FurqanToast.success(`أهلاً بك يا ${userObj.displayName} في الفرقان`);
+                window.FurqanToast.success(`مرحباً بك يا ${displayName} في منصة الفرقان`);
             }
 
-            setTimeout(() => {
-                renderAuthModalContent();
-            }, 300);
+            renderAuthModalContent();
         } else {
-            // تسجيل الدخول
-            const account = accounts[email];
-            if (!account) {
-                // تيسير الدخول الفوري وتوفير حساب تلقائي للمستخدم
-                const uid = 'usr_' + btoa(unescape(encodeURIComponent(email))).replace(/=/g, '').slice(0, 20);
-                const userObj = {
-                    uid: uid,
-                    email: email,
-                    displayName: email.split('@')[0],
-                    phoneNumber: null,
-                    photoURL: null,
-                    bio: 'عضو في مجتمع الفرقان المبارك',
-                    password: password,
-                    providerId: 'email',
-                    createdAt: new Date().toISOString(),
-                    lastLoginAt: new Date().toISOString()
-                };
-                accounts[email] = userObj;
-                saveStoredAccounts(accounts);
+            // تسجيل الدخول الحقيقي عبر Firebase
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-                currentUser = userObj;
-                localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userObj));
-                localStorage.setItem('al_furqan_uid', uid);
-                localStorage.setItem('user_display_name', userObj.displayName);
+            const userData = {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || email.split('@')[0],
+                photoURL: user.photoURL || null,
+                bio: '﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾',
+                providerId: 'email',
+                lastLoginAt: new Date().toISOString()
+            };
 
-                syncUserToFirestore(userObj, 'email').catch(err => console.warn('Sync background notice:', err));
-
-                updateHeaderProfileUI(userObj);
-                showAuthAlert('مرحباً بك! تم تسجيل الدخول بنجاح', 'success');
-
-                if (window.FurqanToast) {
-                    window.FurqanToast.success(`أهلاً بك يا ${userObj.displayName}`);
+            // محاولة جلب النبذة والاسم المخصص من Firestore إن وجد
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    if (data.displayName) userData.displayName = data.displayName;
+                    if (data.bio) userData.bio = data.bio;
+                    if (data.photoURL) userData.photoURL = data.photoURL;
                 }
+            } catch (docErr) {}
 
-                setTimeout(() => {
-                    renderAuthModalContent();
-                }, 300);
-                return;
-            }
+            currentUser = userData;
+            localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userData));
+            localStorage.setItem('al_furqan_uid', user.uid);
+            localStorage.setItem('user_display_name', userData.displayName);
 
-            if (account.password && account.password !== password) {
-                showAuthAlert('كلمة المرور المدخلة غير صحيحة، يرجى التأكد وإعادة المحاولة', 'error');
-                setAuthLoading(false);
-                return;
-            }
+            syncUserToFirestore(userData, 'email').catch(err => console.warn('Firestore sync notice:', err));
 
-            currentUser = account;
-            account.lastLoginAt = new Date().toISOString();
-            accounts[email] = account;
-            saveStoredAccounts(accounts);
-
-            localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(account));
-            localStorage.setItem('al_furqan_uid', account.uid);
-            localStorage.setItem('user_display_name', account.displayName || account.email?.split('@')[0]);
-
-            syncUserToFirestore(account, 'email').catch(err => console.warn('Sync background notice:', err));
-
-            updateHeaderProfileUI(account);
-            showAuthAlert('أهلاً بك مجدداً في منصة الفرقان', 'success');
-
+            updateHeaderProfileUI(userData);
             if (window.FurqanToast) {
-                window.FurqanToast.success(`أهلاً بك مجدداً يا ${account.displayName || 'قارئ الفرقان'}`);
+                window.FurqanToast.success(`أهلاً بك مجدداً يا ${userData.displayName}`);
             }
 
-            setTimeout(() => {
-                renderAuthModalContent();
-            }, 300);
+            renderAuthModalContent();
         }
     } catch (error) {
-        console.error('Email Auth Error:', error);
-        showAuthAlert('حدث خطأ غير متوقع، يرجى المحاولة ثانية', 'error');
+        console.warn('Firebase Auth Error:', error);
+        showAuthAlert(getFirebaseErrorMessage(error), 'error');
     } finally {
         setAuthLoading(false);
     }
 }
 
 /**
- * نسيت كلمة المرور
+ * نسيت كلمة المرور عبر البريد الرسمي
  */
-function handleForgotPassword() {
-    const email = document.getElementById('authEmail')?.value.trim();
+async function handleForgotPassword() {
+    const emailInput = document.getElementById('authEmail');
+    const email = emailInput ? emailInput.value.trim() : '';
+
     if (!email) {
-        showAuthAlert('يرجى إدخال بريدك الإلكتروني في الحقل أعلاه أولاً', 'error');
-        document.getElementById('authEmail')?.focus();
+        showAuthAlert('يرجى كتابة بريدك الإلكتروني في حقل البريد أعلاه أولاً', 'error');
+        emailInput?.focus();
         return;
     }
-    const accounts = getStoredAccounts();
-    if (accounts[email.toLowerCase()]) {
-        showAuthAlert(`كلمة المرور لحسابك هي: (${accounts[email.toLowerCase()].password}) - يمكنك الدخول بها الآن مباشرة`, 'success');
-    } else {
-        showAuthAlert('هذا البريد غير مسجل، يمكنك النقر على "إنشاء حساب جديد" بالأسفل مباشرة', 'error');
+
+    setAuthLoading(true);
+    try {
+        await sendPasswordResetEmail(auth, email);
+        showAuthAlert(`تم إرسال رابط استعادة كلمة المرور إلى بريدك (${email}). يرجى تفقد صندوق الوارد.`, 'success');
+    } catch (error) {
+        showAuthAlert(getFirebaseErrorMessage(error), 'error');
+    } finally {
+        setAuthLoading(false);
     }
 }
 
@@ -504,14 +498,11 @@ function handleForgotPassword() {
 function renderProfileView(container) {
     const user = currentUser;
     const displayName = user.displayName || user.email?.split('@')[0] || 'قارئ الفرقان';
-    const contactInfo = user.email || 'عضو موثق في منصة الفرقان';
+    const email = user.email || 'حساب الفرقان';
     const initialLetter = displayName.charAt(0).toUpperCase();
     const userBio = user.bio || '﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾';
 
-    let providerBadge = '<i class="fa-brands fa-google"></i> حساب Google';
-    if (user.providerId === 'email' || user.email) providerBadge = '<i class="fa-regular fa-envelope"></i> البريد الإلكتروني';
-
-    // حساب الختمة القرآنية الحقيقية من آخر قراءة
+    // حساب الختمة من آخر قراءة
     let khatmaInfo = {
         surahName: 'سورة الفاتحة',
         page: 1,
@@ -528,13 +519,12 @@ function renderProfileView(container) {
                 khatmaInfo.surahName = parsed.surahName || `سورة ${parsed.surahNumber || 1}`;
                 khatmaInfo.page = Number(parsed.page) || 1;
                 khatmaInfo.surahNumber = Number(parsed.surahNumber) || 1;
-                khatmaInfo.ayah = Number(parsed.ayah || parsed.ayahNumber) || 1;
                 khatmaInfo.percent = Math.min(100, Math.max(1, Math.round((khatmaInfo.page / 604) * 100)));
             }
         }
     } catch (e) {}
 
-    // حساب إجمالي التسبيحات الحقيقي
+    // إجمالي التسبيحات
     let tasbeehTotal = 0;
     try {
         const catalog = JSON.parse(localStorage.getItem('tasbeehDhikrCatalog') || '[]');
@@ -543,133 +533,113 @@ function renderProfileView(container) {
         }
     } catch (e) {}
 
-    // حساب العلامات المحفوظة الحقيقية
+    // العلامات المرجعية
     let bookmarksTotal = 0;
     try {
         const bMarks = JSON.parse(localStorage.getItem('bookmarkedVerses') || localStorage.getItem('al_furqan_bookmarks') || '[]');
         bookmarksTotal = Array.isArray(bMarks) ? bMarks.length : 0;
     } catch (e) {}
 
-    // تاريخ الانضمام الفعلي
-    let joinDateText = 'عضو في الفرقان';
-    try {
-        if (user.createdAt) {
-            const d = new Date(user.createdAt);
-            if (!isNaN(d.getTime())) {
-                const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-                joinDateText = `انضم في ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-            }
-        }
-    } catch (e) {}
-
-    // برنامج الختمة القرآنية الحقيقي
     const khatmaProg = getKhatmaProgram();
     const khatmaPercent = Math.min(100, Math.round((khatmaProg.completedDays / Math.max(1, khatmaProg.targetDays)) * 100));
 
     container.innerHTML = `
         <div class="profile-card-header">
-            <div class="profile-avatar-wrapper" id="profileAvatarWrapper">
+            <div class="profile-avatar-wrapper">
                 ${user.photoURL ? `
-                    <img src="${user.photoURL}" alt="${displayName}" class="profile-avatar-img" id="profileAvatarImg" referrerpolicy="no-referrer" />
+                    <img src="${user.photoURL}" alt="${displayName}" class="profile-avatar-img" referrerpolicy="no-referrer" />
                 ` : `
-                    <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder">${initialLetter}</div>
+                    <div class="profile-avatar-placeholder">${initialLetter}</div>
                 `}
                 <span class="profile-online-badge" title="متصل الآن"></span>
-                <button type="button" class="profile-avatar-edit-badge" id="changeAvatarBtn" title="تعديل أو رفع صورة جديدة">
+                <button type="button" class="profile-avatar-edit-badge" id="changeAvatarBtn" title="تغيير الصورة">
                     <i class="fa-solid fa-camera"></i>
                 </button>
+                <input type="file" id="profileAvatarFileInput" accept="image/*" style="display:none;" />
             </div>
-            <!-- حقل مخفي لاختيار صورة من الجهاز -->
-            <input type="file" id="profileAvatarFileInput" accept="image/*" style="display:none;" />
+
             <div class="profile-name-edit-row">
-                <h3 class="profile-user-name" id="profileNameDisplay">${displayName}</h3>
-                <button type="button" class="profile-mini-edit-btn" id="quickEditNameBtn" title="تعديل البيانات">
-                    <i class="fa-solid fa-user-pen"></i>
+                <h3 class="profile-user-name">${escapeHTML(displayName)}</h3>
+                <button type="button" class="profile-mini-edit-btn" id="editProfileNameBtn" title="تعديل الاسم والنبذة">
+                    <i class="fa-solid fa-pen-to-square"></i>
                 </button>
             </div>
-            <span class="profile-user-contact">${contactInfo} • ${joinDateText}</span>
-            
-            <!-- النبذة الشخصية الإيمانية -->
-            <div class="profile-bio-box" id="profileBioBox" title="انقر لتعديل النبذة الشخصية والإيمانية">
-                <i class="fa-solid fa-quote-right bio-quote-icon"></i>
-                <span class="profile-bio-text" id="profileBioText">${userBio}</span>
-                <i class="fa-solid fa-pen-nib bio-edit-icon"></i>
-            </div>
+            <p class="profile-user-email">${escapeHTML(email)}</p>
 
-            <div class="profile-badges-row">
-                <div class="profile-provider-pill">${providerBadge}</div>
+            <div class="profile-bio-box" id="profileBioBox" title="انقر لتعديل النبذة الشخصية">
+                <i class="fa-solid fa-quote-right" style="font-size:11px;color:var(--color-primary,#0F766E);opacity:0.7;"></i>
+                <span>${escapeHTML(userBio)}</span>
             </div>
         </div>
 
-        <!-- بطاقة برنامج الختمة القرآنية المنظم -->
-        <div class="profile-khatma-card" style="cursor:default;">
-            <div class="khatma-card-top">
-                <div class="khatma-icon-box" style="background:var(--color-gold, #C9A227);color:#FFF;">
-                    <i class="fa-solid fa-book-quran"></i>
-                </div>
-                <div class="khatma-details">
-                    <span class="khatma-title" style="display:flex;align-items:center;gap:6px;">
-                        برنامج الختمة القرآنية
-                        <button type="button" id="changeKhatmaPlanBtn" style="background:none;border:none;color:var(--color-primary, #5BC0BE);cursor:pointer;font-size:12px;" title="تعديل نظام الختمة">
-                            <i class="fa-solid fa-gear"></i> ضبط
-                        </button>
-                    </span>
-                    <span class="khatma-status">
-                        الجزء الحالي ${khatmaProg.currentJuz} من 30 • ورْد اليوم: صفحة ${khatmaProg.startPage}
-                    </span>
-                </div>
-                <span class="khatma-percent-badge">${khatmaPercent}%</span>
-            </div>
-            <div class="khatma-progress-track" style="margin-top:10px;">
-                <div class="khatma-progress-fill" style="width: ${Math.max(4, khatmaPercent)}%;background:linear-gradient(90deg, #5BC0BE, #D8B887);"></div>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--color-text-light);">
-                <span>الختمات المنجزة: <strong>${khatmaProg.totalCompletedKhatmas || 0} ختمة</strong></span>
-                <button type="button" id="markWirdDoneBtn" style="background:var(--color-primary, #5BC0BE);color:#FFF;border:none;border-radius:18px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">
-                    <i class="fa-solid fa-check"></i> تسجيل إنجاز ورْد اليوم
-                </button>
-            </div>
-        </div>
-
-        <!-- شبكة الإحصائيات الحقيقية -->
+        <!-- شبكة الإحصائيات -->
         <div class="profile-stats-grid">
-            <div class="profile-stat-box" onclick="window.location.href='/quran/index.html'; closeAuthModal();" style="cursor:pointer;" title="عرض الآيات المحفوظة">
-                <div class="profile-stat-num" id="userBookmarksCount">${bookmarksTotal}</div>
-                <div class="profile-stat-label"><i class="fa-regular fa-bookmark"></i> علامات محفوظة</div>
+            <div class="profile-stat-box">
+                <div class="profile-stat-num">${khatmaProg.totalCompletedKhatmas || 0}</div>
+                <div class="profile-stat-label">ختمات مكتملة</div>
             </div>
-            <div class="profile-stat-box" onclick="window.location.href='/tasbeeh/index.html'; closeAuthModal();" style="cursor:pointer;" title="المسبحة الإلكترونية">
-                <div class="profile-stat-num" id="userTasbeehCount">${tasbeehTotal}</div>
-                <div class="profile-stat-label"><i class="fa-solid fa-hand-holding-heart"></i> مجموع الذكر</div>
+            <div class="profile-stat-box">
+                <div class="profile-stat-num">${tasbeehTotal}</div>
+                <div class="profile-stat-label">إجمالي التسبيح</div>
+            </div>
+            <div class="profile-stat-box">
+                <div class="profile-stat-num">${bookmarksTotal}</div>
+                <div class="profile-stat-label">علامات محفوظة</div>
             </div>
         </div>
 
+        <!-- بطاقة متابعة الختمة القرآنية -->
+        <div class="profile-khatma-card">
+            <div class="khatma-card-top">
+                <span class="khatma-card-title">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                    برنامج الختمة (${khatmaProg.targetDays} يوم)
+                </span>
+                <span class="khatma-badge">${khatmaPercent}%</span>
+            </div>
+            <div class="khatma-progress-track">
+                <div class="khatma-progress-bar" style="width: ${khatmaPercent}%;"></div>
+            </div>
+            <div class="khatma-meta-row">
+                <span>الجزء الحالي: ${khatmaProg.currentJuz || 1}</span>
+                <span>الأيام المنجزة: ${khatmaProg.completedDays} من ${khatmaProg.targetDays}</span>
+            </div>
+            <div class="khatma-btns-row">
+                <button type="button" class="khatma-btn primary" id="markWirdDoneBtn">
+                    <i class="fa-solid fa-check"></i> تسجيل ورْد اليوم
+                </button>
+                <button type="button" class="khatma-btn secondary" id="changeKhatmaPlanBtn">
+                    <i class="fa-solid fa-gear"></i> ضبط الخطة
+                </button>
+            </div>
+        </div>
+
+        <!-- أزرار الإجراءات -->
         <div class="profile-actions-list">
-            <button class="profile-action-btn highlight" id="editProfileNameBtn">
-                <span><i class="fa-solid fa-user-pen" style="color:var(--color-primary, #5BC0BE);margin-left:8px;"></i> تعديل الاسم والنبذة الشخصية</span>
-                <i class="fa-solid fa-chevron-left" style="color:var(--color-text-lighter);font-size:12px;"></i>
+            <button type="button" class="profile-action-btn" id="openEditProfileBtn">
+                <span><i class="fa-solid fa-user-pen" style="color:var(--color-primary,#0F766E);margin-left:8px;"></i> تعديل الملف الشخصي والنبذة</span>
+                <i class="fa-solid fa-chevron-left" style="font-size:12px;color:var(--color-text-light,#94A3B8);"></i>
             </button>
-            <button class="profile-action-btn" id="profileGoToSettingsBtn">
-                <span><i class="fa-solid fa-sliders" style="color:var(--color-primary, #5BC0BE);margin-left:8px;"></i> تفضيلات التطبيق والقراءة</span>
-                <i class="fa-solid fa-chevron-left" style="color:var(--color-text-lighter);font-size:12px;"></i>
+            <button type="button" class="profile-action-btn" id="profileGoToSettingsBtn">
+                <span><i class="fa-solid fa-sliders" style="color:var(--color-primary,#0F766E);margin-left:8px;"></i> تفضيلات التطبيق والقراءة</span>
+                <i class="fa-solid fa-chevron-left" style="font-size:12px;color:var(--color-text-light,#94A3B8);"></i>
             </button>
-            <button class="profile-action-btn logout" id="logoutBtn">
+            <button type="button" class="profile-action-btn logout" id="logoutBtn">
                 <span><i class="fa-solid fa-arrow-right-from-bracket" style="margin-left:8px;"></i> تسجيل الخروج</span>
                 <i class="fa-solid fa-chevron-left" style="font-size:12px;"></i>
             </button>
         </div>
     `;
 
-    // ربط برنامج الختمة
+    // ربط الأحداث
     document.getElementById('changeKhatmaPlanBtn')?.addEventListener('click', configureKhatmaPlan);
     document.getElementById('markWirdDoneBtn')?.addEventListener('click', markTodayWirdCompleted);
-
-    // ربط الأزرار وبضمنها التبديل إلى نموذج تعديل البروفايل والنبذة
-    document.getElementById('logoutBtn')?.addEventListener('click', promptSignOutConfirmation);
+    
     document.getElementById('editProfileNameBtn')?.addEventListener('click', () => {
         isEditingProfile = true;
         renderAuthModalContent();
     });
-    document.getElementById('quickEditNameBtn')?.addEventListener('click', () => {
+    document.getElementById('openEditProfileBtn')?.addEventListener('click', () => {
         isEditingProfile = true;
         renderAuthModalContent();
     });
@@ -677,8 +647,9 @@ function renderProfileView(container) {
         isEditingProfile = true;
         renderAuthModalContent();
     });
-    
-    // ربط تعديل الصورة
+
+    document.getElementById('logoutBtn')?.addEventListener('click', promptSignOutConfirmation);
+
     const fileInput = document.getElementById('profileAvatarFileInput');
     document.getElementById('changeAvatarBtn')?.addEventListener('click', () => fileInput?.click());
     fileInput?.addEventListener('change', handleProfileImageSelected);
@@ -690,92 +661,46 @@ function renderProfileView(container) {
 }
 
 /**
- * واجهة نموذج تعديل الاسم والنبذة الشخصية المدمجة الكاملة (بدون prompt)
+ * نموذج تعديل الملف الشخصي
  */
-function renderProfileEditFormView(container) {
+function renderProfileEditView(container) {
     const user = currentUser || {};
     const displayName = user.displayName || '';
     const bio = user.bio || '﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾';
 
-    const presets = [
-        "﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾",
-        "﴿ وَتَوَكَّلْ عَلَى الْحَيِّ الَّذِي لَا يَمُوتُ ﴾",
-        "﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",
-        "﴿ رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً ﴾",
-        "﴿ إنَّ صَلَاتِي وَنُسُكِي وَمَحْيَايَ وَمَمَاتِي لِلَّهِ رَبِّ الْعَالَمِينَ ﴾",
-        "طالب علم، مُتدبّر لكتاب الله الكريم"
-    ];
-
     container.innerHTML = `
-        <div class="edit-profile-form-wrap">
-            <div class="edit-profile-header">
-                <button type="button" class="edit-profile-back-btn" id="cancelEditProfileBtn" title="إلغاء">
-                    <i class="fa-solid fa-arrow-right"></i>
+        <div style="text-align:right;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <h3 style="font-size:18px;font-weight:800;margin:0;color:var(--color-text,#0F172A);">
+                    <i class="fa-solid fa-user-pen" style="color:var(--color-primary,#0F766E);margin-left:6px;"></i> تعديل البيانات الشخصية
+                </h3>
+                <button type="button" class="profile-mini-edit-btn" id="cancelEditProfileBtn" title="رجوع" style="font-size:16px;">
+                    <i class="fa-solid fa-arrow-left"></i>
                 </button>
-                <h3 class="edit-profile-title"><i class="fa-solid fa-user-pen"></i> تعديل الملف الشخصي والنبذة</h3>
             </div>
 
-            <form id="saveProfileForm" style="margin-top:16px;">
-                <!-- تعديل صورة الملف الشخصي -->
-                <div class="profile-avatar-edit-section">
-                    <div class="edit-avatar-preview">
-                        ${user.photoURL ? `
-                            <img src="${user.photoURL}" alt="${displayName}" class="edit-avatar-img" id="editAvatarPreviewImg" />
-                        ` : `
-                            <div class="edit-avatar-placeholder" id="editAvatarPlaceholder">${displayName.charAt(0).toUpperCase() || 'ف'}</div>
-                        `}
-                    </div>
-                    <div class="edit-avatar-btns">
-                        <button type="button" class="btn-avatar-choice" id="editUploadPhotoBtn">
-                            <i class="fa-solid fa-camera"></i> اختيار صورة من الجهاز
-                        </button>
-                        <button type="button" class="btn-avatar-choice secondary" id="editUrlPhotoBtn">
-                            <i class="fa-solid fa-link"></i> رابط صورة مباشر
-                        </button>
-                        ${user.photoURL ? `
-                        <button type="button" class="btn-avatar-choice danger" id="editRemovePhotoBtn">
-                            <i class="fa-solid fa-trash"></i> حذف الصورة
-                        </button>
-                        ` : ''}
-                    </div>
-                    <input type="file" id="editAvatarFileInput" accept="image/*" style="display:none;" />
-                </div>
-
-                <!-- حقل الاسم الكريم -->
-                <div class="auth-form-group" style="margin-top:16px;">
-                    <label class="auth-label" for="inputEditDisplayName">الاسم المستعار</label>
+            <form id="saveProfileForm">
+                <div class="auth-form-group">
+                    <label class="auth-label" for="inputEditDisplayName">الاسم المعروض</label>
                     <div class="auth-input-wrapper">
                         <i class="fa-regular fa-user auth-input-icon"></i>
                         <input type="text" id="inputEditDisplayName" class="auth-input" value="${escapeAttr(displayName)}" placeholder="مثال: عبد الله أحمد" required />
                     </div>
                 </div>
 
-                <!-- حقل النبذة الإيمانية الشخصية -->
                 <div class="auth-form-group">
-                    <label class="auth-label" for="inputEditBio">النبذة الشخصية والإيمانية</label>
-                    <div class="auth-input-wrapper" style="align-items:flex-start;">
-                        <textarea id="inputEditBio" class="auth-input" rows="3" style="padding-top:10px;resize:vertical;" placeholder="اكتب نبذتك الشخصية أو آيتك المفضلة...">${escapeAttr(bio)}</textarea>
+                    <label class="auth-label" for="inputEditBio">النبذة الشخصية أو الآية المفضلة</label>
+                    <div class="auth-input-wrapper">
+                        <i class="fa-solid fa-quote-right auth-input-icon"></i>
+                        <input type="text" id="inputEditBio" class="auth-input" value="${escapeAttr(bio)}" placeholder="﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾" />
                     </div>
                 </div>
 
-                <!-- عبارات جاهزة سريعة للنبذة -->
-                <div class="bio-presets-section">
-                    <span class="bio-presets-label">عبارات وآيات مقترحة للنبذة:</span>
-                    <div class="bio-presets-chips">
-                        ${presets.map(p => `
-                            <button type="button" class="bio-chip-btn" onclick="document.getElementById('inputEditBio').value = '${escapeAttr(p)}';">
-                                ${escapeHTML(p)}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <div class="edit-profile-actions">
-                    <button type="submit" class="auth-primary-btn" id="submitSaveProfileBtn">
-                        <i class="fa-solid fa-check"></i>
-                        <span>حفظ التعديلات والنبذة</span>
+                <div style="display:flex;gap:10px;margin-top:20px;">
+                    <button type="submit" class="auth-primary-btn" style="margin-top:0;flex:2;">
+                        <i class="fa-solid fa-check"></i> حفظ التغييرات
                     </button>
-                    <button type="button" class="auth-secondary-btn" id="cancelEditProfileBtn2">
+                    <button type="button" class="khatma-btn secondary" id="cancelEditProfileBtn2" style="flex:1;">
                         إلغاء
                     </button>
                 </div>
@@ -783,27 +708,10 @@ function renderProfileEditFormView(container) {
         </div>
     `;
 
-    // ربط اختيار صورة من الجهاز في التعديل
-    const fileInput = document.getElementById('editAvatarFileInput');
-    document.getElementById('editUploadPhotoBtn')?.addEventListener('click', () => fileInput?.click());
-    fileInput?.addEventListener('change', handleProfileImageSelected);
-
-    document.getElementById('editUrlPhotoBtn')?.addEventListener('click', () => {
-        const url = prompt('أدخل رابط الصورة المباشر (HTTPS):');
-        if (url && url.trim().startsWith('http')) {
-            updateProfileAvatar(url.trim());
-        }
-    });
-
-    document.getElementById('editRemovePhotoBtn')?.addEventListener('click', () => {
-        updateProfileAvatar('');
-    });
-
     document.getElementById('cancelEditProfileBtn')?.addEventListener('click', () => {
         isEditingProfile = false;
         renderAuthModalContent();
     });
-
     document.getElementById('cancelEditProfileBtn2')?.addEventListener('click', () => {
         isEditingProfile = false;
         renderAuthModalContent();
@@ -833,36 +741,85 @@ function renderProfileEditFormView(container) {
         }
 
         if (window.FurqanToast) {
-            window.FurqanToast.success('تم حفظ التعديلات والنبذة بنجاح');
+            window.FurqanToast.success('تم حفظ التعديلات بنجاح');
         }
 
         isEditingProfile = false;
         renderAuthModalContent();
         updateHeaderProfileUI(currentUser);
-
-        if (typeof window.updateComposeUserUI === 'function') {
-            window.updateComposeUserUI();
-        }
     });
 }
 
-function escapeAttr(str) {
-    if (!str) return '';
-    return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
+/**
+ * تأكيد تسجيل الخروج
+ */
+function promptSignOutConfirmation() {
+    const confirmOverlayHTML = `
+        <div class="auth-modal-overlay active" id="logoutConfirmOverlay" style="z-index: 100010;">
+            <div class="confirm-dialog-card">
+                <div class="confirm-icon-danger">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </div>
+                <h3 class="confirm-title">تسجيل الخروج</h3>
+                <p class="confirm-desc">
+                    هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك؟ يمكنك العودة وتسجيل الدخول مجدداً في أي وقت لحفظ ومزامنة ختماتك.
+                </p>
+                <div class="confirm-actions">
+                    <button type="button" class="btn-confirm-danger" id="confirmSignOutBtn">
+                        <i class="fa-solid fa-check"></i> نعم، تسجيل الخروج
+                    </button>
+                    <button type="button" class="btn-confirm-cancel" id="cancelSignOutBtn">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
 
-function escapeHTML(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    document.body.insertAdjacentHTML('beforeend', confirmOverlayHTML);
+
+    const overlay = document.getElementById('logoutConfirmOverlay');
+    const confirmBtn = document.getElementById('confirmSignOutBtn');
+    const cancelBtn = document.getElementById('cancelSignOutBtn');
+
+    const removeConfirm = () => overlay?.remove();
+
+    confirmBtn?.addEventListener('click', async () => {
+        removeConfirm();
+        await handleSignOut();
+    });
+
+    cancelBtn?.addEventListener('click', removeConfirm);
+    overlay?.addEventListener('click', (e) => {
+        if (e.target === overlay) removeConfirm();
+    });
 }
 
 /**
- * معالجة اختيار صورة من الجهاز وضغطها لتحسين الأداء
+ * تنفيذ تسجيل الخروج الفعلي
+ */
+async function handleSignOut() {
+    try {
+        await signOut(auth);
+    } catch (e) {
+        console.warn('Sign out warning:', e);
+    }
+
+    currentUser = null;
+    localStorage.removeItem(STORAGE_USER_KEY);
+    localStorage.removeItem('al_furqan_uid');
+    localStorage.removeItem('user_display_name');
+
+    updateHeaderProfileUI(null);
+    closeAuthModal();
+
+    if (window.FurqanToast) {
+        window.FurqanToast.info('تم تسجيل الخروج بنجاح. في أمان الله وحفظه');
+    }
+}
+
+/**
+ * معالجة اختيار وضغط صورة البروفايل
  */
 function handleProfileImageSelected(e) {
     const file = e.target.files?.[0];
@@ -873,17 +830,12 @@ function handleProfileImageSelected(e) {
         return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-        if (window.FurqanToast) window.FurqanToast.error('حجم الصورة كبير جداً، يرجى اختيار صورة أقل من 5 ميجابايت');
-        return;
-    }
-
     const reader = new FileReader();
     reader.onload = function(event) {
         const img = new Image();
-        img.onload = function() {
+        img.onload = async function() {
             const canvas = document.createElement('canvas');
-            const MAX_SIZE = 256;
+            const MAX_SIZE = 200;
             let width = img.width;
             let height = img.height;
 
@@ -904,8 +856,24 @@ function handleProfileImageSelected(e) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            updateProfileAvatar(optimizedDataUrl);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+            currentUser.photoURL = compressedBase64;
+            localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(currentUser));
+
+            try {
+                await setDoc(doc(db, "users", currentUser.uid), {
+                    photoURL: compressedBase64,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+            } catch (err) {}
+
+            updateHeaderProfileUI(currentUser);
+            renderAuthModalContent();
+
+            if (window.FurqanToast) {
+                window.FurqanToast.success('تم تحديث الصورة الشخصية بنجاح');
+            }
         };
         img.src = event.target.result;
     };
@@ -913,81 +881,7 @@ function handleProfileImageSelected(e) {
 }
 
 /**
- * حفظ الصورة وتحديثها محلياً وفي Firestore
- */
-async function updateProfileAvatar(newPhotoURL) {
-    if (!currentUser) return;
-
-    currentUser.photoURL = newPhotoURL || null;
-    localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(currentUser));
-
-    // تحديث الحساب المسجل محلياً
-    if (currentUser.email) {
-        const accounts = getStoredAccounts();
-        if (accounts[currentUser.email]) {
-            accounts[currentUser.email].photoURL = newPhotoURL || null;
-            saveStoredAccounts(accounts);
-        }
-    }
-
-    // التحديث في Firestore
-    try {
-        await setDoc(doc(db, "users", currentUser.uid), {
-            photoURL: newPhotoURL || null,
-            updatedAt: serverTimestamp()
-        }, { merge: true });
-    } catch (e) {
-        console.warn('Firestore photo update warning:', e);
-    }
-
-    if (window.FurqanToast) {
-        window.FurqanToast.success(newPhotoURL ? 'تم تحديث صورة البروفايل بنجاح' : 'تمت إزالة صورة البروفايل');
-    }
-
-    renderAuthModalContent();
-    updateHeaderProfileUI(currentUser);
-
-    if (typeof window.updateComposeUserUI === 'function') {
-        window.updateComposeUserUI();
-    }
-}
-
-/**
- * تعديل اسم المستخدم السريع
- */
-async function handleEditDisplayName() {
-    const newName = prompt('أدخل اسمك الكريم الجديد:', currentUser.displayName || '');
-    if (newName && newName.trim() && newName.trim() !== currentUser.displayName) {
-        currentUser.displayName = newName.trim();
-        localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(currentUser));
-        localStorage.setItem('user_display_name', currentUser.displayName);
-        
-        if (currentUser.email) {
-            const accounts = getStoredAccounts();
-            if (accounts[currentUser.email]) {
-                accounts[currentUser.email].displayName = newName.trim();
-                saveStoredAccounts(accounts);
-            }
-        }
-
-        try {
-            await setDoc(doc(db, "users", currentUser.uid), {
-                displayName: newName.trim(),
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-        } catch (e) {}
-
-        if (window.FurqanToast) {
-            window.FurqanToast.success('تم تعديل الاسم بنجاح');
-        }
-
-        renderAuthModalContent();
-        updateHeaderProfileUI(currentUser);
-    }
-}
-
-/**
- * الحصول على برنامج الختمة القرآنية أو تهيئته بالقيم الافتراضية
+ * إدارة برنامج الختمة القرآنية
  */
 function getKhatmaProgram() {
     try {
@@ -995,18 +889,14 @@ function getKhatmaProgram() {
         if (raw) return JSON.parse(raw);
     } catch (e) {}
     return {
-        targetDays: 30, // 30 يوماً (جزء يومياً)
+        targetDays: 30,
         completedDays: 0,
         totalCompletedKhatmas: 0,
         currentJuz: 1,
-        startPage: 1,
         lastCompletedDate: null
     };
 }
 
-/**
- * حفظ برنامج الختمة محلياً وفي Firestore
- */
 async function saveKhatmaProgram(prog) {
     localStorage.setItem('al_furqan_khatma_program', JSON.stringify(prog));
     if (currentUser && db) {
@@ -1019,43 +909,36 @@ async function saveKhatmaProgram(prog) {
     }
 }
 
-/**
- * تسجيل إنجاز ورْد اليوم في برنامج الختمة
- */
 async function markTodayWirdCompleted() {
     const prog = getKhatmaProgram();
     const todayStr = new Date().toISOString().split('T')[0];
 
     if (prog.lastCompletedDate === todayStr) {
-        if (window.FurqanToast) window.FurqanToast.info('لقد أتممت ورْد هذا اليوم بالفعل، بارك الله في وقتك وخيرك!');
+        if (window.FurqanToast) window.FurqanToast.info('لقد أتممت ورْد هذا اليوم بالفعل، بارك الله فيك!');
         return;
     }
 
     prog.completedDays += 1;
     prog.currentJuz = Math.min(30, (prog.currentJuz % 30) + 1);
-    prog.startPage = Math.min(604, Math.floor(((prog.currentJuz - 1) * 20) + 1));
     prog.lastCompletedDate = todayStr;
 
     if (prog.completedDays >= prog.targetDays || prog.currentJuz === 1) {
-        prog.totalCompletedKhatmas += 1;
+        prog.totalCompletedKhatmas = (prog.totalCompletedKhatmas || 0) + 1;
         if (window.FurqanToast) window.FurqanToast.success('مبارك! لقد أتممت ختمة كاملة لكتاب الله بحمد الله وفضله! 🎉');
     } else {
-        if (window.FurqanToast) window.FurqanToast.success(`تم تسجل إنجاز ورْد اليوم بنجاح! الجزء ${prog.currentJuz - 1} مكتمل`);
+        if (window.FurqanToast) window.FurqanToast.success(`تم تسجيل إنجاز ورْد اليوم بنجاح! الجزء ${prog.currentJuz - 1} مكتمل`);
     }
 
     await saveKhatmaProgram(prog);
     renderAuthModalContent();
 }
 
-/**
- * اختيار أو تغيير برنامج الختمة القرآنية
- */
 async function configureKhatmaPlan() {
     const prog = getKhatmaProgram();
     const choice = prompt(
         "اختر نظام برنامج الختمة القرآنية الخاص بك:\n" +
         "1- ختمة شهرية (جزء واحد يومياً - 30 يوماً)\n" +
-        "2- ختمة شهرين (نصف جزء / 10 صفحات يومياً - 60 يوماً)\n" +
+        "2- ختمة شهرين (نصف جزء يومياً - 60 يوماً)\n" +
         "3- ختمة سريعة (جزآن يومياً - 15 يوماً)\n" +
         "4- إضافة عدد الختمات المنجزة سابقاً يدوياً",
         "1"
@@ -1066,18 +949,18 @@ async function configureKhatmaPlan() {
 
     if (trimmed === '1') {
         prog.targetDays = 30;
-        if (window.FurqanToast) window.FurqanToast.success('تم اختيار برنامج الختمة الشهري (جزء واحد يومياً)');
+        if (window.FurqanToast) window.FurqanToast.success('تم اختيار برنامج الختمة الشهري (30 يوماً)');
     } else if (trimmed === '2') {
         prog.targetDays = 60;
-        if (window.FurqanToast) window.FurqanToast.success('تم اختيار برنامج الختمة الميسر (نصف جزء يومياً)');
+        if (window.FurqanToast) window.FurqanToast.success('تم اختيار برنامج الختمة الميسر (60 يوماً)');
     } else if (trimmed === '3') {
         prog.targetDays = 15;
-        if (window.FurqanToast) window.FurqanToast.success('تم اختيار برنامج الختمة المكثف (جزآن يومياً)');
+        if (window.FurqanToast) window.FurqanToast.success('تم اختيار برنامج الختمة المكثف (15 يوماً)');
     } else if (trimmed === '4') {
-        const khatmaCount = prompt('أدخل إجمالي عدد الختمات التي أكملتها بحمد الله:', prog.totalCompletedKhatmas || 0);
-        if (khatmaCount !== null && !isNaN(parseInt(khatmaCount))) {
-            prog.totalCompletedKhatmas = Math.max(0, parseInt(khatmaCount));
-            if (window.FurqanToast) window.FurqanToast.success(`تم تحديث عدد ختماتك إلى ${prog.totalCompletedKhatmas} ختمة`);
+        const count = prompt('أدخل إجمالي عدد الختمات المكتملة سابقاً:', prog.totalCompletedKhatmas || 0);
+        if (count !== null && !isNaN(parseInt(count))) {
+            prog.totalCompletedKhatmas = Math.max(0, parseInt(count));
+            if (window.FurqanToast) window.FurqanToast.success(`تم تحديث عدد ختماتك إلى ${prog.totalCompletedKhatmas}`);
         }
     } else {
         return;
@@ -1088,64 +971,18 @@ async function configureKhatmaPlan() {
 }
 
 /**
- * تأكيد تسجيل الخروج التفاعلي الآمن
+ * مزامنة المستخدم مع Firestore
  */
-function promptSignOutConfirmation() {
-    const confirmOverlayHTML = `
-        <div class="auth-modal-overlay active" id="logoutConfirmOverlay" style="z-index: 10010;">
-            <div class="auth-modal-container" style="max-width: 420px; text-align: center; padding: 24px;">
-                <div style="font-size: 42px; color: var(--color-gold); margin-bottom: 12px;">
-                    <i class="fa-solid fa-circle-question"></i>
-                </div>
-                <h3 style="font-family: var(--font-amiri), serif; font-size: 20px; color: var(--color-text); margin-bottom: 8px;">تأكيد تسجيل الخروج</h3>
-                <p style="font-size: 13.5px; color: var(--color-text-light); line-height: 1.6; margin-bottom: 20px;">
-                    هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك في منصة الفرقان؟ يمكنك العودة وتسجيل الدخول مجدداً في أي وقت لحفظ ختماتك.
-                </p>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button type="button" class="btn-primary" id="confirmSignOutBtn" style="background: #E53E3E; border-color: #C53030; color: #FFF; padding: 10px 20px;">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> نعم، تسجيل الخروج
-                    </button>
-                    <button type="button" class="btn-secondary" id="cancelSignOutBtn" style="padding: 10px 20px;">
-                        إلغاء
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', confirmOverlayHTML);
-
-    const overlay = document.getElementById('logoutConfirmOverlay');
-    const confirmBtn = document.getElementById('confirmSignOutBtn');
-    const cancelBtn = document.getElementById('cancelSignOutBtn');
-
-    const removeConfirmModal = () => overlay?.remove();
-
-    confirmBtn?.addEventListener('click', async () => {
-        removeConfirmModal();
-        await handleSignOut();
-    });
-
-    cancelBtn?.addEventListener('click', removeConfirmModal);
-    overlay?.addEventListener('click', (e) => {
-        if (e.target === overlay) removeConfirmModal();
-    });
-}
-
-/**
- * مزامنة المستخدم مع Firestore بشكل فوري ومدمج وغير معطل
- */
-async function syncUserToFirestore(user, provider, extra = {}) {
+async function syncUserToFirestore(user, provider) {
     if (!user || !user.uid || !db) return;
     try {
         const userRef = doc(db, "users", user.uid);
         const userData = {
             uid: user.uid,
-            displayName: extra.displayName || user.displayName || 'قارئ الفرقان',
+            displayName: user.displayName || 'قارئ الفرقان',
             email: user.email || null,
-            phoneNumber: user.phoneNumber || null,
             photoURL: user.photoURL || null,
-            bio: extra.bio || user.bio || '﴿ رَبِّ زِدْنِي عِلْمًا ﴾',
+            bio: user.bio || '﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾',
             providerId: provider,
             lastLoginAt: new Date().toISOString()
         };
@@ -1154,7 +991,6 @@ async function syncUserToFirestore(user, provider, extra = {}) {
             userData.createdAt = user.createdAt;
         }
 
-        // استخدام setDoc مع { merge: true } يضمن الحفظ السريع دون الحاجة لـ getDoc إضافي
         await setDoc(userRef, userData, { merge: true });
     } catch (err) {
         console.warn('Firestore user sync notice:', err);
@@ -1175,6 +1011,47 @@ function showAuthAlert(message, type = 'error') {
     `;
 }
 
+function showUnauthorizedDomainHelper() {
+    const alertArea = document.getElementById('authAlertArea');
+    if (!alertArea) return;
+    const currentDomain = window.location.hostname;
+    alertArea.innerHTML = `
+        <div class="auth-alert auth-alert-warning" style="display:flex; flex-direction:column; gap:8px; text-align:right; background:#FFFBEB; border:1px solid #FCD34D; color:#92400E; padding:12px; border-radius:10px;">
+            <div style="display:flex; align-items:center; gap:8px; font-weight:700; font-size:13.5px;">
+                <i class="fa-solid fa-shield-halved" style="color:#D97706; font-size:16px;"></i>
+                <span>تفعيل النطاق في Firebase لتسجيل Google</span>
+            </div>
+            <div style="font-size:12px; line-height:1.6; color:#78350F;">
+                لحماية حساباتك، يتطلب Firebase إضافة اسم النطاق (وليس الرابط كاملاً) إلى <b>Authorized Domains</b>:
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; background:#FEF3C7; padding:6px 10px; border-radius:6px; font-family:monospace; font-size:11.5px; justify-content:space-between;" dir="ltr">
+                <span id="domainToCopy" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:200px;">${escapeHTML(currentDomain)}</span>
+                <button type="button" id="copyDomainBtn" style="padding:4px 10px; font-size:11px; background:#0F766E; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:700; font-family:inherit; white-space:nowrap;">
+                    نسخ النطاق
+                </button>
+            </div>
+            <div style="font-size:11.5px; color:#0F766E; font-weight:700; margin-top:2px;">
+                💡 يمكنك فوراً إنشاء حساب أو تسجيل الدخول بالبريد الإلكتروني بالأسفل بدون أي انتظار!
+            </div>
+        </div>
+    `;
+
+    const copyBtn = document.getElementById('copyDomainBtn');
+    if (copyBtn) {
+        copyBtn.onclick = () => {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(currentDomain);
+            }
+            copyBtn.textContent = 'تم النسخ! ✓';
+            copyBtn.style.background = '#059669';
+            setTimeout(() => {
+                copyBtn.textContent = 'نسخ النطاق';
+                copyBtn.style.background = '#0F766E';
+            }, 3000);
+        };
+    }
+}
+
 function clearAuthAlert() {
     const alertArea = document.getElementById('authAlertArea');
     if (alertArea) alertArea.innerHTML = '';
@@ -1188,32 +1065,34 @@ function setAuthLoading(loading) {
 }
 
 /**
- * ترجمة رسائل أخطاء Firebase
+ * ترجمة رسائل أخطاء Firebase إلى العربية بدقة
  */
 function getFirebaseErrorMessage(error) {
     const code = error.code || '';
     switch (code) {
         case 'auth/invalid-email':
-            return 'صيغة البريد الإلكتروني غير صحيحة';
+            return 'صيغة البريد الإلكتروني غير صحيحة، يرجى كتابته بشكل سليم';
         case 'auth/user-disabled':
-            return 'تم تعطيل هذا الحساب';
+            return 'تم تعطيل هذا الحساب من قِبل إدارة النظام';
         case 'auth/user-not-found':
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
-            return 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+            return 'البريد الإلكتروني أو كلمة المرور غير صحيحة، أو الحساب غير مسجل بعد. يمكنك التبديل إلى (إنشاء حساب جديد) بالأسفل.';
         case 'auth/email-already-in-use':
-            return 'البريد الإلكتروني مسجل مسبقاً، يرجى تسجيل الدخول';
+            return 'هذا البريد الإلكتروني مسجل بالفعل مسبقاً، يمكنك التبديل إلى تبويب (تسجيل الدخول).';
         case 'auth/weak-password':
-            return 'كلمة المرور ضعيفة (يجب أن تكون 6 خانات على الأقل)';
+            return 'كلمة المرور ضعيفة، يجب أن تحتوي على 6 أحرف أو أرقام على الأقل.';
         case 'auth/popup-closed-by-user':
-            return 'تم إغلاق نافذة تسجيل الدخول قبل الإكمال';
+            return 'تم إغلاق نافذة تسجيل الدخول قبل إتمام العملية';
+        case 'auth/unauthorized-domain':
+            return 'نطاق الموقع الحالي يحتاج إلى تفعيل في Authorized Domains في لوحة تحكم Firebase.';
         default:
-            return error.message || 'حدث خطأ غير متوقع، يرجى المحاولة مجدداً';
+            return error.message || 'حدث خطأ غير متوقع، يرجى التحقق من اتصالك والمحاولة مجدداً';
     }
 }
 
 /**
- * تحديث واجهة الهيدر بناءً على حالة المصادقة
+ * تحديث صورة / شارة الملف الشخصي في شريط الهيدر
  */
 function updateHeaderProfileUI(user) {
     const profileBtns = document.querySelectorAll('#profileBtn, .profile-btn');
@@ -1234,6 +1113,21 @@ function updateHeaderProfileUI(user) {
     });
 }
 
+function escapeAttr(str) {
+    if (!str) return '';
+    return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 /**
  * مراقبة تغيرات حالة Firebase Auth الرسمية
  */
@@ -1243,8 +1137,7 @@ onAuthStateChanged(auth, (user) => {
             uid: user.uid,
             displayName: user.displayName || 'قارئ الفرقان',
             email: user.email,
-            phoneNumber: user.phoneNumber || null,
-            photoURL: user.photoURL,
+            photoURL: user.photoURL || null,
             providerId: user.providerData?.[0]?.providerId || 'google',
             lastLoginAt: new Date().toISOString()
         };
@@ -1258,7 +1151,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// تهيئة تلقائية وربط أزرار البروفايل
+// تهيئة تلقائية
 document.addEventListener('DOMContentLoaded', () => {
     injectAuthModal();
     restoreStoredUser();
@@ -1272,7 +1165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// تصدير واجهات برمجية عامة
+// تصدير واجهات عامة
 window.FurqanAuth = {
     open: openAuthModal,
     close: closeAuthModal,
