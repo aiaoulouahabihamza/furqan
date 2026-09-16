@@ -4,6 +4,23 @@
   "webDir": ".",
   "bundledWebRuntime": false,
   "server": {
-    "allowNavigation": ["*"]
+    "allowNavigation": [
+      "*.islamhouse.com",
+      "api3.islamhouse.com",
+      "api.alquran.cloud",
+      "cdn.islamic.network",
+      "cdnjs.cloudflare.com",
+      "fonts.googleapis.com",
+      "fonts.gstatic.com",
+      "*.hadith-api-six.vercel.app",
+      "hadith-api-sultan.vercel.app",
+      "hadith-api.vercel.app",
+      "nominatim.openstreetmap.org",
+      "*.mp3quran.net",
+      "www.gstatic.com",
+      "*.firebaseapp.com",
+      "*.googleapis.com",
+      "accounts.google.com"
+    ]
   }
 }

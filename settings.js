@@ -35,25 +35,25 @@
             id: 'qzabri',
             name: 'الشيخ عمر القزابري',
             file: '/audio/3omaralqzabri.mp3',
-            sources: ['/audio/3omaralqzabri.mp3', '/audio/adhan_qzabri.mp3']
+            sources: ['/audio/3omaralqzabri.mp3', '/audio/adhan_makkah.mp3']
         },
         {
             id: 'anafis',
             name: 'الشيخ أحمد النفيس',
             file: '/audio/ahmedanafis.mp3',
-            sources: ['/audio/ahmedanafis.mp3', '/audio/adhan_anafis.mp3']
+            sources: ['/audio/ahmedanafis.mp3', '/audio/adhan_makkah.mp3']
         },
         {
             id: 'yamani',
             name: 'الشيخ وديع اليمني',
             file: '/audio/wadiaalyamani.mp3',
-            sources: ['/audio/wadiaalyamani.mp3', '/audio/adhan_yamani.mp3']
+            sources: ['/audio/wadiaalyamani.mp3', '/audio/adhan_makkah.mp3']
         },
         {
             id: 'tazi',
             name: 'القارئ أنس التازي',
             file: '/audio/anasatazi.mp3',
-            sources: ['/audio/anasatazi.mp3', '/audio/adhan_tazi.mp3']
+            sources: ['/audio/anasatazi.mp3', '/audio/adhan_makkah.mp3']
         }
     ];
 

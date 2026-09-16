@@ -1,0 +1,39 @@
+[build]
+  publish = "."
+
+# لا تخزين مؤقت (Cache) لملفات الكود والبيانات حتى تصل التحديثات فورًا للزوار
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/data/json/*"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+# تخزين مؤقت لمدة ساعة للملفات الثابتة (صوت، صور، خطوط) لتسريع التحميل
+[[headers]]
+  for = "/audio/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/data/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/data/font/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"

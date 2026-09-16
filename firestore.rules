@@ -12,13 +12,13 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
-    // User profiles - allow read and write
+    // ملفات المستخدمين - كل مستخدم يرى ويعدّل بياناته الخاصة فقط
     match /users/{userId} {
-      allow read: if true;
-      allow create, update: if true;
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId);
       allow delete: if isOwner(userId);
       
-      // Subcollections under user
+      // مجموعات فرعية تحت كل مستخدم (لأي استخدام مستقبلي)
       match /bookmarks/{bookmarkId} {
         allow read, write: if isOwner(userId);
       }
@@ -30,12 +30,6 @@ service cloud.firestore {
       match /logs/{logId} {
         allow read, write: if isOwner(userId);
       }
-    }
-    
-    // Top-level bookmarks collection queryable by userId
-    match /bookmarks/{bookmarkId} {
-      allow read, write: if true;
-      allow delete: if true;
     }
 
     // Default deny all other collections
